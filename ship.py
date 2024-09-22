@@ -35,14 +35,19 @@ class Ship():
         self.speedX = 0
         self.speedY = 0
         # fireRatePerSecond
-        self.fireRate = 10
+        self.FIRE_RATE = 1
+        self.BURST_RATE = 10
+        self.BURST_COUNT = 3
+        self.burstCounter = FPS // self.BURST_RATE * self.BURST_COUNT
         self.fireRateCounter = 0 
+        self.bursting = False
         self.shooting = False
+        
         
     
     def canFire(self):
         if self.fireRateCounter == 0:
-            self.fireRateCounter = FPS // self.fireRate
+            self.fireRateCounter = FPS / self.FIRE_RATE
             return True 
         else:
             return False
@@ -102,15 +107,31 @@ class Ship():
             self.angleRad += self.TURN_RATE
             
     def shootCannon(self):
-        if self.shooting:
-            if self.canFire():
+        
+        if self.shooting and self.canFire():
+            self.bursting = True
+            
+     
+                
+       
+            
+        if self.bursting:
+            if self.burstCounter % (FPS // self.BURST_RATE) == 0:
                 shipGunPosX = self.xPos + self.shipHeight / 2 * math.cos(self.angleRad)
                 shipGunPosY = self.yPos + self.shipHeight / 2 * math.sin(self.angleRad)
                 cannon = Cannon(self.angleRad, (shipGunPosX, shipGunPosY))
                 self.cannonIsShot(cannon)
-                
-        if self.fireRateCounter > 0:
+            self.burstCounter -= 1
+            
+        if self.burstCounter <= 0:
+            self.burstCounter = FPS // self.BURST_RATE * self.BURST_COUNT
+            self.bursting = False
+            
+        if self.fireRateCounter > 0 and self.bursting == False:
             self.fireRateCounter -= 1
+        
+        # if self.fireRateCounter <= 0:
+            # self.burstCounter = self.BURST_COUNT
         
        
     def update(self, screen:pygame.Surface):

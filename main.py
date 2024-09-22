@@ -28,9 +28,20 @@ class Main():
         self.cannonFireList.add(cannon)
         
     def cannonUpdate(self, screen):
+        cannonIsDestroyed = False
         for cannon in self.cannonFireList.copy():
             cannon.update(screen)
             
+            for asteroid in self.asteroids:
+                if asteroid.asteroidRect.colliderect(
+                    cannon.cannonRect):
+                    cannon.dispose()
+                    self.cannonFireList.remove(cannon)
+                    cannonIsDestroyed = True
+                    break
+            if cannonIsDestroyed:
+                break
+                    
             if cannon.isOutOfScreen():
                 cannon.dispose()
                 self.cannonFireList.remove(cannon)
@@ -62,12 +73,14 @@ class Main():
         self.asteroids.add(asteroid)
         
         
-    def updateAsteroids(self):
+    def asteroidsUpdate(self):
         for asteroid in self.asteroids.copy():
             if asteroid.isOutOfScreen():
                 asteroid.dispose()
                 self.asteroids.remove(asteroid)
             asteroid.update(self.screen)
+            
+            
                 
         
 
@@ -99,7 +112,7 @@ class Main():
                 self.ship.handleEvents(event) 
                 
             
-            self.updateAsteroids()
+            self.asteroidsUpdate()
             self.gameUpdate(self.screen)
                 
         pygame.quit()

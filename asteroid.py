@@ -19,15 +19,15 @@ class Asteroid():
         
         polygonPoints =  [((asteroidHalfSizeSize - pertubations[i][0]) * math.cos(j) + asteroidHalfSizeSize, (asteroidHalfSizeSize - pertubations[i][1]) * math.sin(j) + asteroidHalfSizeSize) for i, j in enumerate(polyAngles) if i < numSide - 1]
         
-        self.asteroidSurface = pygame.Surface((asteroidHalfSizeSize * 2 + stroke , asteroidHalfSizeSize * 2 + stroke), pygame.SRCALPHA)
-        pygame.draw.polygon(self.asteroidSurface, fillColor, polygonPoints)
-        pygame.draw.polygon(self.asteroidSurface, outlineColor, polygonPoints, stroke)
-        
+        self.__asteroidSurface = pygame.Surface((asteroidHalfSizeSize * 2 + stroke , asteroidHalfSizeSize * 2 + stroke), pygame.SRCALPHA)
+        pygame.draw.polygon(self.__asteroidSurface, fillColor, polygonPoints)
+        pygame.draw.polygon(self.__asteroidSurface, outlineColor, polygonPoints, stroke)
+        self.asteroidRect = self.__asteroidSurface.get_rect()
         self.xPos = spawnPositionAndAngle[0]
         self.yPos = spawnPositionAndAngle[1]
         self.directionAngleRad = spawnPositionAndAngle[2]
         # self.directionAngleRad = 0
-        print('created')
+      
       
         self.speed = np.random.rand() + .1
         self.rotationAngle = 0
@@ -54,7 +54,7 @@ class Asteroid():
         self.yPos += self.speed * math.sin(self.directionAngleRad)         
         
         self.rotationAngle += self.ROTATION_RATE
-        asteroidSurfaceR = pygame.transform.rotate(self.asteroidSurface, self.rotationAngle)
-        asteroidRect = asteroidSurfaceR.get_rect(center=(self.xPos, self.yPos))
-        screen.blit(asteroidSurfaceR, asteroidRect.topleft)
+        asteroidSurfaceR = pygame.transform.rotate(self.__asteroidSurface, self.rotationAngle)
+        self.asteroidRect = asteroidSurfaceR.get_rect(center=(self.xPos, self.yPos))
+        screen.blit(asteroidSurfaceR, self.asteroidRect.topleft)
         

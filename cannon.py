@@ -17,6 +17,7 @@ class Cannon():
         cannonSurface = pygame.Surface((self.cannonSize, self.cannonThickness), pygame.SRCALPHA)
         pygame.draw.line(cannonSurface, outlineColor, (0, 0), (self.cannonSize, 0), self.cannonThickness)
         self.cannonSurfaceR = pygame.transform.rotate(cannonSurface, -math.degrees(angleRad))
+        self.cannonRect = self.cannonSurfaceR.get_rect()
         
         self.directionX = math.cos(angleRad)
         self.directionY = math.sin(angleRad) 
@@ -30,8 +31,8 @@ class Cannon():
         self.XPos += self.cannonSpeed * self.directionX
         self.YPos += self.cannonSpeed * self.directionY
         
-        cannonSurfaceRect = self.cannonSurfaceR.get_rect(center = (self.XPos, self.YPos))
-        screen.blit(self.cannonSurfaceR, cannonSurfaceRect.topleft)
+        self.cannonRect = self.cannonSurfaceR.get_rect(center = (self.XPos, self.YPos))
+        screen.blit(self.cannonSurfaceR, self.cannonRect.topleft)
          
     def isOutOfScreen(self):
         if self.XPos > WIDTH or self.XPos < 0 or \
