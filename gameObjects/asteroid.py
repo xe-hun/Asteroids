@@ -19,7 +19,8 @@ class Asteroid(pygame.sprite.Sprite):
         numSide = np.random.randint(6, 8)
         
         # map the asteroid life according to its size
-        self.asteroidLife = int(mapValue(35, 45, 1, 5, asteroidHalfSizeSize))
+        # self.asteroidLife = int(mapValue(35, 45, 1, 5, asteroidHalfSizeSize))
+        self.asteroidLife = 4
         print(self.asteroidLife)
 
 
