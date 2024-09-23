@@ -3,7 +3,7 @@ from constant import FPS, HEIGHT, WIDTH, outlineColor, fillColor
 import math
 import pygame
 
-from cannon import Cannon
+from gameObjects.cannon import Cannon
 
 class Steering(Enum):
     steeringLeft = 1

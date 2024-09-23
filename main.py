@@ -5,13 +5,13 @@ import numpy as np
 import pygame
 from gameObjects.asteroid import Asteroid
 from gameObjects.cannon import Cannon
-from gameObjects.constant import WIDTH, HEIGHT, outlineColor, backgroundColor, FPS
+from constant import WIDTH, HEIGHT, outlineColor, backgroundColor, FPS
 from utils.helper import mapValue
 from gameObjects.ship import Ship
 
 
 
-class Main():
+class MainGame():
     
     
     def __init__(self):
@@ -124,5 +124,5 @@ class Main():
     
 
 if __name__ == "__main__":
-    main = Main()
+    main = MainGame()
     main.game()
