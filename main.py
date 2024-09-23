@@ -3,11 +3,11 @@ import os
 import random
 import numpy as np
 import pygame
-from asteroid import Asteroid
-from cannon import Cannon
-from constant import WIDTH, HEIGHT, outlineColor, backgroundColor, FPS
-from helper import mapValue
-from ship import Ship
+from gameObjects.asteroid import Asteroid
+from gameObjects.cannon import Cannon
+from gameObjects.constant import WIDTH, HEIGHT, outlineColor, backgroundColor, FPS
+from utils.helper import mapValue
+from gameObjects.ship import Ship
 
 
 
@@ -91,17 +91,10 @@ class Main():
                 self.asteroids.remove(asteroid)
             asteroid.update(screen)
             
-            
-                
-        
-
-
     def game(self):
         
         obstacle_timer = pygame.USEREVENT + 1
         pygame.time.set_timer(obstacle_timer,2000)
-        
-        
         
         clock = pygame.time.Clock()
         run = True
@@ -129,9 +122,6 @@ class Main():
         pygame.quit()
         quit()
     
-                
-
-
 
 if __name__ == "__main__":
     main = Main()

@@ -1,0 +1,48 @@
+
+import math
+import pygame
+
+from constant import HEIGHT, WIDTH, outlineColor
+
+
+class Cannon():
+    def __init__(self, angleRad:float, startPosition:tuple):
+        
+      
+        # 5 pixels
+        self.cannonSize = 15
+        self.cannonSpeed = 10
+        self.cannonThickness = 2
+        
+        cannonSurface = pygame.Surface((self.cannonSize, self.cannonThickness), pygame.SRCALPHA)
+        pygame.draw.line(cannonSurface, outlineColor, (0, 0), (self.cannonSize, 0), self.cannonThickness)
+        self.cannonSurfaceR = pygame.transform.rotate(cannonSurface, -math.degrees(angleRad))
+        self.cannonRect = self.cannonSurfaceR.get_rect()
+        
+        self.directionX = math.cos(angleRad)
+        self.directionY = math.sin(angleRad) 
+        
+    
+        self.XPos = startPosition[0]
+        self.YPos = startPosition[1]
+
+        
+    def update(self, screen:pygame.Surface):
+        self.XPos += self.cannonSpeed * self.directionX
+        self.YPos += self.cannonSpeed * self.directionY
+        
+        self.cannonRect = self.cannonSurfaceR.get_rect(center = (self.XPos, self.YPos))
+        screen.blit(self.cannonSurfaceR, self.cannonRect.topleft)
+         
+    def isOutOfScreen(self):
+        if self.XPos > WIDTH or self.XPos < 0 or \
+            self.YPos > HEIGHT or self.YPos < 0:
+                return True
+        else:
+            return False
+                
+            
+         
+    def dispose(self):
+        self.cannonSurfaceR = None
+    
