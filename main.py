@@ -28,30 +28,41 @@ class Main():
         self.cannonFireList.add(cannon)
         
     def cannonUpdate(self, screen):
-        cannonIsDestroyed = False
         for cannon in self.cannonFireList.copy():
-            cannon.update(screen)
+            cannon.update(screen)    
             
-            for asteroid in self.asteroids:
-                if asteroid.asteroidRect.colliderect(
-                    cannon.cannonRect):
-                    cannon.dispose()
-                    self.cannonFireList.remove(cannon)
-                    cannonIsDestroyed = True
-                    break
-            if cannonIsDestroyed:
-                break
-                    
             if cannon.isOutOfScreen():
                 cannon.dispose()
                 self.cannonFireList.remove(cannon)
                 
+    def collisionDetection(self):
+        collisionDetected = False
+        for cannon in self.cannonFireList.copy():
+            for asteroid in self.asteroids.copy():
+                if asteroid.rect.colliderect(cannon.rect) and \
+                    pygame.sprite.collide_mask(cannon, asteroid):
+                    # handle cannon
+                    cannon.dispose()
+                    self.cannonFireList.remove(cannon)
+                    
+                    # handle asteroid
+                    asteroid.takeDamage()
+                    if asteroid.isAsteroidDead():
+                        self.asteroids.remove(asteroid)
+                        asteroid.dispose()
+                    
+                    collisionDetected = True
+                    break
+            if collisionDetected:
+                break
+                
 
     def gameUpdate(self, screen):
                     
+        self.collisionDetection()
         self.ship.update(screen)
+        self.asteroidsUpdate(screen)
         self.cannonUpdate(screen)
-        # pygame.display.update()
         pygame.display.flip()
         
     def spawnAsteroid(self):
@@ -73,12 +84,12 @@ class Main():
         self.asteroids.add(asteroid)
         
         
-    def asteroidsUpdate(self):
+    def asteroidsUpdate(self, screen):
         for asteroid in self.asteroids.copy():
             if asteroid.isOutOfScreen():
                 asteroid.dispose()
                 self.asteroids.remove(asteroid)
-            asteroid.update(self.screen)
+            asteroid.update(screen)
             
             
                 
@@ -112,7 +123,7 @@ class Main():
                 self.ship.handleEvents(event) 
                 
             
-            self.asteroidsUpdate()
+           
             self.gameUpdate(self.screen)
                 
         pygame.quit()

@@ -5,9 +5,10 @@ import pygame
 from constant import HEIGHT, WIDTH, outlineColor
 
 
-class Cannon():
+class Cannon(pygame.sprite.Sprite):
     def __init__(self, angleRad:float, startPosition:tuple):
         
+        super().__init__()
       
         # 5 pixels
         self.cannonSize = 15
@@ -17,8 +18,9 @@ class Cannon():
         cannonSurface = pygame.Surface((self.cannonSize, self.cannonThickness), pygame.SRCALPHA)
         pygame.draw.line(cannonSurface, outlineColor, (0, 0), (self.cannonSize, 0), self.cannonThickness)
         self.cannonSurfaceR = pygame.transform.rotate(cannonSurface, -math.degrees(angleRad))
-        self.cannonRect = self.cannonSurfaceR.get_rect()
-        
+        self.image = self.cannonSurfaceR
+        self.rect = self.cannonSurfaceR.get_rect()
+        self.mask = pygame.mask.from_surface(self.cannonSurfaceR)
         self.directionX = math.cos(angleRad)
         self.directionY = math.sin(angleRad) 
         
@@ -31,8 +33,8 @@ class Cannon():
         self.XPos += self.cannonSpeed * self.directionX
         self.YPos += self.cannonSpeed * self.directionY
         
-        self.cannonRect = self.cannonSurfaceR.get_rect(center = (self.XPos, self.YPos))
-        screen.blit(self.cannonSurfaceR, self.cannonRect.topleft)
+        self.rect = self.cannonSurfaceR.get_rect(center = (self.XPos, self.YPos))
+        screen.blit(self.cannonSurfaceR, self.rect.topleft)
          
     def isOutOfScreen(self):
         if self.XPos > WIDTH or self.XPos < 0 or \
