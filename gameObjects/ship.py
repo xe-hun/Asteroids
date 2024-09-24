@@ -15,14 +15,26 @@ class Ship():
     
     
     def __init__(self, cannonIsShot:callable):
+        
+        self.FIRE_RATE = 2
+        self.BURST_RATE = 10
+        self.BURST_COUNT = 3
+        
         self.cannonIsShot = cannonIsShot
         self.shipWidth = 30
         self.shipHeight = 40
-        polygonPoints =  ((0,0), (self.shipWidth, 0), (self.shipWidth // 2, self.shipHeight))
-        self.shipSurface = pygame.Surface((self.shipWidth + 2, self.shipHeight + 2), pygame.SRCALPHA)
-        pygame.draw.polygon(self.shipSurface, fillColor, polygonPoints)
-        pygame.draw.polygon(self.shipSurface, outlineColor, polygonPoints, 2)
-        self.shipSurface = pygame.transform.rotate(self.shipSurface, 90)
+        # polygonPoints =  ((0,0), (self.shipWidth, 0), (self.shipWidth // 2, self.shipHeight))
+        polygonPoints =  ((0,0),
+                          (7, 5),
+                          (15, 0),
+                          (23, 5),
+                          (30, 0),
+                          (15, 40))
+                          
+                        #   (self.shipWidth, 0), (self.shipWidth // 2, self.shipHeight))
+        
+       
+
         self.angleRad = 0
         self.acceleration = .07
         self.friction = .99
@@ -34,14 +46,17 @@ class Ship():
         self.steering = Steering.noSteering
         self.speedX = 0
         self.speedY = 0
-        # fireRatePerSecond
-        self.FIRE_RATE = 1
-        self.BURST_RATE = 10
-        self.BURST_COUNT = 3
         self.burstCounter = FPS // self.BURST_RATE * self.BURST_COUNT
         self.fireRateCounter = 0 
         self.bursting = False
         self.shooting = False
+        
+        self.shipSurface = pygame.Surface((self.shipWidth + 2, self.shipHeight + 2), pygame.SRCALPHA)
+        pygame.draw.polygon(self.shipSurface, fillColor, polygonPoints)
+        pygame.draw.polygon(self.shipSurface, outlineColor, polygonPoints, 2)
+        self.shipSurface = pygame.transform.rotate(self.shipSurface, 90)
+        self.rect = self.shipSurface.get_rect(center=(self.xPos, self.yPos))
+        self.image = self.shipSurface
         
         
     
@@ -141,7 +156,8 @@ class Ship():
         self.wrapTheShip()
         self.shootCannon()
         
-        shipSurfaceR = pygame.transform.rotate(self.shipSurface, -math.degrees(self.angleRad))
-        shipRect = shipSurfaceR.get_rect(center=(self.xPos, self.yPos))
-        screen.blit(shipSurfaceR, shipRect.topleft)
+        self.image = pygame.transform.rotate(self.shipSurface, -math.degrees(self.angleRad))
+        # self.image = shipSurfaceR
+        self.rect = self.image.get_rect(center=(self.xPos, self.yPos))
+        screen.blit(self.image, self.rect.topleft)
         

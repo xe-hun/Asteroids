@@ -33,8 +33,17 @@ class Game():
                 
     def collisionDetection(self):
         collisionDetected = False
-        for cannon in self.cannonFireList.copy():
-            for asteroid in self.asteroids.copy():
+        for asteroid in self.asteroids.copy():
+            
+            if asteroid.rect.colliderect(self.ship.rect) and \
+                pygame.sprite.collide_mask(asteroid, self.ship):
+                    print('zin')
+                    # asteroid.speedX *= -1
+                    self.ship.speedX *= -1
+                    self.ship.speedY *= -1
+            
+            for cannon in self.cannonFireList.copy():
+                               
                 if asteroid.rect.colliderect(cannon.rect) and \
                     pygame.sprite.collide_mask(cannon, asteroid):
                     # handle cannon

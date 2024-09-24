@@ -9,6 +9,5 @@ import math
 #         x=math.cos(angle),
 #         y=math.sin(angle)
 #     )
-    
 def mapValue(minVar, maxVar, minDest, maxDest, var):
-    return var / (maxVar - minVar) * (maxDest - minDest) + minDest
+    return ((var - minVar) / (maxVar - minVar) * (maxDest - minDest)) + minDest

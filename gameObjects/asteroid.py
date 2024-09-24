@@ -13,14 +13,22 @@ class Asteroid(pygame.sprite.Sprite):
     def __init__(self, spawnPositionAndAngle:tuple):
         
         super().__init__()
-       
-        asteroidHalfSizeSize = np.random.randint(35, 45)
+        
+        MIN_SIZE = 20
+        MAX_SIZE = 45
+        MIN_LIFE = 1
+        MAX_LIFE = 5
+        MIN_SIDES = 7
+        MAX_SIDES = 12
+        
         stroke = 2
-        numSide = np.random.randint(6, 8)
+       
+        asteroidHalfSizeSize = np.random.randint(MIN_SIZE, MAX_SIZE)
+        numSide = np.random.randint(MIN_SIDES, MAX_SIDES)
         
         # map the asteroid life according to its size
-        # self.asteroidLife = int(mapValue(35, 45, 1, 5, asteroidHalfSizeSize))
-        self.asteroidLife = 4
+        self.asteroidLife = int(mapValue(MIN_SIZE, MAX_SIZE, MIN_LIFE, MAX_LIFE, asteroidHalfSizeSize))
+        # self.asteroidLife = 4
         print(self.asteroidLife)
 
 
