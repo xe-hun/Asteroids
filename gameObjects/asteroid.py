@@ -46,10 +46,10 @@ class Asteroid(pygame.sprite.Sprite):
         self.xPos = spawnPositionAndAngle[0]
         self.yPos = spawnPositionAndAngle[1]
         self.directionAngleRad = spawnPositionAndAngle[2]
-        # self.directionAngleRad = 0
-      
-      
-        self.speed = np.random.rand() + .1
+        
+        self.speedMagnitude = np.random.rand() + .1
+        self.speedX =  self.speedMagnitude * math.cos(self.directionAngleRad)
+        self.speedY = self.speedMagnitude * math.sin(self.directionAngleRad)   
         self.rotationAngle = 0
         self.ROTATION_RATE = 2 * np.random.randn()
         
@@ -76,8 +76,10 @@ class Asteroid(pygame.sprite.Sprite):
 
     def update(self, screen:pygame.Surface):
         
-        self.xPos += self.speed * math.cos(self.directionAngleRad)
-        self.yPos += self.speed * math.sin(self.directionAngleRad)         
+          
+        
+        self.xPos += self.speedX
+        self.yPos += self.speedY
         
         self.rotationAngle += self.ROTATION_RATE
         asteroidSurfaceR = pygame.transform.rotate(self.__asteroidSurface, self.rotationAngle)
