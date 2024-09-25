@@ -54,6 +54,9 @@ class Main():
 
                 elif self.gameState == GameState.game:
                     self.game.handleGameEvents(event)
+                    
+                elif self.gameState == GameState.test:
+                    self.test.handleEvent(event)
                 
               
                 
@@ -65,6 +68,7 @@ class Main():
                 # self.startScreen.handleEvent()
             elif self.gameState == GameState.test:
                 self.test.update(self.screen)
+                
                 
             pygame.display.flip()
                 
