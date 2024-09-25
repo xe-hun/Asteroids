@@ -3,11 +3,12 @@ import pygame
 from constant import FPS, HEIGHT, WIDTH, backgroundColor
 from game import Game
 from pages.startScreen import StartScreen
+from test import Test
 
 class GameState(Enum):
     startScreen = 1
     game = 2
-    gameOver = 3
+    test = 3
 
 
 class Main():
@@ -18,8 +19,10 @@ class Main():
         pygame.display.set_caption('Asteroids')
         
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        self.gameState = GameState.startScreen
+        # self.gameState = GameState.startScreen
+        self.gameState = GameState.test
         self.startScreen = StartScreen(self.onStartGame, self.onQuitGame)
+        self.test = Test()
         self.run = True
         # self.gameIsRunni
                
@@ -51,6 +54,7 @@ class Main():
 
                 elif self.gameState == GameState.game:
                     self.game.handleGameEvents(event)
+                
               
                 
             if self.gameState == GameState.startScreen:
@@ -59,6 +63,8 @@ class Main():
             elif self.gameState == GameState.game:
                 self.game.gameUpdate(self.screen)
                 # self.startScreen.handleEvent()
+            elif self.gameState == GameState.test:
+                self.test.update(self.screen)
                 
             pygame.display.flip()
                 
