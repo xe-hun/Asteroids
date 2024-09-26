@@ -23,10 +23,10 @@ class Test():
         self.world = box2D.b2World(gravity=(0, 0), doSleep=True)
         
         # Create ground
-        self.ground_body = self.world.CreateStaticBody(
-            position = (0, 1),
-            shapes=box2D.b2PolygonShape(box =  (50, 5))
-        )
+        # self.groundBody = self.world.CreateStaticBody(
+        #     position = (0, 1),
+        #     shapes=box2D.b2PolygonShape(box =  (50, 5))
+        # )
         
         self.dynamicBoxBody = self.world.CreateDynamicBody(
             position=(10, 15)
@@ -74,7 +74,7 @@ class Test():
        
         
         
-        self.shipBody = self.world.CreateDynamicBody(position=centerPos)
+        self.shipBody = self.world.CreateDynamicBody(position=(WIDTH / (2 * self.PPM), HEIGHT / (2 * self.PPM)))
         self.polygonShape1 = box2D.b2.polygonShape(vertices = polygonPointsWorld1)
         self.polygonShape2 = box2D.b2.polygonShape(vertices = polygonPointsWorld2)
         self.polygonShape3 = box2D.b2.polygonShape(vertices = polygonPointsWorld3)
@@ -108,14 +108,16 @@ class Test():
         if self.mouseJoint:
             mouseToWorldPosition = toWorldPos(pygame.mouse.get_pos(), self.PPM, HEIGHT)
             self.mouseJoint.target = mouseToWorldPosition
+            
+        # self.warpShipInWorld(self.shipBody)
 
         
-        for fixture in self.ground_body.fixtures:
-            shape = fixture.shape
-            vertices = [(self.ground_body.transform * v) * self.PPM \
-                for v in shape.vertices]
-            vertices = [(v[0], HEIGHT - v[1]) for v in vertices]
-            pygame.draw.polygon(screen, (0, 225, 0), vertices)
+        # for fixture in self.groundBody.fixtures:
+        #     shape = fixture.shape
+        #     vertices = [(self.groundBody.transform * v) * self.PPM \
+        #         for v in shape.vertices]
+        #     vertices = [(v[0], HEIGHT - v[1]) for v in vertices]
+        #     pygame.draw.polygon(screen, (0, 225, 0), vertices)
            
         
         #   # Render dynamic body
@@ -151,53 +153,72 @@ class Test():
         
         # screen.blit(self.shipSurface, self.shipRect)
         
-         
+    def warpShipInWorld(self, body:box2D.b2Body):
+        left, top, right, bottom = self.getBodyBounds(body)
+        
+        position = body.position
+        bodyWidth = right - left
+        bodyHeight = bottom - top
+        # if right < 0:
+        if position.x < 0:
+            # body.position = (WIDTH / self.PPM + (bodyWidth) / 2, position.y)
+            body.position = (WIDTH / self.PPM, position.y)
+        # elif left > WIDTH/self.PPM:
+        elif position.x > WIDTH/self.PPM:
+            # body.position = (-bodyWidth / 2, position.y)
+            body.position = (0, position.y)
+        
+        # if bottom < 0:
+        if position.y < 0:
+            # body.position = (position.x, HEIGHT / self.PPM + (bodyHeight) / 2)
+            body.position = (position.x, HEIGHT / self.PPM)
+        # elif top > HEIGHT / self.PPM:
+        elif position.y > HEIGHT / self.PPM:
+            # body.position = (position.x, -bodyHeight / 2)
+            body.position = (position.x, 0)
+
+        
+    # def getBodyBounds(self, fixture):
+    #     body = fixture.body
+    #     vertices = [body.transform * v for v in body.shape.vertices]
+    #     xCoords = [v[0] for v in vertices]
+    #     yCoords = [v[1] for v in vertices]
+    #     return (min(xCoords), min(yCoords), max(xCoords), max(yCoords))
+        
+        
+    def getBodyBounds(self, body:box2D.b2Body):
+        # body = fixture.body
+        bounds = [fixture.shape.getAABB(body.transform, 0) for fixture in body.fixtures]
+        left = min(bound.lowerBound.x for bound in bounds)
+        right = max(bound.upperBound.x for bound in bounds)
+        top = max(bound.upperBound.y for bound in bounds)
+        bottom = min(bound.lowerBound.y for bound in bounds)
+        return (left, top, right, bottom)
         
     def handleEvent(self, event:pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            # print('zintol')
             mouseToWorldPosition = toWorldPos(event.pos, self.PPM, HEIGHT)
-            if self.getAABB(self.shipBody).lowerBound.x <= mouseToWorldPosition[0] <= self.getAABB(self.shipBody).upperBound.x and \
-                self.getAABB(self.shipBody).lowerBound.y <= mouseToWorldPosition[1] <= self.getAABB(self.shipBody).upperBound.y:
-            # if self.dynamic_body_fixture.GetAABB(0).lowerBound.x <= mouseToWorldPosition[0] <= self.dynamic_body_fixture.GetAABB(0).upperBound.x and \
-            #     self.dynamic_body_fixture.GetAABB(0).lowerBound.y <= mouseToWorldPosition[1] <= self.dynamic_body_fixture.GetAABB(0).upperBound.y:
-                    
-                    mouseJointDef = box2D.b2MouseJointDef()
-                    mouseJointDef.bodyA = self.world.CreateBody()
-                    mouseJointDef.bodyB = self.dynamicBoxBody
-                    mouseJointDef.target = mouseToWorldPosition
-                    # box2D.b2Body.m
-                    mouseJointDef.maxForce = 1000.0 * self.dynamicBoxBody.mass
-                    self.mouseJoint = self.world.CreateJoint(mouseJointDef)
+            if self.pointInBody(self.shipBody, mouseToWorldPosition):
+                mouseJointDef = box2D.b2MouseJointDef()
+                # mouseJointDef.bodyA = self.groundBody
+                mouseJointDef.bodyA = self.world.CreateBody()
+                mouseJointDef.bodyB = self.shipBody
+                mouseJointDef.target = mouseToWorldPosition
+                mouseJointDef.maxForce = 1000.0 * self.dynamicBoxBody.mass
+                self.mouseJoint = self.world.CreateJoint(mouseJointDef)
                     
         if event.type == pygame.MOUSEBUTTONUP:
             if self.mouseJoint:
                 self.world.DestroyJoint(self.mouseJoint)
                 self.mouseJoint = None
-                    
-                    
-    def getAABB(self, body:box2D.b2Body)->box2D.b2AABB:
-        aabb = box2D.b2AABB()
-        transform = body.transform
+                
+    def pointInBody(self, body:box2D.b2Body, point):
         for fixture in body.fixtures:
-            shape = fixture.shape
+            if fixture.TestPoint(point):
+                return True
             
-            # if isinstance(shape, box2D.b2CircleShape):
-            #     aabb.Combine(aabb, box2D.b2AABB(lowerBound=(shape.pos - (shape.radius, shape.radius)), 
-            #                                 upperBound=(shape.pos + (shape.radius, shape.radius))))
-            # else:
-            
-            aabb.Combine(aabb, shape.getAABB(0))
-            # width = aabb.upperBound.x - aabb.lowerBound.x
-            # height = aabb.upperBound.y - aabb.lowerBound.y
-            # return width, height
-            # aabb.Combine(aabb, fixture.GetAABB(0))
-
-        return aabb
-        
-        
-   
-    
+        return False
+                    
    
         
             
