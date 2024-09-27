@@ -28,12 +28,7 @@ class Test():
         #     shapes=box2D.b2PolygonShape(box =  (50, 5))
         # )
         
-        self.dynamicBoxBody = self.world.CreateDynamicBody(
-            position=(10, 15)
-        )
-        
-        self.dynamic_body_fixture = self.dynamicBoxBody.CreatePolygonFixture(box=(2,1), density=1, friction=.3)
-        
+      
         self.mouseJoint = None
         # self.mouse_world_pos = None
         
@@ -64,38 +59,62 @@ class Test():
         self.image = self.shipSurface
         
     def createShipBox(self):
-        centerPos = toWorldPos((WIDTH / 2, HEIGHT), self.PPM, HEIGHT)
+        centerPos = toWorldPos((WIDTH / 2, HEIGHT/2), self.PPM, HEIGHT)
         polygonPointsPixel1 = ((0, 0), (7, 5), (15, 40))
         polygonPointsPixel2 = ((7, 5), (15, 0), (23, 5), (15, 40))
         polygonPointsPixel3 = ( (23, 5),(30, 0),(15, 40))
-        polygonPointsWorld1 = [toWorldPos(x, self.PPM, HEIGHT).tolist() for x in polygonPointsPixel1]
-        polygonPointsWorld2 = [toWorldPos(x, self.PPM, HEIGHT).tolist() for x in polygonPointsPixel2]
-        polygonPointsWorld3 = [toWorldPos(x, self.PPM, HEIGHT).tolist() for x in polygonPointsPixel3]
+        polygonPointsWorld1 = [(x[0]/self.PPM, x[1]/self.PPM) for x in polygonPointsPixel1]
+        # polygonPointsWorld2 = [toWorldPos(x, self.PPM, HEIGHT).tolist() for x in polygonPointsPixel2]
+        polygonPointsWorld2 = [(x[0]/self.PPM, x[1]/self.PPM) for x in polygonPointsPixel2]
+        polygonPointsWorld3 = [(x[0]/self.PPM, x[1]/self.PPM) for x in polygonPointsPixel3]
        
         
         
-        self.shipBody = self.world.CreateDynamicBody(position=(WIDTH / (2 * self.PPM), HEIGHT / (2 * self.PPM)))
+        self.shipBody = self.world.CreateDynamicBody(position=box2D.b2Vec2(centerPos))
         self.polygonShape1 = box2D.b2.polygonShape(vertices = polygonPointsWorld1)
-        self.polygonShape2 = box2D.b2.polygonShape(vertices = polygonPointsWorld2)
+        self.polygonShape2 = box2D.b2PolygonShape(vertices = polygonPointsWorld2)
         self.polygonShape3 = box2D.b2.polygonShape(vertices = polygonPointsWorld3)
         
-        self.shipBodyFixture = self.shipBody.CreateFixture(
+        # shipBodyDef = box2D.b2BodyDef()
+        # shipBodyDef.type = box2D.b2_dynamicBody
+        # shipBodyDef.position = (10, 10)
+        # self.shipBody = self.world.CreateBody(shipBodyDef)
+        
+        # shipFixture1 = box2D.b2FixtureDef()
+        # shipFixture1.shape = self.polygonShape2
+        # shipFixture1.density = 1.0
+        # shipFixture1.friction = .3
+        
+        
+        
+        # self.shipBody.CreateFixture(shipFixture1)
+        
+        
+        self.shipBody.CreateFixture(
             shape = self.polygonShape1,
             density = 1,
             friction = .3
         )
         
-        self.shipBodyFixture = self.shipBody.CreateFixture(
+        self.shipBody.CreateFixture(
             shape = self.polygonShape2,
             density = 1,
             friction = .3
         )
         
-        self.shipBodyFixture = self.shipBody.CreateFixture(
+        self.shipBody.CreateFixture(
             shape = self.polygonShape3,
             density = 1,
             friction = .3
         )
+        
+        
+        # self.dynamicBoxBody = self.world.CreateDynamicBody(
+        #     position=(10, 15)
+        # )
+        
+        # self.dynamic_body_fixture = self.dynamicBoxBody.CreatePolygonFixture(box=(2,1), density=1, friction=.3)
+        
         
         
           
@@ -120,6 +139,15 @@ class Test():
         #     pygame.draw.polygon(screen, (0, 225, 0), vertices)
            
         
+        # boxPosition = self.dynamicBoxBody.position
+        
+        # boxAngle = self.dynamicBoxBody.angle
+        # boxSurfaceR = pygame.transform.rotate(self.boxSurface, math.degrees(boxAngle))
+        # boxRect = boxSurfaceR.get_rect(center=toPixelPos(boxPosition, self.PPM, HEIGHT))
+        # screen.blit(boxSurfaceR, boxRect.topleft)
+        
+        # screen.blit(self.shipSurface, self.shipRect)
+        
         #   # Render dynamic body
         # for fixture in self.dynamicBoxBody.fixtures:
         #     shape = fixture.shape
@@ -127,15 +155,6 @@ class Test():
         #     vertices = [(v[0], HEIGHT - v[1]) for v in vertices]
         #     pygame.draw.polygon(screen, (255, 0, 0), vertices)
             
-        boxPosition = self.dynamicBoxBody.position
-        
-        boxAngle = self.dynamicBoxBody.angle
-        boxSurfaceR = pygame.transform.rotate(self.boxSurface, math.degrees(boxAngle))
-        boxRect = boxSurfaceR.get_rect(center=toPixelPos(boxPosition, self.PPM, HEIGHT))
-        screen.blit(boxSurfaceR, boxRect.topleft)
-        
-        # screen.blit(self.shipSurface, self.shipRect)
-        
           
            # Render ship body
         for fixture in self.shipBody.fixtures:
@@ -143,9 +162,12 @@ class Test():
             vertices = [(self.shipBody.transform * v) * self.PPM for v in shape.vertices]
             vertices = [(v[0], HEIGHT - v[1]) for v in vertices]
             pygame.draw.polygon(screen, (111, 255, 255), vertices)
+            
+        # print(self.shipBody.transform.position[1])
+        print(self.shipBody.position)
         
         
-        shipPosition = self.shipBody.worldCenter
+        shipPosition = self.shipBody.position
         shipAngle = self.shipBody.angle
         shipSurfaceR = pygame.transform.rotate(self.shipSurface, math.degrees(shipAngle))
         shipRect = shipSurfaceR.get_rect(center=toPixelPos(shipPosition, self.PPM, HEIGHT))
@@ -204,7 +226,7 @@ class Test():
                 mouseJointDef.bodyA = self.world.CreateBody()
                 mouseJointDef.bodyB = self.shipBody
                 mouseJointDef.target = mouseToWorldPosition
-                mouseJointDef.maxForce = 1000.0 * self.dynamicBoxBody.mass
+                mouseJointDef.maxForce = 1000.0 * self.shipBody.mass
                 self.mouseJoint = self.world.CreateJoint(mouseJointDef)
                     
         if event.type == pygame.MOUSEBUTTONUP:
