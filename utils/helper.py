@@ -6,11 +6,13 @@ import math
 import numpy as np
 
 
-# def toComponent(angle):
-#     return namedtuple('toComponent', ['x', 'y'])(
-#         x=math.cos(angle),
-#         y=math.sin(angle)
-#     )
+def toComponent(angle):
+    return np.array([
+        math.cos(angle),
+        math.sin(angle),
+    ])
+    
+    
 def mapValue(minVar, maxVar, minDest, maxDest, var):
     return ((var - minVar) / (maxVar - minVar) * (maxDest - minDest)) + minDest
 
