@@ -1,9 +1,18 @@
 from enum import Enum
-from constant import FPS, HEIGHT, WIDTH, outlineColor, fillColor
+
+import numpy as np
+from constant import FPS, HEIGHT, WIDTH,\
+                    WSCALE, outlineColor,\
+                    fillColor
 import math
 import pygame
+import Box2D
 
+                  
 from gameObjects.cannon import Cannon
+from utils.helper import toComponent, toWorldPos,\
+                        toPixelPos, debugDrawBox2DBodies,\
+                        warpBox2DObject
 
 class Steering(Enum):
     steeringLeft = 1
@@ -12,52 +21,112 @@ class Steering(Enum):
 
 class Ship():
     
-    
-    
-    def __init__(self, cannonIsShot:callable):
+    def __init__(self, world:Box2D.b2Body, CannonIsShot:callable, debugDraw:bool = False):
         
+        self.debugDraw = debugDraw
+        # ship constants 
         self.FIRE_RATE = 2
         self.BURST_RATE = 10
         self.BURST_COUNT = 3
+        self.MAXSPEED = 100
+        # turn rate in degrees
+        self.TURN_RATE = 7
         
-        self.cannonIsShot = cannonIsShot
+        # ship dimensions
         self.shipWidth = 30
         self.shipHeight = 40
-        # polygonPoints =  ((0,0), (self.shipWidth, 0), (self.shipWidth // 2, self.shipHeight))
-        polygonPoints =  ((0,0),
-                          (7, 5),
-                          (15, 0),
-                          (23, 5),
-                          (30, 0),
-                          (15, 40))
-                          
-                        #   (self.shipWidth, 0), (self.shipWidth // 2, self.shipHeight))
         
-       
-
+        # ship flags
+        self.cannonIsShot = CannonIsShot
+        self.boosting = False
+        self.steering = Steering.noSteering
+        self.bursting = False
+        self.shooting = False
+        
+        # ship parameters
+        self.turnForce = 0
+        self.boostForce = 900
         self.angleRad = 0
         self.acceleration = .07
         self.friction = .99
         self.xPos = WIDTH // 2
         self.yPos = HEIGHT // 2
-        self.MAXSPEED = 7
-        self.TURN_RATE = math.pi / 180 * 4
-        self.boosting = False
-        self.steering = Steering.noSteering
         self.speedX = 0
         self.speedY = 0
         self.burstCounter = FPS // self.BURST_RATE * self.BURST_COUNT
         self.fireRateCounter = 0 
-        self.bursting = False
-        self.shooting = False
         
-        self.shipSurface = pygame.Surface((self.shipWidth + 2, self.shipHeight + 2), pygame.SRCALPHA)
-        pygame.draw.polygon(self.shipSurface, fillColor, polygonPoints)
-        pygame.draw.polygon(self.shipSurface, outlineColor, polygonPoints, 2)
-        self.shipSurface = pygame.transform.rotate(self.shipSurface, 90)
-        self.rect = self.shipSurface.get_rect(center=(self.xPos, self.yPos))
+        
+        # polygonPoints =  ((0,0),
+        #                   (7, 5),
+        #                   (15, 0),
+        #                   (23, 5),
+        #                   (30, 0),
+        #                   (15, 40))
+        
+        # building the shop
+        # polygon points for ship frame centered on zero
+        # ships width is 30 and ships height is 40
+        polygonPoints =  [(-15,-20), (-8, -15), (0, -20),
+                          (8, -15), (15, -20), (0, 20)]
+        # seperate the polygon shapes to mitigate against
+        # convex shape for box2D
+        polygonPointsSeperated = [[(-15,-20), (-8, -15), (0, 20)],
+                                  [(-8, -15), (0, -20),(8, -15), (0, 20)],
+                                  [ (8, -15), (15, -20), (0, 20)]]
+                                  
+        
+        self.shipSurface, self.rect = self.buildShipInPixel(self.xPos, self.yPos,
+                                            self.shipWidth, self.shipHeight, polygonPoints)
+        
         self.image = self.shipSurface
         
+        self.world = world
+        self.box2DBodiesDebugList = []
+        
+        shipPositionInWorld = toWorldPos((self.xPos, self.yPos), WSCALE, HEIGHT)
+        self.shipBodyBox2D = self.buildShipBodyBox2D(self.world, *shipPositionInWorld, polygonPointsSeperated)
+        
+    # def initializeBox2DWorld(self):
+       
+    #     return Box2D.b2World((0, 0))
+    
+        
+    def buildShipBodyBox2D(self, world:Box2D.b2World, xPos, yPos, polygonPointsList):
+        
+        shipBody = world.CreateDynamicBody( position = (xPos, yPos))
+        
+        for polygonPoints in polygonPointsList:
+            # scale down polygon points from pixel space to world space
+            polygonPointsInWorldScale = [Box2D.b2Vec2(p) / WSCALE for p in polygonPoints]
+            
+            # print([(p[0] + 15, p[1] + 20) for p in polygonPoints])
+       
+            shipBody.CreateFixture(
+                density = 1,
+                friction = .3,
+                shape = Box2D.b2PolygonShape(vertices = polygonPointsInWorldScale),
+            )
+        
+        self.box2DBodiesDebugList.append(shipBody)
+        shipBody.fixedRotation = True
+        shipBody.inertia = 50
+        # Box2D.b2Body.angularDamping = 500
+        return shipBody
+    
+        
+    def buildShipInPixel(self, xPos, yPos, shipWidth, shipHeight, polygonPoints):
+        # shift the polygon points by half width and half ship height to make top left 0,0 for pygame coordinate
+        strokeSize = 2
+        polygonPointsShifted = [(i[0] + shipWidth / 2 , i[1] + shipHeight / 2 ) for i in polygonPoints]
+        
+        shipSurface = pygame.Surface((shipWidth + strokeSize, shipHeight + strokeSize), pygame.SRCALPHA)
+        pygame.draw.polygon(shipSurface, fillColor, polygonPointsShifted)
+        pygame.draw.polygon(shipSurface, outlineColor, polygonPointsShifted, strokeSize)
+        rect = shipSurface.get_rect(center=(xPos, yPos))
+
+        
+        return shipSurface, rect
         
     
     def canFire(self):
@@ -66,16 +135,6 @@ class Ship():
             return True 
         else:
             return False
-    
-    def wrapTheShip(self):
-        if self.xPos > WIDTH:
-            self.xPos = 0
-        elif self.xPos < 0:
-            self.xPos = WIDTH
-        elif self.yPos  > HEIGHT:
-            self.yPos = 0
-        elif self.yPos < 0:
-            self.yPos = HEIGHT
     
 
     def handleEvents(self, event: pygame.event):
@@ -86,7 +145,7 @@ class Ship():
         else:
             self.boosting = False
             
-        if keys[pygame.K_UP]:
+        if keys[pygame.K_SPACE] or keys[pygame.K_UP]:
             self.shooting = True
         else:
             self.shooting = False
@@ -99,42 +158,15 @@ class Ship():
             self.steering = Steering.noSteering
        
             
-    def updateShipDirection(self):
-          
-        if self.boosting:
-            # accelerate the ship
-            self.speedX += self.acceleration * math.cos(self.angleRad)
-            self.speedY += self.acceleration * math.sin(self.angleRad)
             
-            self.speedX *= self.friction
-            self.speedY *= self.friction
-            
-            
-        # update the ship position
-        self.xPos += self.speedX
-        self.yPos += self.speedY
-        
-    
-    def updateShipSteering(self):
-        if self.steering == Steering.steeringLeft:
-            self.angleRad -= self.TURN_RATE
-        elif self.steering == Steering.steeringRight:
-            self.angleRad += self.TURN_RATE
-            
-    def shootCannon(self):
-        
+    def shootCannon(self, shipGunPosX, shipGunPosY):
+      
         if self.shooting and self.canFire():
             self.bursting = True
             
-     
-                
-       
-            
         if self.bursting:
             if self.burstCounter % (FPS // self.BURST_RATE) == 0:
-                shipGunPosX = self.xPos + self.shipHeight / 2 * math.cos(self.angleRad)
-                shipGunPosY = self.yPos + self.shipHeight / 2 * math.sin(self.angleRad)
-                cannon = Cannon(self.angleRad, (shipGunPosX, shipGunPosY))
+                cannon = Cannon(-self.angleRad - math.pi / 2, (shipGunPosX, shipGunPosY))
                 self.cannonIsShot(cannon)
             self.burstCounter -= 1
             
@@ -144,20 +176,82 @@ class Ship():
             
         if self.fireRateCounter > 0 and self.bursting == False:
             self.fireRateCounter -= 1
-        
-        # if self.fireRateCounter <= 0:
-            # self.burstCounter = self.BURST_COUNT
-        
+       
        
     def update(self, screen:pygame.Surface):
         
-        self.updateShipSteering()
-        self.updateShipDirection()
-        self.wrapTheShip()
-        self.shootCannon()
+        self.steerShip(self.steering)
         
-        self.image = pygame.transform.rotate(self.shipSurface, -math.degrees(self.angleRad))
-        # self.image = shipSurfaceR
-        self.rect = self.image.get_rect(center=(self.xPos, self.yPos))
-        screen.blit(self.image, self.rect.topleft)
+        cannonPosition = toPixelPos(self.shipBodyBox2D.GetWorldPoint((-5/WSCALE, 15/WSCALE)), WSCALE, HEIGHT)
+        self.shootCannon(*cannonPosition)
+        
+        self.boostShip(self.shipBodyBox2D, self.boosting, self.boostForce)
+        
+        self.capSpeed(self.shipBodyBox2D)
+        warpBox2DObject(self.shipBodyBox2D)   
+        
+        shipPosition = toPixelPos(self.shipBodyBox2D.position, WSCALE, HEIGHT) 
+        self.angleRad = self.shipBodyBox2D.angle
+        self.image = pygame.transform.rotate(self.shipSurface, math.degrees(self.angleRad - math.pi))
+        rect = self.image.get_rect(center=shipPosition)
+        screen.blit(self.image, rect.topleft)      
+        
+        # boxLocal = [(-12, -20), (12, -20), (12, -80), (-12, -80)]
+        # boxLocal = [(b[0]/WSCALE, b[1]/WSCALE) for b in boxLocal]
+        
+        # boxGlobal = [ self.shipBodyBox2D.GetWorldPoint(b) for b in boxLocal]
+        
+      
+        # boxGlobal = [toPixelPos(b, WSCALE, HEIGHT) for b in boxGlobal]
+        # pygame.draw.polygon(screen, (100,100,10), boxGlobal, 1)
+        
+        
+             
+        
+        
+        if self.debugDraw:
+            debugDrawBox2DBodies(screen, self.box2DBodiesDebugList)
+        
+        
+        
+    def capSpeed(self, shipBody):
+        velocity = shipBody.linearVelocity
+        velocityMagnitude = velocity.length
+        
+        if velocityMagnitude > self.MAXSPEED:
+            velocity.Normalize()
+            velocity *= self.MAXSPEED
+            
+        shipBody.linearVelocity = velocity
+            
+   
+    def boostShip(self, shipBody:Box2D.b2Body, boosting:bool, boostForce:int):
+        if boosting == False:
+            return
+        
+        angleRad = shipBody.angle
+        forcePoint = shipBody.GetWorldPoint((0, -15/WSCALE))
+        forceVector = boostForce * toComponent(angleRad + math.pi / 2)
+        shipBody.ApplyForce(forceVector, forcePoint, True)
+
+        
+        
+    def steerShip(self, steering:Steering):
+        self.turnForce += .2
+        self.turnForce = min(self.turnForce, self.TURN_RATE)
+        
+        if steering == Steering.steeringRight:
+            self.shipBodyBox2D.angle -= math.radians(self.turnForce)
+        elif steering == Steering.steeringLeft:
+            self.shipBodyBox2D.angle += math.radians(self.turnForce)
+        elif steering == Steering.noSteering:
+            self.turnForce = 0
+    
+    # def drawShip(self, screen:pygame.Surface, angleRad:float, position:tuple, shipSurface:pygame.Surface):
+    #     image = pygame.transform.rotate(shipSurface, math.degrees(angleRad - math.pi))
+    #     rect = self.image.get_rect(center=position)
+    #     screen.blit(self.image, self.rect.topleft)
+        
+    #     return rect, image
+    
         

@@ -20,11 +20,11 @@ class Main():
         
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         # self.gameState = GameState.startScreen
-        self.gameState = GameState.test
+        # self.gameState = GameState.test
         self.startScreen = StartScreen(self.onStartGame, self.onQuitGame)
         self.test = Test()
         self.run = True
-        # self.gameIsRunni
+        self.onStartGame()
                
     def onStartGame(self):
         self.game = Game()

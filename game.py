@@ -3,19 +3,24 @@ import os
 import random
 import numpy as np
 import pygame
+import Box2D
 from gameObjects.asteroid import Asteroid
 from gameObjects.cannon import Cannon
-from constant import WIDTH, HEIGHT, outlineColor, backgroundColor, FPS
-from utils.helper import mapValue
+from constant import WIDTH, HEIGHT, WSCALE, outlineColor, backgroundColor, FPS
+from utils.helper import getBodyBounds, mapValue, toWorldPos
 from gameObjects.ship import Ship
 
 
 class Game():
     def __init__(self):
+        
+          
+        self.VELOCITY_ITERATIONS = 10
+        self.POSITION_ITERATIONS = 10
       
-        self.ship = Ship(self.cannonIsShot)
-        # self.cannonFireList = set()
-        # self.asteroids = set()
+        self.world = Box2D.b2World((0, 0), doSleep=True)
+        self.ship = Ship(self.world, self.cannonIsShot, False)
+  
         self.cannonFireList = []
         self.asteroids = []
         
@@ -35,95 +40,56 @@ class Game():
                 
     def collisionDetection(self):
         collisionDetected = False
-        # for asteroid in self.asteroids.copy():
-        for i in range(len(self.asteroids)-1, -1, -1):
-            asteroid = self.asteroids[i]
-            
-            
-            if asteroid.rect.colliderect(self.ship.rect) and \
-                pygame.sprite.collide_mask(asteroid, self.ship):
-                    print('zin')
-                    shipMass = 10
-                    asteroidMass = 50
-                    
-                    
-                    
-                    
-                    prevShipSpeed = np.array([self.ship.speedX, self.ship.speedY])
-                    prevAsteroidSpeed = np.array([asteroid.speedX, asteroid.speedY])
-                    
-                    # velocity_exchange = (prevAsteroidSpeed - prevShipSpeed) * (2 * asteroidMass) / (shipMass + asteroidMass)
-                    
-                    # newShipSpeed = prevShipSpeed + velocity_exchange
-                    # newAsteroidSpeed = prevAsteroidSpeed - velocity_exchange
-                    
-                    newShipSpeed = (prevShipSpeed * (shipMass - asteroidMass) + 2 * asteroidMass * prevAsteroidSpeed) / (shipMass + asteroidMass)
-                    newAsteroidSpeed = (prevAsteroidSpeed * (asteroidMass - shipMass) + 2 * shipMass * prevShipSpeed) / (shipMass + asteroidMass)
-                    
-                    # newShipSpeed *= .7
-                    # newAsteroidSpeed *= .7
-                    
-                    
-                    self.ship.SpeedX, self.ship.speedY = newShipSpeed[0], newShipSpeed[1]
-                    asteroid.speedX, asteroid.speedY = newAsteroidSpeed[0], newAsteroidSpeed[1]
-                    
-                 
-                    
-            
-            # for cannon in self.cannonFireList.copy():
-            for j in range(len(self.cannonFireList)-1, -1, -1):
-                cannon = self.cannonFireList[j]
+        
+    
+        for i in range(len(self.cannonFireList)-1, -1, -1):
+            cannon = self.cannonFireList[i]
+           
+            for j in range(len(self.asteroids)-1, -1, -1):
+                asteroid = self.asteroids[j]
                                
                 if asteroid.rect.colliderect(cannon.rect) and \
                     pygame.sprite.collide_mask(cannon, asteroid):
                     # handle cannon
                     cannon.dispose()
-                    # self.cannonFireList.remove(cannon)
-                    self.cannonFireList.pop(j)
+                    self.cannonFireList.pop(i)
                     
                     # handle asteroid
                     asteroid.takeDamage()
                     if asteroid.isAsteroidDead():
                         asteroid.dispose()
                         # self.asteroids.remove(asteroid)
-                        self.asteroids.pop(i)
+                        self.asteroids.pop(j)
                     
                     collisionDetected = True
                     break
             if collisionDetected:
                 break
                 
-
-   
         
-        
-    def spawnAsteroid(self):
-        
-        pi = math.pi
-        spawnPosAndAngle = random.choices([
-         (-10,                         np.random.rand() * HEIGHT,   mapValue(0, 1, -0.25 * pi, 0.25 * pi, np.random.rand()) ),
-         (np.random.rand() * WIDTH,    HEIGHT + 10,                 mapValue(0, 1, 1.25 * pi , 1.75 * pi, np.random.rand()) ),
-         (WIDTH + 10,                  np.random.rand() * HEIGHT,   mapValue(0, 1, 0.75 * pi , 1.25 * pi, np.random.rand()) ),
-         (np.random.rand() * WIDTH,    -10,                         mapValue(0, 1, 0.25 * pi , 0.75 * pi, np.random.rand()) ),
-         None,],
-         weights=[1,2,2,1,3])
-        
-        if(spawnPosAndAngle[0] == None):
+    def spawnAsteroid(self, xPos, yPos):
+        if np.random.rand() < .2:
             return
         
-        
-        asteroid = Asteroid(*spawnPosAndAngle)
+        asteroid = Asteroid(self.world, xPos, yPos)
         self.asteroids.append(asteroid)
         
         
     def asteroidsUpdate(self, screen):
-        for asteroid in self.asteroids.copy():
-            if asteroid.isOutOfScreen():
+        for i in range(len(self.asteroids)-1, -1, -1):
+            asteroid = self.asteroids[i]
+            
+           
+            
+            if asteroid.isOutOfBounds():
                 asteroid.dispose()
-                self.asteroids.remove(asteroid)
+                self.asteroids.pop(i)
+                continue    
             asteroid.update(screen)
             
     def gameUpdate(self, screen):
+        self.world.Step(1.0/60, self.VELOCITY_ITERATIONS, self.POSITION_ITERATIONS)
+
         self.collisionDetection()
         self.ship.update(screen)
         self.asteroidsUpdate(screen)
@@ -131,7 +97,11 @@ class Game():
         
     def handleGameEvents(self, event:pygame.event.Event):
         if event.type == self.obstacle_timer:
-                self.spawnAsteroid()
+                self.spawnAsteroid(0, 0)
+        
+        # if event.type == pygame.MOUSEBUTTONUP:
+        #     pos = toWorldPos(event.pos, WSCALE, HEIGHT)
+        #     self.spawnAsteroid(*pos)
         
         self.ship.handleEvents(event)
         
