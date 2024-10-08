@@ -1,25 +1,25 @@
-from constant import HEIGHT, WIDTH, backgroundColor, outlineColor
+from constant import HEIGHT, START_NEW_GAME_EVENT, WIDTH, backgroundColor, outlineColor
 
 import pygame
+
+from gameStateController import GameStateController
 
 
 class StartScreen():
     
-    def __init__(self, onStartGame:callable, onQuitGame:callable) -> None:
+    def __init__(self, highScore:int) -> None:
         
-        self.onStartGame = onStartGame
-        self.onQuitGame = onQuitGame
         
         self.gameFont = pygame.font.Font('font/Pixeltype.ttf', 50)
         
-        self.msg_startGame = self.gameFont.render('Start Game', False, outlineColor)
+        self.msg_startGame = self.gameFont.render('START GAME', False, outlineColor)
         self.msg_startGame_rect = self.msg_startGame.get_rect(center=(WIDTH / 2, 0.4 * HEIGHT))
         
-        self.msg_quit = self.gameFont.render('Quit', False, outlineColor)
+        self.msg_quit = self.gameFont.render('QUIT', False, outlineColor)
         # pygame.draw.polygon(self.msg_quit, outlineColor, [(0,0), (50, 0), (30, 50), (0, 30)], 2)
         self.msg_quit_rect = self.msg_quit.get_rect(center=(WIDTH / 2, 0.5 * HEIGHT))
         
-        self.msg_score = self.gameFont.render('Score : 200', False, outlineColor)
+        self.msg_score = self.gameFont.render(f'High Score : {highScore}', False, outlineColor)
         self.msg_score_rect = self.msg_score.get_rect(center=(WIDTH / 2, 0.8 * HEIGHT))
     
     def draw(self, screen:pygame.surface):
@@ -28,11 +28,17 @@ class StartScreen():
         screen.blit(self.msg_quit, self.msg_quit_rect)
         screen.blit(self.msg_score, self.msg_score_rect)
         
-    def handleEvent(self, event:pygame.event.Event):
+    def handleEvents(self, event:pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONUP:
-            self.handleClick(*event.pos, self.msg_startGame_rect, self.onStartGame)
-            self.handleClick(*event.pos, self.msg_quit_rect, self.onQuitGame)
+            self.handleClick(*event.pos, self.msg_startGame_rect, self.startGame)
+            self.handleClick(*event.pos, self.msg_quit_rect, self.quitGame)
             # self.handleClick(*event.pos, self.msg_quit_rect, self.onQuitGame())
+    
+    def startGame(self):
+        pygame.event.post(pygame.event.Event(START_NEW_GAME_EVENT))
+        
+    def quitGame(self):
+        pygame.event.post(pygame.event.Event(pygame.QUIT))
         
    
             

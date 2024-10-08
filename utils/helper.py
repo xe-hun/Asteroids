@@ -3,19 +3,20 @@
 from collections import namedtuple
 import math
 import Box2D
-
-import numpy as np
 import pygame
 
-from constant import HEIGHT, WIDTH, WSCALE
+from constant import HEIGHT, SHAKE_EVENT, WIDTH, WSCALE
+# from utils.lerp import Lerp
 
 
 def toComponent(angle):
-    return np.array([
+    return Box2D.b2Vec2(
         math.cos(angle),
         math.sin(angle),
-    ])
+    )
     
+def clamp(minVal, maxVal, val):
+    return (min(maxVal, max(minVal, val)))
     
 def mapValue(minVar, maxVar, minDest, maxDest, var):
     return ((var - minVar) / (maxVar - minVar) * (maxDest - minDest)) + minDest
@@ -53,7 +54,7 @@ def getBodyBounds(ship:Box2D.b2Body):
             
 def warpBox2DObject(ship:Box2D.b2Body):
         left, top, right, bottom = getBodyBounds(ship)
-        buffer = 5
+        buffer = 10
         
         position = ship.position
         bodyWidth = right - left
@@ -68,4 +69,10 @@ def warpBox2DObject(ship:Box2D.b2Body):
         elif bottom > HEIGHT / WSCALE:
             ship.position = (position.x, (-bodyHeight + buffer) / 2)
 
-
+        
+        
+                
+        
+            
+            
+ 

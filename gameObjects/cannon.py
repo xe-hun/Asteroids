@@ -3,13 +3,15 @@ import math
 import pygame
 
 from constant import HEIGHT, WIDTH, outlineColor
+from utils.shake import Shake
 
 
 class Cannon(pygame.sprite.Sprite):
-    def __init__(self, angleRad:float, startPosition:tuple):
+    def __init__(self, angleRad:float, startPosition:tuple, shake:Shake):
         
         super().__init__()
       
+        self.shake = shake
         # 5 pixels
         self.cannonSize = 15
         self.cannonSpeed = 10
@@ -32,6 +34,8 @@ class Cannon(pygame.sprite.Sprite):
     def update(self, screen:pygame.Surface):
         self.XPos += self.cannonSpeed * self.directionX
         self.YPos += self.cannonSpeed * self.directionY
+        
+        self.XPos, self.YPos = tuple(map(self.shake.watch, (self.XPos, self.YPos)))
         
         self.rect = self.cannonSurfaceR.get_rect(center = (self.XPos, self.YPos))
         screen.blit(self.cannonSurfaceR, self.rect.topleft)

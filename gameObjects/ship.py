@@ -1,7 +1,9 @@
 from enum import Enum
 
 import numpy as np
-from constant import FPS, HEIGHT, WIDTH,\
+from utils.shake import Shake
+from utils.box2DHelperClasses import RaycastCallback
+from constant import BOX2D_SHIP_USER_DATA, FPS, HEIGHT, WIDTH,\
                     WSCALE, outlineColor,\
                     fillColor
 import math
@@ -19,9 +21,13 @@ class Steering(Enum):
     steeringRight = 2
     noSteering = 3
 
+
+
+
+
 class Ship():
     
-    def __init__(self, world:Box2D.b2Body, CannonIsShot:callable, debugDraw:bool = False):
+    def __init__(self, world:Box2D.b2Body, CannonIsShot:callable, shake:Shake, debugDraw:bool = False):
         
         self.debugDraw = debugDraw
         # ship constants 
@@ -33,8 +39,10 @@ class Ship():
         self.TURN_RATE = 7
         
         # ship dimensions
-        self.shipWidth = 30
-        self.shipHeight = 40
+        self.shipSizeScale = 0.7
+        self.shipWidth = 30 * self.shipSizeScale
+        self.shipHeight = 40 * self.shipSizeScale
+        self.shipBasePoint = - self.shipWidth / (2 * WSCALE)
         
         # ship flags
         self.cannonIsShot = CannonIsShot
@@ -45,7 +53,7 @@ class Ship():
         
         # ship parameters
         self.turnForce = 0
-        self.boostForce = 900
+        self.boostForce = 500
         self.angleRad = 0
         self.acceleration = .07
         self.friction = .99
@@ -56,28 +64,45 @@ class Ship():
         self.burstCounter = FPS // self.BURST_RATE * self.BURST_COUNT
         self.fireRateCounter = 0 
         
-        
-        # polygonPoints =  ((0,0),
-        #                   (7, 5),
-        #                   (15, 0),
-        #                   (23, 5),
-        #                   (30, 0),
-        #                   (15, 40))
+        # anti thrust parameters
+        self.antiThrustRange = 20
+        self.antiThrustForce = 4000
         
         # building the shop
         # polygon points for ship frame centered on zero
         # ships width is 30 and ships height is 40
-        polygonPoints =  [(-15,-20), (-8, -15), (0, -20),
-                          (8, -15), (15, -20), (0, 20)]
+        b2Vec2 = Box2D.b2Vec2
+        polygonPoints =  [
+                          b2Vec2(-15,-20) * self.shipSizeScale,
+                          b2Vec2(-8, -15) * self.shipSizeScale,
+                          b2Vec2(0, -20) * self.shipSizeScale,
+                          b2Vec2(8, -15) * self.shipSizeScale,
+                          b2Vec2(15, -20) * self.shipSizeScale,
+                          b2Vec2(0, 20) * self.shipSizeScale
+                        ]
         # seperate the polygon shapes to mitigate against
         # convex shape for box2D
-        polygonPointsSeperated = [[(-15,-20), (-8, -15), (0, 20)],
-                                  [(-8, -15), (0, -20),(8, -15), (0, 20)],
-                                  [ (8, -15), (15, -20), (0, 20)]]
+        polygonPointsSeperated =    [
+                                        [
+                                            b2Vec2(-15,-20) * self.shipSizeScale,
+                                            b2Vec2(-8, -15) * self.shipSizeScale,
+                                            b2Vec2(0, 20) * self.shipSizeScale
+                                        ],
+                                        [
+                                            b2Vec2(-8, -15) * self.shipSizeScale,
+                                            b2Vec2(0, -20) * self.shipSizeScale,
+                                            b2Vec2(8, -15) * self.shipSizeScale,
+                                            b2Vec2(0, 20) * self.shipSizeScale
+                                        ],    
+                                        [   b2Vec2(8, -15) * self.shipSizeScale,
+                                            b2Vec2(15, -20) * self.shipSizeScale,
+                                            b2Vec2(0, 20) * self.shipSizeScale
+                                        ]
+                                    ]
                                   
         
         self.shipSurface, self.rect = self.buildShipInPixel(self.xPos, self.yPos,
-                                            self.shipWidth, self.shipHeight, polygonPoints)
+                                            self.shipWidth, self.shipHeight, list(polygonPoints))
         
         self.image = self.shipSurface
         
@@ -85,27 +110,27 @@ class Ship():
         self.box2DBodiesDebugList = []
         
         shipPositionInWorld = toWorldPos((self.xPos, self.yPos), WSCALE, HEIGHT)
-        self.shipBodyBox2D = self.buildShipBodyBox2D(self.world, *shipPositionInWorld, polygonPointsSeperated)
+        self.shipBodyBox2D = self.buildShipBodyBox2D(self.world, *shipPositionInWorld, list(polygonPointsSeperated))
         
-    # def initializeBox2DWorld(self):
+        self.shake = shake
        
-    #     return Box2D.b2World((0, 0))
-    
+
         
     def buildShipBodyBox2D(self, world:Box2D.b2World, xPos, yPos, polygonPointsList):
         
-        shipBody = world.CreateDynamicBody( position = (xPos, yPos))
+        shipBody = world.CreateDynamicBody( 
+                                           position = (xPos, yPos),
+                                           userData = BOX2D_SHIP_USER_DATA,
+                                           )
         
         for polygonPoints in polygonPointsList:
             # scale down polygon points from pixel space to world space
-            polygonPointsInWorldScale = [Box2D.b2Vec2(p) / WSCALE for p in polygonPoints]
+            polygonPointsInWorldScale = [p / WSCALE for p in polygonPoints]
             
-            # print([(p[0] + 15, p[1] + 20) for p in polygonPoints])
-       
             shipBody.CreateFixture(
                 density = 1,
                 friction = .3,
-                shape = Box2D.b2PolygonShape(vertices = polygonPointsInWorldScale),
+                shape = Box2D.b2PolygonShape(vertices = polygonPointsInWorldScale)
             )
         
         self.box2DBodiesDebugList.append(shipBody)
@@ -166,7 +191,7 @@ class Ship():
             
         if self.bursting:
             if self.burstCounter % (FPS // self.BURST_RATE) == 0:
-                cannon = Cannon(-self.angleRad - math.pi / 2, (shipGunPosX, shipGunPosY))
+                cannon = Cannon(-self.angleRad - math.pi / 2, (shipGunPosX, shipGunPosY), self.shake)
                 self.cannonIsShot(cannon)
             self.burstCounter -= 1
             
@@ -183,27 +208,21 @@ class Ship():
         self.steerShip(self.steering)
         
         cannonPosition = toPixelPos(self.shipBodyBox2D.GetWorldPoint((-5/WSCALE, 15/WSCALE)), WSCALE, HEIGHT)
+        cannonPosition = tuple(map(self.shake.watch, cannonPosition))
         self.shootCannon(*cannonPosition)
         
-        self.boostShip(self.shipBodyBox2D, self.boosting, self.boostForce)
-        
+        self.boostShip(self.shipBodyBox2D, self.boosting, self.boostForce, self.shipBasePoint)
+        self.reverseThrust(screen, self.shipBodyBox2D, self.antiThrustRange, self.antiThrustForce, self.shipBasePoint)
         self.capSpeed(self.shipBodyBox2D)
         warpBox2DObject(self.shipBodyBox2D)   
         
         shipPosition = toPixelPos(self.shipBodyBox2D.position, WSCALE, HEIGHT) 
+        shipPosition = tuple(map(self.shake.watch, shipPosition))
+        
         self.angleRad = self.shipBodyBox2D.angle
         self.image = pygame.transform.rotate(self.shipSurface, math.degrees(self.angleRad - math.pi))
         rect = self.image.get_rect(center=shipPosition)
-        screen.blit(self.image, rect.topleft)      
-        
-        # boxLocal = [(-12, -20), (12, -20), (12, -80), (-12, -80)]
-        # boxLocal = [(b[0]/WSCALE, b[1]/WSCALE) for b in boxLocal]
-        
-        # boxGlobal = [ self.shipBodyBox2D.GetWorldPoint(b) for b in boxLocal]
-        
-      
-        # boxGlobal = [toPixelPos(b, WSCALE, HEIGHT) for b in boxGlobal]
-        # pygame.draw.polygon(screen, (100,100,10), boxGlobal, 1)
+        screen.blit(self.image, rect.topleft)  
         
         
              
@@ -225,14 +244,46 @@ class Ship():
         shipBody.linearVelocity = velocity
             
    
-    def boostShip(self, shipBody:Box2D.b2Body, boosting:bool, boostForce:int):
+    def boostShip(self, shipBody:Box2D.b2Body, boosting:bool, boostForce:int, shipBasePoint:float):
         if boosting == False:
             return
         
         angleRad = shipBody.angle
-        forcePoint = shipBody.GetWorldPoint((0, -15/WSCALE))
-        forceVector = boostForce * toComponent(angleRad + math.pi / 2)
-        shipBody.ApplyForce(forceVector, forcePoint, True)
+        forcePoint = shipBody.GetWorldPoint((0, shipBasePoint))
+        thrustVector = boostForce * toComponent(angleRad + math.pi / 2)
+        shipBody.ApplyForce(thrustVector, forcePoint, True)
+      
+        
+    def reverseThrust(self, screen, shipBody:Box2D.b2Body, antiThrustRange, antiThrustForce, shipBasePoint):
+        
+      
+        thrustDirection = - toComponent(shipBody.angle + math.pi / 2)
+        
+        rayCastStart = shipBody.GetWorldPoint((0, shipBasePoint))
+        rayCastEnd = rayCastStart + (antiThrustRange * thrustDirection)
+        # self.debugDrawRayCast(rayCastStart, rayCastEnd, screen)
+       
+        rayCastCallBack = RaycastCallback()
+        self.world.RayCast(rayCastCallBack, rayCastStart, rayCastEnd)
+        
+        rayCastHit =  rayCastCallBack.fixture and rayCastCallBack.fixture.body != self.shipBodyBox2D
+        if self.boosting and rayCastHit:
+           
+            # apply anti thrust force
+            distanceFromShip = (rayCastCallBack.point - rayCastStart).length
+            antiThrustRatio = antiThrustForce * (1 - distanceFromShip / antiThrustRange)
+            antiThrustMagnitude = antiThrustRatio * thrustDirection
+            
+            hitBody = rayCastCallBack.fixture.body
+            hitBody.ApplyForce(antiThrustMagnitude, rayCastCallBack.point, True)
+       
+    
+    
+    def debugDrawRayCast(self, rayCastStart, rayCastEnd, screen):
+        rayCastStartToPixel = toPixelPos(rayCastStart, WSCALE, HEIGHT)
+        rayCastEndToPixel = toPixelPos(rayCastEnd, WSCALE, HEIGHT)
+        pygame.draw.line(screen, (255, 10, 10), rayCastStartToPixel, rayCastEndToPixel)
+       
 
         
         
@@ -246,12 +297,5 @@ class Ship():
             self.shipBodyBox2D.angle += math.radians(self.turnForce)
         elif steering == Steering.noSteering:
             self.turnForce = 0
-    
-    # def drawShip(self, screen:pygame.Surface, angleRad:float, position:tuple, shipSurface:pygame.Surface):
-    #     image = pygame.transform.rotate(shipSurface, math.degrees(angleRad - math.pi))
-    #     rect = self.image.get_rect(center=position)
-    #     screen.blit(self.image, self.rect.topleft)
-        
-    #     return rect, image
     
         
