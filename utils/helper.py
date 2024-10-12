@@ -3,11 +3,52 @@
 from collections import namedtuple
 import math
 import Box2D
+import numpy as np
 import pygame
 
 from constant import HEIGHT, SHAKE_EVENT, WIDTH, WSCALE
 # from utils.lerp import Lerp
 
+
+def scale(img: pygame.Surface, factor):
+    w, h = img.get_width() * factor, img.get_height() * factor
+    return pygame.transform.scale(img, (int(w), int(h)))
+
+def mag(vec):
+    if vec[0] == 0 and vec[1] == 0:
+        return 0
+    return math.sqrt(vec[0] ** 2 + vec[1] ** 2)
+
+def norm(vec):
+    magnitude = mag(vec)
+    if magnitude == 0:
+        return np.array((0, 0))
+    return np.array((vec[0] / magnitude, vec[1] / magnitude))
+
+def dot(vec1, vec2):
+    return vec1[0] * vec2[0] + vec1[1] * vec2[1]
+
+def angleDiff(vec1, vec2):
+    magnitude1 = mag(vec1)
+    magnitude2 = mag(vec2)
+    
+    if magnitude1 * magnitude2 == 0:
+        return 0
+    
+    cosAngle = dot(vec1, vec2) / (magnitude1 * magnitude2)
+    
+    cosAngle = clamp(-1, 1, cosAngle)
+    
+    angle = math.acos(cosAngle)
+    return angle
+
+def rotateVec(vec, rate):
+    x = vec[0]
+    y = vec[1]
+    return np.array(
+        (x * math.cos(rate) - y * math.sin(rate),
+        x * math.sin(rate) + y * math.cos(rate),)
+    )
 
 def toComponent(angle):
     return Box2D.b2Vec2(

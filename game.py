@@ -1,8 +1,11 @@
 import numpy as np
 import pygame
 import Box2D
+from effects.worldStar import WorldStar
+from gameObjects.rocket import Rocket
 from gameStateController import GameStateController
-from utils.shake import Shake
+from strategies.targetStrategy import TargetStrategy
+from utils.camera import Camera
 from utils.box2DHelperClasses import CollisionFilter, ContactListener
 from gameObjects.asteroid import Asteroid
 from gameObjects.cannon import Cannon
@@ -24,13 +27,14 @@ class Game():
         self.maxAsteroidPerLevel = MAX_ASTEROID_PER_LEVEL        
         self.numAsteroidSpawned = 0
       
-        self.shake = Shake(SHAKE_DURATION, SHAKE_INTENSITY, SHAKE_FREQUENCY)
+        self.camera = Camera(SHAKE_DURATION, SHAKE_INTENSITY, SHAKE_FREQUENCY)
         self.world = Box2D.b2World((0, 0), doSleep=True)
         self.world.contactFilter = CollisionFilter()
         self.world.contactListener = ContactListener()
-        self.ship = Ship(self.world, self.cannonIsShot, self.shake, False)
+        self.ship = Ship(self.world, self.projectileIsShot, self.camera, False)
   
         self.cannonFireList = []
+        self.rocketFireList = []
         self.asteroids = []
         
         self.obstacle_timer = pygame.USEREVENT + 1
@@ -38,22 +42,71 @@ class Game():
         pygame.time.set_timer(self.obstacle_timer, 2000)
         pygame.time.set_timer(self.time_timer, 1000)
         
+        self.worldStar = WorldStar()
+        
     # def destroy(self):
         
         
-    def cannonIsShot(self, cannon:Cannon):
-        self.cannonFireList.append(cannon)
+    def projectileIsShot(self, projectile:Cannon | Rocket):
+      
+        if isinstance(projectile, Cannon):
+            self.cannonFireList.append(projectile)
+            
+        if isinstance(projectile, Rocket):
+            self.rocketFireList.append(projectile)
         
-    def cannonUpdate(self, screen):
-        for cannon in self.cannonFireList.copy():
-            cannon.update(screen)    
+    def projectileUpdate(self, screen, isLevelInProgress):
+        if isLevelInProgress == False:
+            return
+        
+        for i in range(len(self.cannonFireList)-1, -1, -1):
+            cannon = self.cannonFireList[i]
+          
+            cannon.update(screen)
             
             if cannon.isOutOfScreen():
-                cannon.dispose()
-                self.cannonFireList.remove(cannon)
+                self.cannonFireList.pop(i)
+                
+        for i in range(len(self.rocketFireList)-1, -1, -1):
+            rocket = self.rocketFireList[i]
+            if rocket.hasTarget() == False:
+                targetPosition = TargetStrategy(rocket.position, [i.position for i in self.asteroids], 300).targetPosition()
+                rocket.setTargetPosition(targetPosition)
+
+            rocket.update(screen)
+            
+            if rocket.isOutOfScreen():
+                self.rocketFireList.pop(i)
+                
+                
+                
+                
+                
+                # projectile.dispose()
+                
+        # for cannon in self.cannonFireList.copy():
+        #     cannon.update(screen)    
+            
+        #     if cannon.isOutOfScreen():
+        #         cannon.dispose()
+        #         self.cannonFireList.remove(cannon)
                 
     def collisionDetection(self):
         collisionDetected = False
+        
+        for i in range(len(self.rocketFireList)-1, -1, -1):
+            rocket = self.rocketFireList[i]
+           
+            for j in range(len(self.asteroids)-1, -1, -1):
+                asteroid = self.asteroids[j]
+                
+                if asteroid.rect.colliderect(rocket.rect) and \
+                    pygame.sprite.collide_mask(rocket, asteroid):
+                    # handle cannon
+                    # cannon.dispose()
+                    self.rocketFireList.pop(i)
+        
+        
         
     
         for i in range(len(self.cannonFireList)-1, -1, -1):
@@ -91,7 +144,7 @@ class Game():
             return
         
         self.controller.reportAsteroidSpawned()
-        asteroid = Asteroid(self.world, self.shake, debugDraw=False)
+        asteroid = Asteroid(self.world, self.camera, debugDraw=False)
         self.asteroids.append(asteroid)
         
         
@@ -101,18 +154,21 @@ class Game():
             asteroid.update(screen)
             
     def gameUpdate(self, screen):
-        self.world.Step(1.0/60, self.VELOCITY_ITERATIONS, self.POSITION_ITERATIONS)
+        if self.controller.isLevelInProgress():
+            self.world.Step(1.0/60, self.VELOCITY_ITERATIONS, self.POSITION_ITERATIONS)
 
+        self.worldStar.draw(screen)
         self.collisionDetection()
-        self.ship.update(screen)
+        
+        self.ship.update(screen, self.controller.isLevelInProgress())
         self.asteroidsUpdate(screen)
-        self.cannonUpdate(screen)
+        self.projectileUpdate(screen, self.controller.isLevelInProgress())
         self.hud.update(screen, self.controller)
         self.controller.controllerUpdate(len(self.asteroids))
         
     def handleGameEvents(self, event:pygame.event.Event):
         
-        self.shake.eventUpdate(event)
+        self.camera.eventUpdate(event)
         
         if event.type == self.obstacle_timer:
                 self.spawnAsteroid()

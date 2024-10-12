@@ -3,7 +3,7 @@ from constant import SHAKE_EVENT
 from utils.lerp import Lerp
 
 
-class Shake():
+class Camera():
     def __init__(self, duration:int, intensity:float, frequency:int) -> None:
         self.duration = duration
         self.intensity = intensity

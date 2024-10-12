@@ -6,16 +6,16 @@ import pygame
 import numpy as np
 import Box2D
 
-from utils.shake import Shake
-from utils.helper import debugDrawBox2DBodies, mapValue, toComponent, toPixelPos, warpBox2DObject
+from utils.camera import Camera
+from utils.helper import debugDrawBox2DBodies, mapValue, norm, toComponent, toPixelPos, warpBox2DObject
 
 
 class Asteroid(pygame.sprite.Sprite):
-    def __init__(self, world:Box2D.b2World, shake:Shake, xPos:float = None, yPos:float = None, debugDraw:bool = False, halfSize:float = None):
+    def __init__(self, world:Box2D.b2World, camera:Camera, position:tuple = None, debugDraw:bool = False, halfSize:float = None):
         
         super().__init__()
         self.debugDraw = debugDraw
-        self.shake = shake
+        self.camera = camera
         self.world = world
         self.box2DBodiesDebugList = []
         # outOfBoundsExtension prevents the asteroid from being remove right after creation
@@ -35,8 +35,7 @@ class Asteroid(pygame.sprite.Sprite):
        
         stroke = 2
         self.breakageThreshold = MIN_SIZE
-        lenghtDisplacementRange = 10
-        angleDisplacementRange = .05
+      
         
         
         self.asteroidHalfSize =  np.random.randint(MIN_SIZE, MAX_SIZE) if halfSize is None else halfSize
@@ -46,17 +45,22 @@ class Asteroid(pygame.sprite.Sprite):
       
 
         x, y, direction = self.generateInitialStates(creationExtension)
-        self.xPos = x if xPos is None else xPos
-        self.yPos = y if yPos is None else yPos
+        
+        if position == None:
+            self.position = (x, y)
+        else:
+            self.position = position
         
         speed = 7 + random.random() * 15
-        linearVelocity = toComponent(direction) * speed
+        linearVelocity = norm(toComponent(direction)) * speed
         angularVelocity = 2 + random.random() * 5
         
-        position = (self.xPos, self.yPos)
+        lenghtDisplacementRange = self.asteroidHalfSize * .6
+        angleDisplacementRange = .05
+        
         
         polygonPoints = self.createPolygonPoints(self.asteroidHalfSize, numSide, lenghtDisplacementRange, angleDisplacementRange)
-        self.asteroidBodybox2D = self.createAsteroidBodyBox2D(polygonPoints, self.world, position, linearVelocity, angularVelocity)
+        self.asteroidBodybox2D = self.createAsteroidBodyBox2D(polygonPoints, self.world, self.position, linearVelocity, angularVelocity)
 
          
         self.__asteroidSurface = self.drawAsteroidSurface(polygonPoints, self.asteroidHalfSize, stroke)
@@ -76,7 +80,7 @@ class Asteroid(pygame.sprite.Sprite):
     def generateInitialStates(self, creationExtension):
         
         pi = math.pi
-        worldHeight, worldWidth = HEIGHT / WSCALE, WIDTH / WSCALE
+        worldHeight, worldWidth = HEIGHT, WIDTH
         
         
         return tuple(random.choices([
@@ -103,6 +107,9 @@ class Asteroid(pygame.sprite.Sprite):
         
         
     def createAsteroidBodyBox2D(self, polygonPoints, world:Box2D.b2World, position, linearVelocity, angularVelocity):
+        
+        position = Box2D.b2Vec2(position) / WSCALE
+        
         # scale the polygon points to world dimension
         polygonPoints = [(p[0] / WSCALE, p[1] / WSCALE) for p in polygonPoints]
         # invert the x axis to account for inverted angle rotation when creating the polygon points
@@ -147,11 +154,12 @@ class Asteroid(pygame.sprite.Sprite):
         
     
     def breakApart(self, debugDraw:bool):
-        position = self.asteroidBodybox2D.position
+        # position = self.asteroidBodybox2D.position
+        
         asteroidHalfSize = max(((self.asteroidHalfSize + np.random.randn() * 10)/ 2), self.breakageThreshold)
-        asteroidA = Asteroid(self.world, self.shake, *position, debugDraw, asteroidHalfSize)
+        asteroidA = Asteroid(self.world, self.camera, self.position, debugDraw, asteroidHalfSize)
         asteroidHalfSize = max(((self.asteroidHalfSize + np.random.randn() * 10)/ 2), self.breakageThreshold)
-        asteroidB = Asteroid(self.world, self.shake, *position, debugDraw, asteroidHalfSize)
+        asteroidB = Asteroid(self.world, self.camera, self.position, debugDraw, asteroidHalfSize)
         return asteroidA, asteroidB
         
         
@@ -167,12 +175,12 @@ class Asteroid(pygame.sprite.Sprite):
         
         
         warpBox2DObject(self.asteroidBodybox2D)  
-        position = toPixelPos(self.asteroidBodybox2D.position, WSCALE, HEIGHT) 
-        position = tuple(map(self.shake.watch, position))
+        self.position = toPixelPos(self.asteroidBodybox2D.position, WSCALE, HEIGHT) 
+        self.position = tuple(map(self.camera.watch, self.position))
  
         angleRad = self.asteroidBodybox2D.angle
         self.image = pygame.transform.rotate(self.__asteroidSurface, math.degrees(angleRad - math.pi))
-        self.rect = self.image.get_rect(center=position)
+        self.rect = self.image.get_rect(center=self.position)
         screen.blit(self.image, self.rect.topleft)  
         
         if self.debugDraw:

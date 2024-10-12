@@ -22,11 +22,14 @@ class Main():
         pygame.display.set_caption('Asteroids')
         
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        # self.gameState = GameState.test
-        # self.test = Test()
         self.controller = GameStateController()
         self.initializeStartScreen(self.controller)
+        # self.initializeTest()
         # self.onStartGame(self.controller)
+        
+    def initializeTest(self):
+        self.gameState = GameState.test
+        self.test = Test()
         
         
     def initializeStartScreen(self, controller:GameStateController):
