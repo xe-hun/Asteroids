@@ -1,8 +1,6 @@
-from constant import HEIGHT, START_NEW_GAME_EVENT, WIDTH, backgroundColor, outlineColor
-
+from config import Colors, EventConfig, GlobalConfig
 import pygame
-
-from gameStateController import GameStateController
+from ui.uiFactory import UiFactory
 
 
 class StartScreen():
@@ -10,42 +8,30 @@ class StartScreen():
     def __init__(self, highScore:int) -> None:
         
         
-        self.gameFont = pygame.font.Font('font/Pixeltype.ttf', 50)
+        self._text_start_game = UiFactory.create_button_large('START GAME', self._start_game)
+        self._text_start_game_position = (GlobalConfig.width / 2, .4 * GlobalConfig.height)
+     
         
-        self.msg_startGame = self.gameFont.render('START GAME', False, outlineColor)
-        self.msg_startGame_rect = self.msg_startGame.get_rect(center=(WIDTH / 2, 0.4 * HEIGHT))
+        self._text_quit = UiFactory.create_button_large('QUIT', self._quit_game)
+        self._text_quit_position = (GlobalConfig.width / 2, 0.5 * GlobalConfig.height)
         
-        self.msg_quit = self.gameFont.render('QUIT', False, outlineColor)
-        # pygame.draw.polygon(self.msg_quit, outlineColor, [(0,0), (50, 0), (30, 50), (0, 30)], 2)
-        self.msg_quit_rect = self.msg_quit.get_rect(center=(WIDTH / 2, 0.5 * HEIGHT))
-        
-        self.msg_score = self.gameFont.render(f'High Score : {highScore}', False, outlineColor)
-        self.msg_score_rect = self.msg_score.get_rect(center=(WIDTH / 2, 0.8 * HEIGHT))
+        font = pygame.font.Font('font/quantum.ttf', 30)
+        self.msg_score = font.render(f'High Score : {highScore}', False, Colors.drawing_color)
+        self.msg_score_rect = self.msg_score.get_rect(center=(GlobalConfig.width / 2, 0.8 * GlobalConfig.height))
     
     def draw(self, screen:pygame.surface):
-        screen.fill(backgroundColor)
-        screen.blit(self.msg_startGame, self.msg_startGame_rect)
-        screen.blit(self.msg_quit, self.msg_quit_rect)
+        screen.fill(Colors.background_color)
+        self._text_start_game.draw(screen, self._text_start_game_position)
+        self._text_quit.draw(screen, self._text_quit_position)
         screen.blit(self.msg_score, self.msg_score_rect)
         
     def handleEvents(self, event:pygame.event.Event):
-        if event.type == pygame.MOUSEBUTTONUP:
-            self.handleClick(*event.pos, self.msg_startGame_rect, self.startGame)
-            self.handleClick(*event.pos, self.msg_quit_rect, self.quitGame)
-            # self.handleClick(*event.pos, self.msg_quit_rect, self.onQuitGame())
+        pass
+     
     
-    def startGame(self):
-        pygame.event.post(pygame.event.Event(START_NEW_GAME_EVENT))
+    def _start_game(self):
+        pygame.event.post(pygame.event.Event(EventConfig.start_new_game_event))
         
-    def quitGame(self):
+    def _quit_game(self):
         pygame.event.post(pygame.event.Event(pygame.QUIT))
         
-   
-            
-    def handleClick(self, mouseX:float, mouseY:float, buttonRect:pygame.rect.Rect, onButtonCLick:callable):
-        if buttonRect.x <= mouseX <= buttonRect.x + buttonRect.width and \
-            buttonRect.y <= mouseY <= buttonRect.y + buttonRect.height:
-                # if onButtonCLick is not None:
-                    onButtonCLick()
-        
-    

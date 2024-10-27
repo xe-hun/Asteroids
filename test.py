@@ -6,7 +6,7 @@ import pygame
 from constant import HEIGHT, WIDTH
 from utils.delay import Delay
 from utils.lerp import Lerp
-from utils.helper import angleDiff, dot, mag, norm, rotateVec
+from utils.helper import v_angle_diff, v_dot, v_mag, v_norm, v_rotate
 
 
 import math
@@ -46,7 +46,7 @@ class Test():
         if self.mouseDown:
             self.prevDir = self.objDir.copy()
             # self.objPos = np.array(event.pos)
-            self.objDir = norm(np.array(pygame.mouse.get_pos()) - self.rocket.position)
+            self.objDir = v_norm(np.array(pygame.mouse.get_pos()) - self.rocket.position)
 
     def update(self, screen:pygame.surface.Surface):
         
@@ -173,7 +173,7 @@ class Rocket():
         # self.velocity = None
         
     def toWorldPos(self, vec:tuple):
-        return self.position + rotateVec(vec, self.angle)
+        return self.position + v_rotate(vec, self.angle)
     # + rotateVec(vec, self.angle)
     
     def update(self, newDirection:tuple):
@@ -181,15 +181,15 @@ class Rocket():
         if self.direction is None:
             self.direction = newDirection
             
-        if angleDiff(self.direction, newDirection) < self.turnRate:
+        if v_angle_diff(self.direction, newDirection) < self.turnRate:
             self.direction = newDirection
         else:
-            dotProd = dot(self.direction, rotateVec(newDirection, math.pi / 2))
+            dotProd = v_dot(self.direction, v_rotate(newDirection, math.pi / 2))
                 
             if dotProd > 0:
-                self.direction = rotateVec(self.direction, -self.turnRate)
+                self.direction = v_rotate(self.direction, -self.turnRate)
             elif dotProd < 0:
-                self.direction = rotateVec(self.direction, self.turnRate)
+                self.direction = v_rotate(self.direction, self.turnRate)
             
         self.velocity = self.direction * self.speed
         self.angle = math.atan2(self.direction[1], self.direction[0])

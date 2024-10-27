@@ -1,7 +1,8 @@
 from enum import Enum
 import pygame
-from constant import END_GAME_EVENT, EXIT_GAME_EVENT, FPS, HEIGHT, SHAKE_EVENT, START_NEW_GAME_EVENT, WIDTH, backgroundColor
+from constant import END_GAME_EVENT, EXIT_GAME_EVENT, FPS, HEIGHT, SHAKE_EVENT, START_NEW_GAME_EVENT, WIDTH, background_color
 from game import Game
+from globalResolver import GlobalResolver
 from pages.endGameScreen import EndGameScreen
 from pages.startScreen import StartScreen
 from gameStateController import GameStateController
@@ -33,8 +34,8 @@ class Main():
         
         
     def initializeStartScreen(self, controller:GameStateController):
-        controller.resetGame()
-        self.startScreen = StartScreen(controller.getHighScore())
+        controller.reset_game()
+        self.startScreen = StartScreen(controller.high_score)
         self.gameState = GameState.startScreen
         
     def initializeGame(self):
@@ -42,7 +43,7 @@ class Main():
         self.gameState = GameState.game
         
     def initializeEndGameScreen(self):
-        self.endGameScreen = EndGameScreen(self.controller.getLivesRemaining())
+        self.endGameScreen = EndGameScreen(self.controller.lives_remaining)
         self.gameState = GameState.endGame
     
     def logic(self):
@@ -54,7 +55,7 @@ class Main():
         run = True
         while run:
             clock.tick(FPS)
-            self.screen.fill(backgroundColor)
+            self.screen.fill(background_color)
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -73,8 +74,8 @@ class Main():
             
     def handleEvents(self, event):
         
-        if event.type == pygame.MOUSEBUTTONUP:
-            pygame.event.post(pygame.event.Event(SHAKE_EVENT))
+        # if event.type == pygame.MOUSEBUTTONUP:
+        #     pygame.event.post(pygame.event.Event(SHAKE_EVENT))
            
         if event.type == START_NEW_GAME_EVENT:
             self.initializeGame()
@@ -88,13 +89,18 @@ class Main():
             self.startScreen.handleEvents(event)
 
         elif self.gameState == GameState.game:
-            self.game.handleGameEvents(event)
+            self.game.handle_events(event)
             
         elif self.gameState == GameState.endGame:
             self.endGameScreen.handleEvents(event)
             
         elif self.gameState == GameState.test:
             self.test.handleEvent(event)
+            
+        for item in GlobalResolver.event_queue:
+            item.handle_event(event)
+            
+        GlobalResolver.event_queue.clear()
                 
             
     def handleUpdates(self):
@@ -102,7 +108,7 @@ class Main():
             self.startScreen.draw(self.screen)
 
         elif self.gameState == GameState.game:
-            self.game.gameUpdate(self.screen)
+            self.game.update_and_draw(self.screen)
             
         elif self.gameState == GameState.endGame:
             self.endGameScreen.draw(self.screen)

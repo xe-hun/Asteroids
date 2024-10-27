@@ -5,8 +5,8 @@ import Box2D as box2D
 import numpy as np
 import pygame
 
-from constant import HEIGHT, WIDTH, fillColor, outlineColor
-from utils.helper import WHToPixel, toComponent, toPixelPos, toWorldPos
+from constant import HEIGHT, WIDTH, fill_color, outline_color
+from utils.helper import WHToPixel, v_to_component, to_pixel_position, to_box2D_position
 
 class Steering(Enum):
     steeringLeft = 1
@@ -61,8 +61,8 @@ class Test():
                           (15, 40))
         
         self.shipSurface = pygame.Surface((self.shipWidth + 2, self.shipHeight + 2), pygame.SRCALPHA)
-        pygame.draw.polygon(self.shipSurface, fillColor, polygonPoints)
-        pygame.draw.polygon(self.shipSurface, outlineColor, polygonPoints, 2)
+        pygame.draw.polygon(self.shipSurface, fill_color, polygonPoints)
+        pygame.draw.polygon(self.shipSurface, outline_color, polygonPoints, 2)
         self.shipRect = self.shipSurface.get_rect(center=(self.xPos, self.yPos))
        
         
@@ -72,7 +72,7 @@ class Test():
         # circleShape = box2D.b2CircleShape(5/self.PPM)
         # self.circleBody.Createfixture(shape = circleShape, density = 1, friction = .3)
         
-        centerPos = toWorldPos((WIDTH / 2, HEIGHT/2), self.PPM, HEIGHT)
+        centerPos = to_box2D_position((WIDTH / 2, HEIGHT/2), self.PPM, HEIGHT)
         polygonPointsPixel1 = ((0, 0), (7, 5), (15, 40))
         polygonPointsPixel2 = ((7, 5), (15, 0), (23, 5), (15, 40))
         polygonPointsPixel3 = ( (23, 5),(30, 0),(15, 40))
@@ -137,11 +137,11 @@ class Test():
         polygonPoints =  [((asteroidHalfSizeSize - pertubations[i][0]) * math.cos(j) + asteroidHalfSizeSize, (asteroidHalfSizeSize - pertubations[i][1]) * math.sin(j) + asteroidHalfSizeSize) for i, j in enumerate(polyAngles) if i < numSide - 1]
         
         self.asteroidSurface = pygame.Surface((asteroidHalfSizeSize * 2 + stroke , asteroidHalfSizeSize * 2 + stroke), pygame.SRCALPHA)
-        pygame.draw.polygon(self.asteroidSurface, fillColor, polygonPoints)
-        pygame.draw.polygon(self.asteroidSurface, outlineColor, polygonPoints, stroke)
+        pygame.draw.polygon(self.asteroidSurface, fill_color, polygonPoints)
+        pygame.draw.polygon(self.asteroidSurface, outline_color, polygonPoints, stroke)
         
         self.asteroidBox2DBody = self.world.CreateDynamicBody(
-            position = toWorldPos((WIDTH / 5, HEIGHT / 5), self.PPM, HEIGHT)
+            position = to_box2D_position((WIDTH / 5, HEIGHT / 5), self.PPM, HEIGHT)
         )
         asteroidShape = box2D.b2PolygonShape(vertices = [ (-(i[0] - asteroidHalfSizeSize) / self.PPM, (i[1] - asteroidHalfSizeSize) / self.PPM) for i in polygonPoints])
         self.asteroidBox2DBody.CreateFixture(
@@ -178,7 +178,7 @@ class Test():
         self.world.Step(1.0/60, self.VELOCITY_ITERATIONS, self.POSITION_ITERATIONS)
         
         if self.mouseJoint:
-            mouseToWorldPosition = toWorldPos(pygame.mouse.get_pos(), self.PPM, HEIGHT)
+            mouseToWorldPosition = to_box2D_position(pygame.mouse.get_pos(), self.PPM, HEIGHT)
             self.mouseJoint.target = mouseToWorldPosition
             
         self.warpShipInWorld(self.shipBody)
@@ -215,13 +215,13 @@ class Test():
         shipPosition = self.shipBody.position
         shipAngle = self.shipBody.angle - math.pi
         shipSurfaceR = pygame.transform.rotate(self.shipSurface, math.degrees(shipAngle))
-        shipRect = shipSurfaceR.get_rect(center=toPixelPos(shipPosition, self.PPM, HEIGHT))
+        shipRect = shipSurfaceR.get_rect(center=to_pixel_position(shipPosition, self.PPM, HEIGHT))
         screen.blit(shipSurfaceR, shipRect.topleft)
         
         asteroidPosition = self.asteroidBox2DBody.position
         asteroidAngle = self.asteroidBox2DBody.angle - math.pi
         asteroidSurfaceR = pygame.transform.rotate(self.asteroidSurface, math.degrees(asteroidAngle))
-        asteroidRect = asteroidSurfaceR.get_rect(center=toPixelPos(asteroidPosition, self.PPM, HEIGHT))
+        asteroidRect = asteroidSurfaceR.get_rect(center=to_pixel_position(asteroidPosition, self.PPM, HEIGHT))
         screen.blit(asteroidSurfaceR, asteroidRect.topleft)
         
         
@@ -245,8 +245,8 @@ class Test():
             
         # pygame.draw.circle(screen, (255, 100, 0), tuple(toPixelPos(self.shipBody.GetWorldPoint((0, 0)), self.PPM, HEIGHT)), 5)
         forcePoint = self.shipBody.GetWorldPoint((0, -15/self.PPM))
-        forceVector = toComponent(self.shipBody.angle + math.pi / 2)
-        p = toPixelPos(forcePoint, self.PPM, HEIGHT)
+        forceVector = v_to_component(self.shipBody.angle + math.pi / 2)
+        p = to_pixel_position(forcePoint, self.PPM, HEIGHT)
         # pygame.draw.line(screen, (40, 200, 0), p, (p + np.array(forceVector) * self.PPM * 2) , 2)
 
             
@@ -277,7 +277,7 @@ class Test():
     def boostShip(self):
         maxVelocity = 5
         forcePoint = self.shipBody.GetWorldPoint((0, -15/self.PPM))
-        forceVector = 8 * toComponent(self.shipBody.angle + math.pi / 2)
+        forceVector = 8 * v_to_component(self.shipBody.angle + math.pi / 2)
         
       
 
@@ -313,7 +313,7 @@ class Test():
         
     def handleEvent(self, event:pygame.event.Event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            mouseToWorldPosition = toWorldPos(event.pos, self.PPM, HEIGHT)
+            mouseToWorldPosition = to_box2D_position(event.pos, self.PPM, HEIGHT)
             if self.pointInBody(self.shipBody, mouseToWorldPosition):
                 mouseJointDef = box2D.b2MouseJointDef()
                 # mouseJointDef.bodyA = self.groundBody

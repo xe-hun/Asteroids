@@ -1,48 +1,60 @@
 
 import math
+import numpy as np
 import pygame
 
-from constant import HEIGHT, WIDTH, outlineColor
+from config import CannonConfig, Colors, GlobalConfig
+from constant import HEIGHT, WIDTH, outline_color
+from gameObjects.objectBase import ObjectBase, ProjectileBase
+from utils.helper import v_to_angle
 from utils.camera import Camera
 
 
-class Cannon(pygame.sprite.Sprite):
-    def __init__(self, angleRad:float, startPosition:tuple, camera:Camera):
+class Cannon(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
+    def __init__(self, direction:tuple, startPosition:tuple, camera:Camera):
         
-        super().__init__()
-      
-        self.camera = camera
-        # 5 pixels
-        self.cannonSize = 15
-        self.cannonSpeed = 10
-        self.cannonThickness = 2
+        self.SIZE = CannonConfig.size
+        self.SPEED = CannonConfig.speed
+        self.THICKNESS = CannonConfig.thickness
         
-        cannonSurface = pygame.Surface((self.cannonSize, self.cannonThickness), pygame.SRCALPHA)
-        pygame.draw.line(cannonSurface, outlineColor, (0, 0), (self.cannonSize, 0), self.cannonThickness)
-        self.cannonSurfaceR = pygame.transform.rotate(cannonSurface, -math.degrees(angleRad))
-        self.image = self.cannonSurfaceR
-        self.rect = self.cannonSurfaceR.get_rect()
-        self.mask = pygame.mask.from_surface(self.cannonSurfaceR)
-        self.directionX = math.cos(angleRad)
-        self.directionY = math.sin(angleRad) 
-        
+        self._camera = camera
+        _surface = pygame.Surface((self.SIZE, self.THICKNESS), pygame.SRCALPHA)
+        pygame.draw.line(_surface, Colors.drawing_color, (0, 0), (self.SIZE, 0), self.THICKNESS)
+        self.surface_r = pygame.transform.rotate(_surface, -math.degrees(v_to_angle(direction)))
+        self.image = self.surface_r
+        self.rect = self.surface_r.get_rect()
     
-        self.XPos = startPosition[0]
-        self.YPos = startPosition[1]
+        self._direction = np.array(direction)
+        self._position = np.array(startPosition)
+        self._alive = True
+    
+        
+    @property
+    def position(self):
+        return self._position
+    
+    @property
+    def direction(self):
+        return self._direction
+    
+    @property
+    def alive(self):
+        return self._alive
 
+    
+    def update(self):
         
-    def update(self, screen:pygame.Surface):
-        self.XPos += self.cannonSpeed * self.directionX
-        self.YPos += self.cannonSpeed * self.directionY
+        self._position += self._direction * self.SPEED
+        self._position = self._camera.watch(self._position)
+    
         
-        self.XPos, self.YPos = tuple(map(self.camera.watch, (self.XPos, self.YPos)))
+    def draw(self, screen:pygame.surface.Surface):
+        self.rect = self.surface_r.get_rect(center = self._position)
+        screen.blit(self.surface_r, self.rect.topleft)
         
-        self.rect = self.cannonSurfaceR.get_rect(center = (self.XPos, self.YPos))
-        screen.blit(self.cannonSurfaceR, self.rect.topleft)
-         
-    def isOutOfScreen(self):
-        if self.XPos > WIDTH or self.XPos < 0 or \
-            self.YPos > HEIGHT or self.YPos < 0:
+    def is_out_of_screen(self):
+        if self._position[0] > WIDTH or self._position[0] < 0 or \
+            self._position[1] > HEIGHT or self._position[1] < 0:
                 return True
         else:
             return False
@@ -50,5 +62,6 @@ class Cannon(pygame.sprite.Sprite):
             
          
     def dispose(self):
-        self.cannonSurfaceR = None
+        self.surface_r = None
+        self._alive = False
     

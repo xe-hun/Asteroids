@@ -1,187 +1,214 @@
 import math
 import time
+from constant import FPS
 from utils.helper import clamp
 
 
 class Lerp():
     
-    def __init__(self, onDone:callable = None) -> None:
-        self.startTime = None
+    def __init__(self, fps:int = FPS, use_timer:bool = False, activate:bool = True) -> None:
+        self.UNIT_OF_SECOND = 1000
+        self._activate = activate
+        self._fps = fps
         self.duration = None
-        self.__done = False
-        self.progress = 0
-        self.child = None
-        self.onDone = onDone
-        self.value = None
+        self.on_done = None
+        self._use_timer = use_timer
+        self._start_time = None
+        self._is_done = False
+        self._progress = 0
+        self._child = None
+        self._value = None
+        self._frame_counter = 0
+        self._pause = False
+        self._first_call = False
         
-    
-    
-    def drive(self):
-        if self.progress >= 1:
-            if self.onDone != None and self.__done == False:
-                self.onDone()
+        
+    def _drive(self):
+        
+        if self._activate == False:
+            self._is_done = True
+            return True
+        
+        if self._pause:
+            return not self._is_done
+        
+        if self._progress >= 1:
+            if self.on_done != None and self._is_done == False:
+                self.on_done()
                 
-            self.__done = True
+            self._is_done = True
             return False
         
-        if self.startTime == None:
-            self.startTime = time.time() * 1000
-        
-        else:
-            currentTime = time.time() * 1000
-            self.progress = (currentTime - self.startTime) / self.duration
-            self.progress = clamp(0, 1, self.progress)
+        if self._use_timer == True and self._start_time == None:
+            self._start_time = time.time() * 1000
             
+        elif self._use_timer == True:
+            current_time = time.time() * 1000
+            self._progress = (current_time - self._start_time) / self.duration
+        else:
+            self._frame_counter += (self.UNIT_OF_SECOND / self._fps)
+            self._progress = self._frame_counter / self.duration
+              
+        self._progress = clamp(0, 1, self._progress)    
         return True
             
-    def isDone(self):
-        return self.__done
+    @property
+    def is_done(self):
+        return self._is_done
     
-    def getValue(self):
-        return self.value
+    @property
+    def value(self):
+        return self._value
         
+    def copy_params(self, on_done, duration):
+        self._first_call = True
+        self.on_done = on_done
+        self.duration = duration
+        
+    def copy_control(self, pause):
+        self._pause = pause
+        
+    def control(self, pause:bool = False):
+        assert self._use_timer == False
+        'control() not allowed when _use_timer == True'
+        
+        # assert (self._first_call == False and self.duration == None)\
+        #     or (self._first_call == True and self.duration != None)
+        # 'control() may only be called in the beginning of the chain'
+        
+        self._pause = pause
+        return self
             
-    
-    def do(self, duration:int, call:callable, onDone:callable=None, **kwargs):
+    def do(self, duration:int, call:callable, on_done:callable=None, **kwargs):
+        assert duration > 0 
+        "duration cannot be <= 0"
+        
+        self._first_call = True
+        
         if self.duration == None:
             self.duration = duration
             
-        if onDone != None:
-            self.onDone = onDone
+        self.on_done = on_done
             
-        if self.drive() == True:
-            # self.drive()
-            self.value = call(self, **kwargs)
-            # self.drive()
-            return Dummy(self.value)
+        if self._drive() == True:
+            self._value = call(self, **kwargs)
+         
+            return Dummy(self._value, self._activate)
         return self
     
-    def wait(self, duration:int):
+    def wait(self, duration:int, on_done:callable = None):
+        
+        self._first_call = True
+        
         if self.duration == None:
             self.duration = duration
             
-        if self.drive() == True:
-            # self.drive()
-            return Dummy(None)
+        self.on_done = on_done
+            
+        if self._drive() == True:
+         
+            return Dummy(None, self._activate)
         return self
     
-    def andThen(self, duration:int, call:callable, onDone:callable = None, **kwargs):
-   
+    def and_then(self, duration:int, call:callable, on_done:callable = None, **kwargs):
         
-        if self.child == None:
-            self.child = Lerp(onDone)
-            self.child.duration = duration
+        assert self._first_call == True
+        'the do() or wait() method may be used first'
         
-        if self.child.drive() == True:
-            # self.child.drive()
-            self.value = call(self.child, **kwargs)
-            self.child.value = self.value
-            # self.child.drive()
-            return Dummy(self.value)
+             
+        if self._child == None:
+            self._child = Lerp()
+            self._child.copy_params(on_done, duration)
+     
+        self._child.copy_control(self._pause)
+        
+        if self._child._drive() == True:
+           
+            self._value = call(self._child, **kwargs)
+            self._child._value = self._value
+           
+            return Dummy(self._value, self._activate)
         else:
-            # self.child.value = self.value
-            return self.child
+          
+            return self._child
     
-    def andWait(self, duration:int):
-        if self.child == None:
-            self.child = Lerp()
-            self.child.duration = duration
-        
-        if self.child.drive() == True:
-            # self.child.value = None
+    def and_wait(self, duration:int, on_done:callable = None,):
+        if self._child == None:
+            self._child = Lerp()
+            self._child.copy_params(on_done, duration)
 
-            # self.child.drive()
-            return Dummy(None)
+        self._child.copy_control(self._pause)
+        
+        if self._child._drive() == True:
+           
+            return Dummy(None, self._activate)
         else:
-            return self.child
+            return self._child
         
           
         
     def linear(self, a, b):
-        t = self.progress
+        t = self._progress
         return a + (b - a) * t
     
-    def easeIn(self, a, b):
-        t = self.progress
+    def ease_in(self, a, b):
+        t = self._progress
         return a + (b - a) * t * t
     
-    def easeOut(self, a, b):
-        t = self.progress
+    def ease_out(self, a, b):
+        t = self._progress
         return a + (b - a) * (1 -  (1 - t) * (1 - t))
     
-    def easeInOut(self, a, b):
-        t = self.progress
+    def ease_in_out(self, a, b):
+        t = self._progress
         return a + (b - a) * (2 * t * t if t < .5 else 1 - 2 * (1 - t) * (1 - t))
     
-    def cubicEaseIn(self, a, b):
-        t = self.progress
+    def cubic_ease_in(self, a, b):
+        t = self._progress
         return a + (b - a) * t * t * t  
     
-    def cubicEaseOut(self, a, b):
-        t = self.progress
+    def cubic_ease_out(self, a, b):
+        t = self._progress
         return a + (b - a) *( 1 - (1 - t) *(1 - t) * (1 - t))
     
-    def cubicEaseInOut(self, a, b):
-        t = self.progress
+    def cubic_ease_in_out(self, a, b):
+        t = self._progress
         return a + (b - a) * (4 * t * t * t if t < .5 else 1 - 4 * (1 - t) * (1 - t) * (1 - t))
     
-    def exponentialEaseIn(self, a, b):
-        t = self.progress
+    def exponential_ease_in(self, a, b):
+        t = self._progress
         return a + (b - a) * math.pow(2, 10 * (t - 1))
     
-    def exponentialEaseOut(self, a, b):
-        t = self.progress
+    def exponential_ease_out(self, a, b):
+        t = self._progress
         return a + (b - a) * (1 - math.pow(2, -10 * (t - 1)))
     
-    def Sinusoidal(self, a, b, f:int=1):
-        t = self.progress
+    def sinusoidal(self, a, b, f:int=1):
+        t = self._progress
         return a + (b - a) * (1 - (0.5 * math.cos(2 * math.pi * f * t) + .5))
     
-    # def exponentialEaseInOut(self, a, b):
-    #     t = self.progress
-    #     return a + (b - a) * (2 * math.pow(2, 10 * (t - 1)) if t < .5 else 1 - 2 * math.pow(2, -10 * (t - 1)))
-    
-    # def SinusoidalEaseIn(self, a, b):
-    #     t = self.progress
-    #     return a + (b - a) * (1 - math.cos(t * math.pi / 2))
-    
-    # def SinusoidalEaseOut(self, a, b):
-    #     t = self.progress
-    #     return a + (b - a) * (1 - math.sin(t * math.pi / 2))
-    
-    # def SinusoidalEaseInOut(self, a, b):
-    #     t = self.progress
-    #     return a + (b - a) * (-.5 - math.cos(math.pi * t) + .5)
     
     
-    # def BackTween(self, a, b, overshoot):
-    #     t = self.progress
-    #     return a + (b - a) * ((t - 1) * (t - 1) * ((1.5 - overshoot) * (t - 1) - overshoot) + 1)
-    
-    # def BackEaseIn(self, a, b, overshoot):
-    #     t = self.progress
-    #     return a + (b - a) * (t  * t * ((1.5 - overshoot) * t - overshoot))
-      
 
 
 
 class Dummy():
     
-    def __init__(self, value) -> None:
-        self.value = value
+    def __init__(self, value, activate:bool) -> None:
+        self._value = value
+        self._activate = activate
     
-    def andThen(self, *args, **kwargs):
+    def and_then(self, *args, **kwargs):
         
-        return Dummy(self.value)   
+        return Dummy(self._value, self._activate)   
     
-    def andWait(self, *args, **kwargs):
-        return Dummy(self.value)   
+    def and_wait(self, *args, **kwargs):
+        return Dummy(self._value, self._activate)   
        
-    def isDone(self):
-        return False
+    @property
+    def is_done(self):
+        return False if self._activate else True
     
-    def onDone(self, *args, **kwargs):
-        return Dummy(self.value)   
-    
-    def getValue(self):
-        return self.value   
+    @property
+    def value(self):
+        return self._value   

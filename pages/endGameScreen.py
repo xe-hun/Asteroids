@@ -1,4 +1,4 @@
-from constant import EXIT_GAME_EVENT, HEIGHT, START_NEW_GAME_EVENT, WIDTH, backgroundColor, outlineColor
+from constant import EXIT_GAME_EVENT, HEIGHT, START_NEW_GAME_EVENT, WIDTH, background_color, outline_color
 
 import pygame
 
@@ -9,23 +9,23 @@ class EndGameScreen():
         
         self.livesRemaining = livesRemaining
         
-        self.gameFont50 = pygame.font.Font('font/Pixeltype.ttf', 50)
-        self.gameFont30 = pygame.font.Font('font/Pixeltype.ttf', 30)
+        self.gameFont50 = pygame.font.Font('font/quantum.ttf', 30)
+        self.gameFont30 = pygame.font.Font('font/quantum.ttf', 10)
         
-        self.m_LIVES_Render = self.gameFont30.render(f'LIVES x {livesRemaining}', False, outlineColor)
+        self.m_LIVES_Render = self.gameFont30.render(f'LIVES x {livesRemaining}', False, outline_color)
         self.m_LIVES_Rect = self.m_LIVES_Render.get_rect(center=(WIDTH / 2, 0.4 * HEIGHT))
         
-        self.m_CONTINUE_Render = self.gameFont50.render('CONTINUE', False, outlineColor)
+        self.m_CONTINUE_Render = self.gameFont50.render('CONTINUE', False, outline_color)
         self.m_CONTINUE_Rect = self.m_CONTINUE_Render.get_rect(center=(WIDTH / 2, 0.5 * HEIGHT))
         
-        self.m_GAME_OVER_Render = self.gameFont50.render('GAME OVER!!', False, outlineColor)
+        self.m_GAME_OVER_Render = self.gameFont50.render('GAME OVER!!', False, outline_color)
         self.m_GAME_OVER_Rect = self.m_CONTINUE_Render.get_rect(center=(WIDTH / 2, 0.5 * HEIGHT))
         
-        self.m_EXIT_Render = self.gameFont50.render('EXIT', False, outlineColor)
+        self.m_EXIT_Render = self.gameFont50.render('EXIT', False, outline_color)
         self.m_EXIT_Rect = self.m_EXIT_Render.get_rect(center=(WIDTH / 2, 0.8 * HEIGHT))
     
     def draw(self, screen:pygame.surface):
-        screen.fill(backgroundColor)
+        screen.fill(background_color)
         screen.blit(self.m_LIVES_Render, self.m_LIVES_Rect)
         if self.livesRemaining > 0:
             screen.blit(self.m_CONTINUE_Render, self.m_CONTINUE_Rect) 

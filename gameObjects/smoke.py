@@ -1,13 +1,15 @@
  
         
 import random
+import numpy as np
 import pygame
 from constant import FPS
-from helper import clamp, scale
+from utils.lerp import Lerp
+from utils.helper import clamp, scale
 
 
 class Smoke:
-    def __init__(self, rate:int = 30, tail:float = .5):
+    def __init__(self, rate:int = 30, tail:float = .3):
         self.pf = FPS // rate
         self.tail = tail
         self.particles = []
@@ -19,9 +21,8 @@ class Smoke:
         self.frames += 1
         if self.frames % self.pf == 0:
             self.frames = 0
-            rotatedImage = pygame.transform.rotate(self.img, random.random() * 360)
-
-            self.particles.append(SmokeParticle(rotatedImage,direction, velocity, position, self.tail))
+            rotated_image = pygame.transform.rotate(self.img, random.random() * 360)
+            self.particles.append(SmokeParticle(rotated_image,direction, velocity, position, self.tail))
         for i in self.particles:
             i.update()
             
@@ -35,49 +36,45 @@ class Smoke:
 class SmokeParticle:
     
     def __init__(self, img:pygame.surface.Surface,direction:tuple, velocity:tuple, position:tuple, tail:float):
-        tail = clamp(0, 1, tail)
-        self.direction = direction
-        self.velocity = velocity
-        # variation =  .09 * random.random() * random.choice([-1, 1])
-        self.x = position[0] 
-        self.y = position[1] 
-        self.scaleK = .03
-        self.origImage = img
-        self.scaledImage = scale(self.origImage, self.scaleK)
+        
+        self.SCALE_RATE = .0009
+        
+        self.tail = tail * 1000
+        # tail = clamp(0, 1, tail)
+        self.direction = np.array(direction)
+        self.velocity = np.array(velocity)
+        self.position = np.array(position)
+        
+        self.img_scale = .02
+        self.unscaled_image = img
+        self.scaled_image = scale(self.unscaled_image, self.img_scale)
         self.alpha = 255
-        # self.alphaRate = 255 / 2 * tail
-        self.alphaRate = 10
+        self.alpha_rate = 30
         self.alive = True
-        # self.vx = velocity[0] + random.random() * .01
-        # self.vy = velocity[1] + random.random() * .01
-        self.s =  .009 * random.random() * random.choice([-1, 1])
+        self.particle_speed = 3
+        
+        self.lerp = Lerp()
+        
+
+    def dispose(self):
+        self.alive = False
         
     def update(self):
-        s = 10 
+        
+        particle_force = -self.direction * self.particle_speed
+        particle_force += self.velocity
+        self.position += particle_force
+        
+        self.img_scale += self.SCALE_RATE
+        
+      
+        self.alpha = self.lerp.do(self.tail, lambda lerp:lerp.ease_in(255, 0), self.dispose).value
        
-        smokeVelX, smokeVelY = 0, 0 
-        smokeVelX = - self.direction[0] * s
-        smokeVelY = - self.direction[1] * s
-        
-        smokeVelX += self.velocity[0]
-        smokeVelY += self.velocity[1]
-        
-        self.x += smokeVelX 
-        self.y += smokeVelY 
-        self.scaleK += .0009
-        self.alpha -= self.alphaRate
-        if self.alpha < 0:
-            self.alpha = 0
-            self.alive = False
             
-        self.alphaRate -= .1
-        if self.alphaRate < 1.5:
-            self.alphaRate = 1.5
-            
-        self.scaledImage = scale(self.origImage, self.scaleK)
-        self.scaledImage.set_alpha(self.alpha)
+        self.scaled_image = scale(self.unscaled_image, self.img_scale)
+        self.scaled_image.set_alpha(self.alpha)
         
     def draw(self, screen:pygame.surface.Surface):
-        screen.blit(self.scaledImage, self.scaledImage.get_rect(center = (self.x, self.y)))
+        screen.blit(self.scaled_image, self.scaled_image.get_rect(center = self.position))
         
     

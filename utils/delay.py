@@ -1,44 +1,61 @@
 import math
 import time
+from constant import FPS
 from utils.helper import clamp
 
 
 class Delay():
     
-    def __init__(self) -> None:
-        # self.progress = 0
-        # self.isDone = True
-        # self.startTime = None
-        self.reset()
+    def __init__(self, fps:int = FPS, use_timer:bool = False, activate:bool = True) -> None:
+        self.UNIT_OF_SECOND = 1000
+        self._fps = fps
+        self._use_timer = use_timer
+        self._activate = activate
+        self._reset()
         pass
         
-    def delay(self, duration:int, onDone:callable = None, reset:bool = False, **kwargs):
+    def delay(self, duration:int, on_done:callable = None, reset:bool = False, **kwargs):
         
-        if self.progress >= 1 :
-            if onDone:
-                onDone(**kwargs)
-            if reset:
-                self.reset()
-            self.isDone = True
+        assert duration > 0
+        "duration cannot be <= 0"
+        
+        if self._activate == False:
+            self._is_done == True
             return self
         
-        if self.startTime == None:
-            self.startTime = time.time() * 1000
-            self.isDone = False
+        if self._progress >= 1 :
+            if on_done != None and self.is_done == False:
+                on_done(**kwargs)
+            if reset:
+                self._reset()
+            self._is_done = True
+            return self
+        
+        
+        self._is_done = False
+        if self._use_timer == True and self._start_time == None:
+            self._start_time = time.time() * 1000
+            
+        elif self._use_timer == True:
+            current_time = time.time() * 1000
+            self._progress = (current_time - self._start_time) / duration
         
         else:
-            currentTime = time.time() * 1000
-            self.progress = (currentTime - self.startTime) / duration
-            self.porgress = clamp(0, 1, self.progress)
+            self._frame_counter += (self.UNIT_OF_SECOND / self._fps)
+            self._progress = self._frame_counter / duration
+            
+        self._progress = clamp(0, 1, self._progress)
         return self
     
-    def reset(self):
-        self.progress = 0
-        self.startTime = None
-        self.isDone = True
-        
-    def done(self):
-        return self.isDone
+    def _reset(self):
+        self._progress = 0
+        self._frame_counter = 0
+        self._start_time = None
+        self._is_done = True
+    
+    @property
+    def is_done(self):
+        return self._is_done
     
   
             
