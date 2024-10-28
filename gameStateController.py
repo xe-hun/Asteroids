@@ -1,5 +1,6 @@
 import pygame
 
+from Activity import Activity
 from config import ControllerConfig, EventConfig
 from constant import END_GAME_EVENT, START_NEW_GAME_EVENT
 from gameObjects.rocket import Rocket
@@ -27,8 +28,8 @@ class GameStateController():
         # self.resetGame = False
         self.delay_before_new_level = Delay()
         self.counter_delay = Delay()
-        self._perks_collected = 0
-        self._perks_completed = 0
+        self._upgrade_perk_collected = 0
+        self._upgrade_perk_completed = 0
         self._ship_rocket_count = ControllerConfig.rocket_base_quantity
         
         self._game_paused = False
@@ -73,8 +74,12 @@ class GameStateController():
         return self._ship_rocket_count   
     
     @property
-    def perks_completed(self):
-        return self._perks_completed   
+    def upgrade_perk_completed(self):
+        return self._upgrade_perk_completed   
+    
+    @property
+    def upgrade_perk_collected(self):
+        return self._upgrade_perk_collected
     
     @property
     def level(self):
@@ -129,16 +134,19 @@ class GameStateController():
     #     self.asteroids_remaining = remaining
         
     def report_upgrade_perk_collected(self):
-        self._perks_collected += 1/self.PERKS_PER_COMPLETION
-        if self._perks_collected >= 1:
-            self._perks_collected = 0
-            self._perks_completed += 1
+        self._upgrade_perk_collected += 1/self.PERKS_PER_COMPLETION
+        if self._upgrade_perk_collected >= 1:
+            self._upgrade_perk_collected = 0
+            self._upgrade_perk_completed += 1
+            
+        return Activity.upgrade_collected()
         
-        return self._perks_collected, self._perks_completed
+        # return self._perks_collected, self._perks_completed
     
     def report_rocket_perk_collected(self):
         self._ship_rocket_count += 1
-        return self._ship_rocket_count
+        return Activity.rocket_collected(1)
+    
         
     
     def report_asteroid_destroyed(self):

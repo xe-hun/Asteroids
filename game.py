@@ -45,7 +45,6 @@ class Game():
         
         self._create_world_boundary()
         self._spawn_strategy = SpawnStrategy(self._spawn_asteroid, self._spawn_rocket_perk, self._spawn_upgrade_perk)
-        # self._spawn_controller = SpawnController()
         
         
         
@@ -153,8 +152,7 @@ class Game():
                         break
             if collisionDetected == True:
                 break;
-            
-            
+              
                    
     def _ship_perks_collision(self):
         for perk in self._perks_list:
@@ -167,12 +165,16 @@ class Game():
                
             if pygame.sprite.collide_mask(perk, self._ship):
             
-                if perk.type == PerkType.upgrade:
+                if perk.perk_type == PerkType.upgrade:
                     # perks_collected, perks_completed = self._controller.report_rocket_perk_collected()
-                    self._hud.update_upgrade_perk_bar(self._controller.report_upgrade_perk_collected())
+                    # self._hud.update_upgrade_perk_bar(self._controller.report_upgrade_perk_collected())
+                    activity = self._controller.report_upgrade_perk_collected()
+                    self._hud.register_activity(activity)
                 
-                if perk.type == PerkType.rocket:
-                    self._hud.update_rocket_count(self._controller.report_rocket_perk_collected())
+                if perk.perk_type == PerkType.rocket:
+                    # self._hud.update_rocket_count(self._controller.report_rocket_perk_collected())
+                    activity = self._controller.report_rocket_perk_collected()
+                    self._hud.register_activity(activity)
                 
                 
                 

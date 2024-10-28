@@ -68,19 +68,22 @@ class Hud():
         self._pause_screen = None
         
         self._rocket_count_watcher = Watcher(self._on_rocket_count_change, self._controller.ship_rocket_count)
-        self._perk_count_watcher = Watcher(self._on_perk_count_change, self._controller.perks_completed)
+        self._upgrade_perk_completed_watcher = Watcher(self._on_upgrade_perk_completed_change, self._controller.upgrade_perk_completed)
+        self._upgrade_perk_collected_watcher = Watcher(self._on_upgrade_perk_collected_change, self._controller.upgrade_perk_collected)
         
-        self._mock_event = 0
+     
         self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)
        
        
-        
     def _on_rocket_count_change(self, _):
         self._rocket_count_render_effect.activate()
         
-    def _on_perk_count_change(self, _):
+    def _on_upgrade_perk_completed_change(self, _):
         self._level_up_sequence_lerp = Lerp()
         self._perk_count_render_effect.activate()
+        
+    def _on_upgrade_perk_collected_change(self, value):
+        self._perk_bar.set_progress(value)
         
     
     def _render_text(self, text, font:pygame.font.Font, effect:callable = None):
@@ -105,18 +108,20 @@ class Hud():
         rect = render_scaled.get_rect(center = (WIDTH / 2, HEIGHT / 2))
         screen.blit(render_scaled, rect)
         
+        
     def _level_up_sequence(self, lerp:Lerp, screen):
         self._animate_sequence(lerp, screen, self._m_LEVEL_UP_Render)
+        
             
     def _sequence1(self, lerp:Lerp, screen):
         self._animate_sequence(lerp, screen, self._m_STAGE_X_Render)
+        
         
     def _sequence2(self, lerp:Lerp, screen):
         self._animate_sequence(lerp, screen, self._m_READY_Render)
    
         
-    def _sequence3(self, lerp:Lerp, screen):
-           
+    def _sequence3(self, lerp:Lerp, screen):   
             self._animate_sequence(lerp, screen, self._m_GO_Render)
             
             y_up = lerp.cubic_ease_out(0, self._object_position_up)
@@ -124,12 +129,15 @@ class Hud():
             
             return y_up, y_down
         
+        
     def _pause_game(self):
         if self._controller.game_paused:
             self._controller.game_paused = False 
         else:
             self._controller.game_paused = True
           
+    def register_activity(self, activity_description):
+        self._timed_list.register_item(activity_description)
         
     def handle_event(self, event):
         self.reticle.handle_event(event)
@@ -138,9 +146,9 @@ class Hud():
             if event.key == pygame.K_ESCAPE:
                 self._pause_game()
                 
-        if event.type == pygame.MOUSEBUTTONUP:
-            self._mock_event += 1
-            self._timed_list.register_item(f'event {self._mock_event}')
+        # if event.type == pygame.MOUSEBUTTONUP:
+        #     self._mock_event += 1
+        #     self._timed_list.register_item(f'event {self._mock_event}')
                 
       
      
@@ -152,15 +160,11 @@ class Hud():
     def update_penalty_bar_out_of_bound(self, penalty_point):
         self._penalty_bar.set_progress(1 - penalty_point)
         
-    def update_upgrade_perk_bar(self, perks_collected, perks_count):
-        self._perk_bar.set_progress(perks_collected)
-       
-       
-             
+    # def update_upgrade_perk_bar(self, perks_collected, perks_count):
+    #     self._perk_bar.set_progress(perks_collected)
     
     def update(self):
         self._penalty_bar.update()
-       
         
     def draw(self, screen):
         
@@ -168,7 +172,8 @@ class Hud():
         
         level_time =  self._controller.level_time
         ship_rocket_count = self._rocket_count_watcher.watch(self._controller.ship_rocket_count).new_value(150)
-        perks_count = self._perk_count_watcher.watch(self._controller.perks_completed).new_value(150)
+        upgrade_perk_completed = self._upgrade_perk_completed_watcher.watch(self._controller.upgrade_perk_completed).new_value(150)
+        self._upgrade_perk_collected_watcher.watch(self._controller.upgrade_perk_collected)
         
         
         if self._start_sequence_lerp.control(self._controller.game_paused)\
@@ -181,7 +186,7 @@ class Hud():
             
             _ , game_time_render = self._render_text(f"{level_time:02d}", self._game_font_40)
             
-            perk_count_rect, perk_count_render = self._render_text(f" x {perks_count:02d}",
+            perk_count_rect, perk_count_render = self._render_text(f" x {upgrade_perk_completed:02d}",
                                                                    self._game_font_10,
                                                                    self._perk_count_render_effect.effect_1)
             if self._perk_count_rect == None:
