@@ -170,9 +170,14 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
     def handle_events(self, event: pygame.event.Event):
         
         if event.type == pygame.MOUSEBUTTONDOWN:
-            self._mouse_down = True
+            if event.button == 1:
+                self._mouse_down = True
+            if event.button == 3:
+                self._rocket_fire_strategy.shooting = True
+                
         if event.type == pygame.MOUSEBUTTONUP:
-            self._mouse_down = False
+            if event.button == 1:
+                self._mouse_down = False
             
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:

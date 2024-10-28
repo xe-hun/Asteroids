@@ -13,6 +13,14 @@ class UiFactory():
     _hover_color = (50, 50, 50)
     _text_deactivate_color = (120, 120, 120)
     
+    # def create_text_medium(text:str, is_active:bool = True):
+    #     font = pygame.font.Font('font/quantum.ttf', 20)
+    #     if is_active:
+    #         return font.render(text,  dimension = UiFactory._medium_dimension, on_click=on_clicked, click_color = UiFactory._click_color, hover_color=UiFactory._hover_color, font = font)
+    #     else:
+    #         return Button(text, dimension = UiFactory._medium_dimension, on_click=on_clicked, click_color = UiFactory._click_color, hover_color=None, font = font, text_color = UiFactory._text_deactivate_color)
+       
+    
     def create_button_medium(text:str, on_clicked:callable, is_active:bool = True):
         font = pygame.font.Font('font/quantum.ttf', 20)
         if is_active:

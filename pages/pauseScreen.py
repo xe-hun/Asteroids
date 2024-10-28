@@ -42,9 +42,9 @@ class PauseScreen():
     def _on_sound_control(self):
         self._controller.sound_on = not self._controller.sound_on
         if self._controller.sound_on:
-            self._sound_button = self._ui_creator.create_button_20('SOUND', on_clicked=self._on_sound_control)
+            self._sound_button = UiFactory.create_button_medium('SOUND', on_clicked=self._on_sound_control)
         else:
-            self._sound_button = self._ui_creator.create_button_20('SOUND', on_clicked=self._on_sound_control, is_active = False)
+            self._sound_button = UiFactory.create_button_medium('SOUND', on_clicked=self._on_sound_control, is_active = False)
             
         
     def _on_quit(self):
