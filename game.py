@@ -3,6 +3,7 @@ import random
 import numpy as np
 import pygame
 import Box2D
+from config import EventConfig
 from strategies.penaltyStrategy import PenaltyStrategy
 from strategies.spawnStrategy import SpawnStrategy
 from utils.lerp import Lerp
@@ -56,10 +57,7 @@ class Game():
         self._particle_list = []
         self._perks_list = []
         
-        self.obstacle_timer = pygame.USEREVENT + 1
-        self.time_timer = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.obstacle_timer, 2000)
-        pygame.time.set_timer(self.time_timer, 1000)
+        pygame.time.set_timer(EventConfig.time_timer, 1000)
         
         self.background_stars = WorldStar()
         self._update_reticle()
@@ -296,15 +294,9 @@ class Game():
     def handle_events(self, event:pygame.event.Event):
         
         self._hud.handle_event(event)
-        self._camera.handle_events(event)
+        self._camera.handle_event(event)
         
-        # if event.type == self.obstacle_timer:
-        #         self._spawn_asteroid()
-        
-        if event.type == self.time_timer:
-            self._controller.game_time_pulse()
-       
-        
-        self._ship.handle_events(event)
+        self._ship.handle_event(event, self._controller.key_map)
+        self._controller.handle_event(event)
         
         

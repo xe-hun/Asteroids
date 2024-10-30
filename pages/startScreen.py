@@ -8,11 +8,11 @@ class StartScreen():
     def __init__(self, highScore:int) -> None:
         
         
-        self._text_start_game = UiFactory.create_button_large('START GAME', self._start_game)
+        self._text_start_game = UiFactory.create_button('START GAME', self._start_game, 30)
         self._text_start_game_position = (GlobalConfig.width / 2, .4 * GlobalConfig.height)
      
         
-        self._text_quit = UiFactory.create_button_large('QUIT', self._quit_game)
+        self._text_quit = UiFactory.create_button('QUIT', self._quit_game, 30)
         self._text_quit_position = (GlobalConfig.width / 2, 0.5 * GlobalConfig.height)
         
         font = pygame.font.Font('font/quantum.ttf', 30)

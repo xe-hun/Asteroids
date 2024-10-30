@@ -39,7 +39,7 @@ class Button():
         self._fill_hover_color()
             
     
-    def draw(self, screen:pygame.surface.Surface, position:tuple, pause:bool = False):
+    def draw(self, screen:pygame.surface.Surface, center:tuple = None, pause:bool = False, **kwargs):
         
         GlobalResolver.event_queue.add(self)
     
@@ -49,11 +49,18 @@ class Button():
         if click_lerp.is_done == False:
             self._surface.fill(color)
             
-        self._rect = self._surface.get_rect(center = position)
-        self._text_rect = text_render.get_rect(center=position)
+        elif kwargs.get('top_left') != None:
+            self._rect = self._surface.get_rect(topleft = kwargs.get('top_left'))
+            self._text_rect = text_render.get_rect(center = self._rect.center)
+        elif kwargs.get('top_right') != None:
+            self._rect = self._surface.get_rect(topright = kwargs.get('top_right'))
+            self._text_rect = text_render.get_rect(center = self._rect.center)
+        else:
+            self._rect = self._surface.get_rect(center = center)
+            self._text_rect = text_render.get_rect(center = center)
             
-        screen.blit(self._surface, self._rect)
-        screen.blit(text_render, self._text_rect)
+        screen.blit(self._surface, self._rect.topleft)
+        screen.blit(text_render, self._text_rect.topleft)
         
         self._on_click_delay.delay(200, self._on_click)
             

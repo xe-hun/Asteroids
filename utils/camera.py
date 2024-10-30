@@ -12,7 +12,7 @@ class Camera():
         self.lerp = None
         
     
-    def handle_events(self, event):
+    def handle_event(self, event):
         if event.type == SHAKE_EVENT:
             self.lerp = Lerp()
             

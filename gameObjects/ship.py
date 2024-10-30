@@ -2,9 +2,10 @@ import math
 import numpy as np
 import pygame
 import Box2D
-from config import Colors, GlobalConfig, ShipConfig
+from config import Colors, GlobalConfig, MiscConfig, ShipConfig
+from customEnum import ShipActions, Steering
+from gameStateController import GameStateController
 from utils.animation_handler import AnimationHandler
-from enums.enums import Steering
 from gameObjects.objectBase import ObjectBase
 from gameObjects.rocket import Rocket
 from strategies.shootingStrategy import ShootingStrategy
@@ -27,7 +28,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
         self._debugDraw = debugDraw
         self._alive = True
-        self._mouse_down = False
+        self._steer_on = False
         self.in_boundary = True
         self._is_colliding = False
         
@@ -164,40 +165,85 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
     def get_collision_impulse(self, normal_impulse):
         self._collision_force = max(normal_impulse, self._collision_force)
         
-    
-    
         
-    def handle_events(self, event: pygame.event.Event):
+    def _handle_mapped_key_press(self, event:pygame.event.Event, ship_action:ShipActions, key_map:dict, on_button_down:callable, on_button_up:callable):
+        key_map_value = key_map[ship_action]
+        key_map_key = next((k for k, v in MiscConfig.button_to_event_map.items() if v == key_map_value), None)
         
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                self._mouse_down = True
-            if event.button == 3:
-                self._rocket_fire_strategy.shooting = True
+        if str(key_map_key).casefold().startswith('m'):
+            key = int(key_map_key.split('_')[1])
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == key:
+                on_button_down()
                 
-        if event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1:
-                self._mouse_down = False
+            if event.type == pygame.MOUSEBUTTONUP and event.button == key:
+                on_button_up()
+                
+        else:
+            key = int(key_map_key)
+            if event.type == pygame.KEYDOWN and event.key == key:
+                on_button_down()
+                
+            if event.type == pygame.KEYUP and event.key == key:
+                on_button_up()
+        
+    def _set_ship_boost(self, value:bool):
+        self._boosting = value
+        
+    def _set_ship_cannon(self, value:bool):
+        self._cannon_fire_strategy.shooting = value
+        
+    def _set_ship_rocket(self, value:bool):
+        self._rocket_fire_strategy.shooting = value
+        
+    def _set_ship_steer(self, value:bool):
+        self._steer_on = value
+        
+
+        
+    def handle_event(self, event: pygame.event.Event, key_map : dict):
+        self._handle_mapped_key_press(event, ShipActions.Boost, key_map, lambda: self._set_ship_boost(True), lambda: self._set_ship_boost(False))
+        self._handle_mapped_key_press(event, ShipActions.Cannon, key_map, lambda: self._set_ship_cannon(True), lambda: self._set_ship_cannon(False))
+        self._handle_mapped_key_press(event, ShipActions.Rocket, key_map, lambda: self._set_ship_rocket(True), lambda: self._set_ship_rocket(False))
+        self._handle_mapped_key_press(event, ShipActions.Steer, key_map, lambda: self._set_ship_steer(True), lambda: self._set_ship_steer(False))
+      
+                
+        
+        
+        # if event.type == pygame.MOUSEBUTTONDOWN:
+        #     if event.button == 1:
+        #         self._steer_on = True
+        #     if event.button == 3:
+        #         self._rocket_fire_strategy.shooting = True
+                
+        # if event.type == pygame.MOUSEBUTTONUP:
+        #     if event.button == 1:
+        #         self._mouse_down = False
+                
+                
+                
             
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                self._cannon_fire_strategy.shooting = True
-                
-            if event.key == pygame.K_RIGHT:
-                self._rocket_fire_strategy.shooting = True
-                
-            if event.key == pygame.K_DOWN:
-                self._boosting = True
+        # if event.type == pygame.KEYDOWN:
             
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT:
-                self._cannon_fire_strategy.shooting = False
+           
+            
+        #     if event.key == pygame.K_LEFT:
+        #         self._cannon_fire_strategy.shooting = True
                 
-            if event.key == pygame.K_RIGHT:
-                self._rocket_fire_strategy.shooting = False
+        #     if event.key == pygame.K_RIGHT:
+        #         self._rocket_fire_strategy.shooting = True
                 
-            if event.key == pygame.K_DOWN:
-                self._boosting = False
+        #     if event.key == pygame.K_DOWN:
+        #         self._boosting = True
+            
+        # if event.type == pygame.KEYUP:
+        #     if event.key == pygame.K_LEFT:
+        #         self._cannon_fire_strategy.shooting = False
+                
+        #     if event.key == pygame.K_RIGHT:
+        #         self._rocket_fire_strategy.shooting = False
+                
+        #     if event.key == pygame.K_DOWN:
+        #         self._boosting = False
     
        
        
@@ -236,7 +282,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
    
     def update(self):
         
-        self._steer_ship(self._steering)
+        self._steer_ship()
         
         self.in_boundary = check_box2D_object_in_bounds(self._ship_body_box2D)
         
@@ -294,8 +340,6 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self.animation_handler.animate(rocket_pos, angle, screen)
         
         
-      
-        
     def _draw_flare(self, screen:pygame.surface.Surface):
         rocket_pos = to_pixel_position(self._ship_body_box2D .GetWorldPoint((0, self.SHIP_BASE_POINT-.5)), GlobalConfig.world_scale, GlobalConfig.height)
         rect = self.flare_image.get_rect(center=rocket_pos)
@@ -340,11 +384,8 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         pygame.draw.line(screen, (255, 10, 10), ray_cast_start_in_pixel, ray_cast_end_in_pixel)
        
         
-    def _steer_ship(self, steering:Steering):
-                  
-                
-                
-        if self._mouse_down == True:
+    def _steer_ship(self):
+        if self._steer_on == True:
             # calculate ship angle to mouse
             mouse_dir = np.array(pygame.mouse.get_pos()) - np.array(self.position)
             angle_to_mouse = v_angle_diff(self.direction, mouse_dir)

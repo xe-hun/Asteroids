@@ -7,6 +7,7 @@ from pages.endGameScreen import EndGameScreen
 from pages.startScreen import StartScreen
 from gameStateController import GameStateController
 from test import Test
+from ui.button import Button
 
 class GameState(Enum):
     startScreen = 1
@@ -84,11 +85,21 @@ class Main():
         if event.type == EXIT_GAME_EVENT:
             self.initializeStartScreen(self.controller)
             
+        button_event = False 
+        for item in GlobalResolver.event_queue:
+            item.handle_event(event)
+            if isinstance(item, Button):
+                button_event = True
+            
+        GlobalResolver.event_queue.clear()
+        
+        
+            
             
         if self.gameState == GameState.startScreen:
             self.startScreen.handleEvents(event)
 
-        elif self.gameState == GameState.game:
+        elif self.gameState == GameState.game and not button_event:
             self.game.handle_events(event)
             
         elif self.gameState == GameState.endGame:
@@ -96,11 +107,7 @@ class Main():
             
         elif self.gameState == GameState.test:
             self.test.handleEvent(event)
-            
-        for item in GlobalResolver.event_queue:
-            item.handle_event(event)
-            
-        GlobalResolver.event_queue.clear()
+          
                 
             
     def handleUpdates(self):

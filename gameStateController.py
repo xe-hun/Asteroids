@@ -1,9 +1,10 @@
 import pygame
 
 from Activity import Activity
-from config import ControllerConfig, EventConfig
+from config import ControllerConfig, EventConfig, MiscConfig
 from constant import END_GAME_EVENT, START_NEW_GAME_EVENT
 from gameObjects.rocket import Rocket
+from pages.map_button_screen import ShipActions
 from utils.helper import Helper
 from utils.delay import Delay
 
@@ -33,9 +34,14 @@ class GameStateController():
         self._ship_rocket_count = ControllerConfig.rocket_base_quantity
         
         self._game_paused = False
+        self._load_key_map()
         
+       
+    def _load_key_map(self):        
+        key_map = Helper.load_key_map(MiscConfig.map_button_save_location) 
+        self.key_map = key_map if key_map != None else MiscConfig.default_key_map
+
     def _score_update(self):
-        
         def update():
              self._game_score_counter += counter_step
         
@@ -122,7 +128,7 @@ class GameStateController():
     def asteroid_spawn_complete(self):
         return self._asteroid_spawned >= self._asteroid_spawn_per_level
     
-    def game_time_pulse(self):
+    def _game_time_pulse(self):
         # if self.level_is_in_progress and not self.game_paused:
         if self.level_is_in_progress_and_game_not_paused:
             self._level_time -= 1
@@ -130,8 +136,6 @@ class GameStateController():
     def report_asteroid_spawned(self):
         self._asteroid_spawned += 1
             
-    # def _get_asteroid_remaining(self, remaining):
-    #     self.asteroids_remaining = remaining
         
     def report_upgrade_perk_collected(self):
         self._upgrade_perk_collected += 1/self.PERKS_PER_COMPLETION
@@ -141,17 +145,15 @@ class GameStateController():
             
         return Activity.upgrade_collected()
         
-        # return self._perks_collected, self._perks_completed
-    
+        
     def report_rocket_perk_collected(self):
         self._ship_rocket_count += 1
         return Activity.rocket_collected(1)
     
-        
     
     def report_asteroid_destroyed(self):
         self._number_of_asteroids_destroyed += 1
-        # self._game_score += self.ASTEROID_DESTROYED_POINT
+
         
     def report_projectile_fired(self, projectile_type:type):
         if projectile_type == Rocket:
@@ -168,8 +170,6 @@ class GameStateController():
         
         if self.game_paused:
             return
-        
-        # self._get_asteroid_remaining(numAsteroids)
         
         self._score_update()
         
@@ -197,3 +197,11 @@ class GameStateController():
         self._lives_remaining -= 1
         pygame.event.post(pygame.event.Event(EventConfig.end_game_event))
         
+        
+    def handle_event(self, event):
+        
+        if event.type == EventConfig.time_timer:
+            self._game_time_pulse()
+        
+        if event.type == EventConfig.save_button_map_event:
+            self._load_key_map()

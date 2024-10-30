@@ -1,6 +1,7 @@
 
 
 from collections import namedtuple
+import json
 import math
 import Box2D
 import numpy as np
@@ -8,7 +9,7 @@ import pygame
 
 from config import ControllerConfig
 from constant import HEIGHT, SHAKE_EVENT, WIDTH, WSCALE
-# from utils.lerp import Lerp
+from customEnum import ShipActions
 
 
 class Helper():
@@ -19,6 +20,22 @@ class Helper():
     @staticmethod
     def calculate_level_time(game_level:int):
          return ControllerConfig.base_level_time + int(math.log(game_level) * 20)
+     
+    @staticmethod
+    def save_key_map(file_name, key_map):
+        serialized_key_map = {key.value: value for key, value in key_map.items()}
+        with open(file_name, 'w') as file:
+            json.dump(serialized_key_map, file)
+            
+    @staticmethod
+    def load_key_map(file_name):
+        try:
+            with open(file_name, 'r') as file:
+                serialized_key_map = json.load(file)
+                return {ShipActions(int(i)) : value for i, value in serialized_key_map.items()}
+        except FileNotFoundError:
+            print('file not found')
+            return None
 
 
 def scale(surface: pygame.Surface, factor):
