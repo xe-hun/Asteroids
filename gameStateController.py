@@ -60,6 +60,10 @@ class GameStateController():
         self._level_in_progress = value
         
     @property
+    def can_spawn_asteroid(self):
+        return self.asteroids_alive < ControllerConfig.max_asteroid_on_screen and not self._asteroid_spawn_complete
+        
+    @property
     def level_is_in_progress(self):
         return self._level_in_progress
         
@@ -125,7 +129,8 @@ class GameStateController():
     def level_is_in_progress_and_game_not_paused(self):
         return self.level_is_in_progress and not self.game_paused
     
-    def asteroid_spawn_complete(self):
+    @property
+    def _asteroid_spawn_complete(self):
         return self._asteroid_spawned >= self._asteroid_spawn_per_level
     
     def _game_time_pulse(self):
@@ -167,13 +172,15 @@ class GameStateController():
             
     def update(self, asteroids_alive):
         
+        self.asteroids_alive = asteroids_alive
         
         if self.game_paused:
             return
         
         self._score_update()
         
-        if self.asteroid_spawn_complete() and asteroids_alive == 0:
+        if self._asteroid_spawn_complete and self.asteroids_alive == 0:
+           
             self.set_level_in_progress(False)
             self.delay_before_new_level.delay(2000, self.goto_new_level, True)
                 

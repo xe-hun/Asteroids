@@ -18,11 +18,11 @@ class SpawnStrategy():
         
 
     
-    def update(self, game_time, game_level, asteroids_alive):
+    def update(self, game_time, game_level, can_spawn):
         if self._delay.delay(self._spawn_interval, reset=True).is_done:
-            can_spawn_asteroid = asteroids_alive < ControllerConfig.max_asteroid_on_screen
+            # can_spawn_asteroid = asteroids_alive < ControllerConfig.max_asteroid_on_screen
             
-            if self._with_chance_of(self.CHANCES_OF_ASTEROID) and can_spawn_asteroid:
+            if self._with_chance_of(self.CHANCES_OF_ASTEROID) and can_spawn:
                 self._spawn_asteroid()
                 
             # this value decreases as time approaches level_time
