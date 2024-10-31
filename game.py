@@ -142,9 +142,12 @@ class Game():
                         self._particle_list.append(Explosion(asteroid.position))
                         self._controller.report_asteroid_destroyed()
                         if asteroid.can_break_apart():
-                            asteroidA, asteroidB = asteroid.break_apart(debugDraw=False)
-                            self._asteroid_list.append(asteroidA)
-                            self._asteroid_list.append(asteroidB)
+                            asteroids = asteroid.break_apart(debug_draw = False)
+                            for a in asteroids:
+                                self._asteroid_list.append(a)
+                            # asteroidA, asteroidB = asteroid.break_apart(debugDraw=True)
+                            # self._asteroid_list.append(asteroidA)
+                            # self._asteroid_list.append(asteroidB)
                         asteroid.dispose()
                         collisionDetected = True
                         break
@@ -190,7 +193,7 @@ class Game():
         
     def _spawn_asteroid(self):
         self._controller.report_asteroid_spawned()
-        asteroid = Asteroid(self._world, self._camera, debug_draw=False)
+        asteroid = Asteroid(self._world, self._camera, debug_draw=True)
         self._asteroid_list.append(asteroid)
     
     

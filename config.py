@@ -31,7 +31,7 @@ class ShipConfig():
     ship_hieght = 40
     
 class AsteroidConfig():
-    min_size = 12
+    min_size = 8
     max_size = 30
     min_life = 1
     max_life = 5
@@ -68,16 +68,17 @@ class Colors():
     drawing_color = (220, 220, 220)
     fill_color = (0, 0, 0)
     background_color = (10, 10, 10)
+    debug_color = (50, 111, 50)
     
 class ControllerConfig():
 
     new_level_point = 2000
     
     # params
-    base_level_time = 200
+    base_level_time = 150
     
     # asteroids
-    asteroid_spawn_per_level = 20
+    asteroid_spawn_per_level = 30
     max_asteroid_on_screen = 7
     
     # perk

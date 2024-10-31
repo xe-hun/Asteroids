@@ -27,7 +27,7 @@ class SpawnStrategy():
                 
             # this value decreases as time approaches level_time
             # minimises the advantage gained when for prolonging a level
-            decreasing_probability = 1 - (game_time / Helper.calculate_level_time(game_level))
+            decreasing_probability = (game_time / Helper.calculate_level_time(game_level))
         
             if self._with_chance_of(self.CHANCES_OF_PERK * decreasing_probability):
                 if self._with_chance_of(self.CHANCES_OF_ROCKET_PERK_OVER_UPGRADE_PERK):

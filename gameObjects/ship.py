@@ -11,7 +11,7 @@ from gameObjects.rocket import Rocket
 from strategies.shootingStrategy import ShootingStrategy
 from utils.camera import Camera
 from utils.box2DHelperClasses import RaycastCallback
-from utils.helper import v_angle_diff, check_box2D_object_in_bounds, clamp, v_dot, v_norm, v_rotate, scale, v_to_angle, v_to_component, to_box2D_position,\
+from utils.helper import Helper, v_angle_diff, check_box2D_object_in_bounds, clamp, v_dot, v_norm, v_rotate, scale, v_to_angle, v_to_component, to_box2D_position,\
                         to_pixel_position, debug_draw_box2D_bodies,\
                         wrap_box2D_object
 from constant import HEIGHT, SHAKE_EVENT, WIDTH,\
@@ -208,44 +208,6 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
       
                 
         
-        
-        # if event.type == pygame.MOUSEBUTTONDOWN:
-        #     if event.button == 1:
-        #         self._steer_on = True
-        #     if event.button == 3:
-        #         self._rocket_fire_strategy.shooting = True
-                
-        # if event.type == pygame.MOUSEBUTTONUP:
-        #     if event.button == 1:
-        #         self._mouse_down = False
-                
-                
-                
-            
-        # if event.type == pygame.KEYDOWN:
-            
-           
-            
-        #     if event.key == pygame.K_LEFT:
-        #         self._cannon_fire_strategy.shooting = True
-                
-        #     if event.key == pygame.K_RIGHT:
-        #         self._rocket_fire_strategy.shooting = True
-                
-        #     if event.key == pygame.K_DOWN:
-        #         self._boosting = True
-            
-        # if event.type == pygame.KEYUP:
-        #     if event.key == pygame.K_LEFT:
-        #         self._cannon_fire_strategy.shooting = False
-                
-        #     if event.key == pygame.K_RIGHT:
-        #         self._rocket_fire_strategy.shooting = False
-                
-        #     if event.key == pygame.K_DOWN:
-        #         self._boosting = False
-    
-       
        
     def _fire_cannon(self):
         cannon_position = to_pixel_position(self._ship_body_box2D.GetWorldPoint((-5/GlobalConfig.world_scale, 15/GlobalConfig.world_scale)), GlobalConfig.world_scale, GlobalConfig.height)
@@ -293,7 +255,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
     
         self._boost_ship(self._ship_body_box2D, self._boosting, self.BOOST_FORCE, self.SHIP_BASE_POINT)
         self._kick_back_thrust(self._ship_body_box2D, self.ROCKET_KICK_BACK_RANGE, self.ROCKET_KICK_BACK_FORCE, self.SHIP_BASE_POINT)
-        self._cap_speed(self._ship_body_box2D)
+        Helper.cap_box2D_body_speed(self._ship_body_box2D, self.MAXSPEED)
             
         # wrap_box2D_object(self._ship_body_box2D)   
         
@@ -325,15 +287,15 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
         
         
-    def _cap_speed(self, shipBody):
-        velocity = shipBody.linearVelocity
-        velocityMagnitude = velocity.length
+    # def _cap_speed(self, shipBody):
+    #     velocity = shipBody.linearVelocity
+    #     velocityMagnitude = velocity.length
         
-        if velocityMagnitude > self.MAXSPEED:
-            velocity.Normalize()
-            velocity *= self.MAXSPEED
+    #     if velocityMagnitude > self.MAXSPEED:
+    #         velocity.Normalize()
+    #         velocity *= self.MAXSPEED
             
-        shipBody.linearVelocity = velocity
+    #     shipBody.linearVelocity = velocity
             
     def _draw_flame(self, screen:pygame.surface.Surface, angle:float):
         rocket_pos = to_pixel_position(self._ship_body_box2D .GetWorldPoint((.2, self.SHIP_BASE_POINT - 2)), GlobalConfig.world_scale, GlobalConfig.height)

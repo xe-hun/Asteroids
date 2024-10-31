@@ -7,7 +7,7 @@ import Box2D
 import numpy as np
 import pygame
 
-from config import ControllerConfig
+from config import Colors, ControllerConfig, GlobalConfig
 from constant import HEIGHT, SHAKE_EVENT, WIDTH, WSCALE
 from customEnum import ShipActions
 
@@ -15,6 +15,17 @@ from customEnum import ShipActions
 class Helper():
     def __init__(self):
         pass
+    
+    @staticmethod
+    def cap_box2D_body_speed(body:Box2D.b2Body, max_speed):
+        velocity = body.linearVelocity
+        velocity_magnitude = velocity.length
+        
+        if velocity_magnitude > max_speed:
+            velocity.Normalize()
+            velocity *= max_speed
+            
+        body.linearVelocity = velocity
            
     
     @staticmethod
@@ -115,13 +126,30 @@ def WHToPixel(w, h, scale):
 def WHToWorld(w, h, scale):
     return Box2D.b2Vec2([w / scale / 2, h / scale / 2])
 
-def debug_draw_box2D_bodies(screen:pygame.Surface, box2DBodiesDebugList:list):
-    for box2DBody in box2DBodiesDebugList:
-        for fixture in box2DBody.fixtures:
+def debug_draw_box2D_bodies(screen:pygame.Surface, box2D_bodies_debug_list:list):
+    for box2D_body in box2D_bodies_debug_list:
+        for fixture in box2D_body.fixtures:
             shape = fixture.shape
-            coordPoints = [(box2DBody.transform * v) for v in shape.vertices]
-            coordPoints = [to_pixel_position(v, WSCALE, HEIGHT) for v in coordPoints ]
-            pygame.draw.polygon(screen, (50, 111, 50), coordPoints)
+            
+            position = to_pixel_position(box2D_body.position, GlobalConfig.world_scale, GlobalConfig.height)
+            if isinstance(shape, Box2D.b2CircleShape):
+                radius = shape.radius * GlobalConfig.world_scale
+                pygame.draw.circle(screen, Colors.debug_color, position, radius)
+                
+                line_end = position[0] + math.cos(box2D_body.angle - math.pi) * radius,\
+                            position[1] - math.sin(box2D_body.angle - math.pi) * radius
+                            
+                pygame.draw.line(screen, Colors.drawing_color, position, line_end, 2)
+            
+            elif isinstance(shape, Box2D.b2PolygonShape):
+                coordPoints = [(box2D_body.transform * v) for v in shape.vertices]
+                coordPoints = [to_pixel_position(v, GlobalConfig.world_scale, GlobalConfig.height) for v in coordPoints ]
+                pygame.draw.polygon(screen, Colors.debug_color, coordPoints)
+                
+            elif isinstance(shape, Box2D.b2EdgeShape):
+                v1 = position + shape.vertex1 * GlobalConfig.world_scale
+                v2 = position + shape.vertex2 * GlobalConfig.world_scale
+                pygame.draw.line(screen, Colors.debug_color, v1, v2, 2)
             
             
 def get_body_bounds(body:Box2D.b2Body):
