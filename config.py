@@ -48,6 +48,9 @@ class RocketConfig():
     speed = 4
     turn_rate_degrees = 4
     
+    # in seconds
+    rocket_life = 10
+    
 class CannonConfig():
     size = 10
     thickness = 2
@@ -75,7 +78,7 @@ class ControllerConfig():
     new_level_point = 2000
     
     # params
-    base_level_time = 150
+    base_level_time = 3
     
     # asteroids
     asteroid_spawn_per_level = 30

@@ -272,7 +272,6 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
             self._draw_flame(screen, degree_angle)
             
         
-        
         self.image = pygame.transform.rotate(self._ship_surface, degree_angle)
         self.rect = self.image.get_rect(center=self._position)
         screen.blit(self.image, self.rect.topleft) 
@@ -285,17 +284,6 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         if self._debugDraw:
             debug_draw_box2D_bodies(screen, self._box2D_bodies_debug_list)
         
-        
-        
-    # def _cap_speed(self, shipBody):
-    #     velocity = shipBody.linearVelocity
-    #     velocityMagnitude = velocity.length
-        
-    #     if velocityMagnitude > self.MAXSPEED:
-    #         velocity.Normalize()
-    #         velocity *= self.MAXSPEED
-            
-    #     shipBody.linearVelocity = velocity
             
     def _draw_flame(self, screen:pygame.surface.Surface, angle:float):
         rocket_pos = to_pixel_position(self._ship_body_box2D .GetWorldPoint((.2, self.SHIP_BASE_POINT - 2)), GlobalConfig.world_scale, GlobalConfig.height)

@@ -2,7 +2,7 @@ import pygame
 from config import Colors, EventConfig, GlobalConfig
 
 from gameStateController import GameStateController
-from pages.map_button_screen import MapButtonScreen
+from pages.mapButtonScreen import MapButtonScreen
 from ui.button import Button
 from ui.uiFactory import UiFactory
 from utils.lerp import Lerp

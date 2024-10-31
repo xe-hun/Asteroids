@@ -4,7 +4,7 @@ from Activity import Activity
 from config import ControllerConfig, EventConfig, MiscConfig
 from constant import END_GAME_EVENT, START_NEW_GAME_EVENT
 from gameObjects.rocket import Rocket
-from pages.map_button_screen import ShipActions
+from pages.mapButtonScreen import ShipActions
 from utils.helper import Helper
 from utils.delay import Delay
 

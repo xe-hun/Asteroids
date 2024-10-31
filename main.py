@@ -75,8 +75,6 @@ class Main():
             
     def handleEvents(self, event):
         
-        # if event.type == pygame.MOUSEBUTTONUP:
-        #     pygame.event.post(pygame.event.Event(SHAKE_EVENT))
            
         if event.type == START_NEW_GAME_EVENT:
             self.initializeGame()
@@ -101,9 +99,6 @@ class Main():
 
         elif self.gameState == GameState.game and not button_event:
             self.game.handle_events(event)
-            
-        elif self.gameState == GameState.endGame:
-            self.endGameScreen.handleEvents(event)
             
         elif self.gameState == GameState.test:
             self.test.handleEvent(event)

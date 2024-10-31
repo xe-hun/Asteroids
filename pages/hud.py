@@ -3,6 +3,7 @@ from config import Colors, GlobalConfig
 from constant import HEIGHT, outline_color, WIDTH
 from pages.pauseScreen import PauseScreen
 from ui.timedList import TimedList
+from ui.uiFactory import UiFactory
 from utils.effect import Effect
 from gameObjects.reticle import Reticle
 from gameStateController import GameStateController
@@ -21,17 +22,18 @@ class Hud():
         game_font_50 = pygame.font.Font('font/quantum.ttf', 50)
         self._game_font_10 = pygame.font.Font('font/quantum.ttf', 10)
         self._game_font_40 = pygame.font.Font('font/quantum.ttf', 40)
-        self._game_font_30 = pygame.font.Font('font/quantum.ttf', 30)
+        game_font_30 = pygame.font.Font('font/quantum.ttf', 30)
       
-        self._m_READY_Render = game_font_50.render("READY", False, outline_color)
+        self._m_READY_Render = UiFactory.create_text('READY', font = game_font_50)
         
-        self._m_GO_Render = game_font_50.render("GO!!", False, outline_color)
+        self._m_Go_Render = UiFactory.create_text('GO!!', font = game_font_50)
         
-        self._m_STAGE_X_Render = game_font_50.render(f"STAGE {level}", False, outline_color)
+        self._m_STAGE_X_Render = UiFactory.create_text(f"STAGE {level}", font = game_font_50)
+      
+        self._m_LEVEL_UP_Render = UiFactory.create_text(f"LEVELED UP !!", font = game_font_30, color = Colors.green_color)
         
-        self._m_LEVEL_UP_Render = self._game_font_30.render("LEVELED UP!!", False, Colors.green_color)
+        self._m_TIME_UP_Render = UiFactory.create_text(f"TIME UP !!", font = game_font_30)
         
-        self._m_TIME_UP_Render = self._game_font_30.render(f"TIME UP!!", False, outline_color)
         self.rocket_thumbnail_surface = scale(pygame.image.load('images/rocket.png'), .5)
         
         self._penalty_bar = ProgressBar(initial_progress = 1)
@@ -122,7 +124,7 @@ class Hud():
    
         
     def _sequence3(self, lerp:Lerp, screen):   
-            self._animate_sequence(lerp, screen, self._m_GO_Render)
+            self._animate_sequence(lerp, screen, self._m_Go_Render)
             
             y_up = lerp.cubic_ease_out(0, self._object_position_up)
             y_down = lerp.cubic_ease_out(HEIGHT, self._object_position_down)
@@ -182,8 +184,7 @@ class Hud():
                 
                 
             y_up, y_down = self._sequence3_lerp.control(self._controller.game_paused).do(1000, self._sequence3, lambda: self._controller.set_level_in_progress(True), screen = screen).value
-                        
-            
+                            
             _ , game_time_render = self._render_text(f"{level_time:02d}", self._game_font_40)
             
             perk_count_rect, perk_count_render = self._render_text(f" x {upgrade_perk_completed:02d}",
