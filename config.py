@@ -81,8 +81,8 @@ class ControllerConfig():
     # base_level_time = 3
     
     # asteroids
-    asteroid_spawn_per_level = 30
-    max_asteroid_on_screen = 7
+    # asteroid_spawn_per_level = 30
+    max_asteroid_on_screen = 12
     
     # perk
     upgrade_perk_completion = 10

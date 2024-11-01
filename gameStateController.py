@@ -113,7 +113,6 @@ class GameStateController():
     
     def goto_new_level(self):
         self._game_level += 1
-        self._level_param_adjuster.set_game_level()
         self._game_score += self.NEW_LEVEL_POINT
         self.reset_new_level()
         pygame.event.post(pygame.event.Event(EventConfig.start_new_game_event))

@@ -31,13 +31,11 @@ class SpawnStrategy():
             
             if self._with_chance_of(LevelParamAdjuster.chances_of_asteroid(game_level)) and can_spawn:
                 self._spawn_asteroid()
+                print(LevelParamAdjuster.chances_of_asteroid(game_level))
                 
             # this value decreases as time approaches level_time
             # minimises the advantage gained when for prolonging a level
             decreasing_probability = (game_time / LevelParamAdjuster.get_level_time(game_level))
-            print(decreasing_probability)
-            print(LevelParamAdjuster.chances_of_perk)
-        
             if self._with_chance_of(LevelParamAdjuster.chances_of_perk * decreasing_probability):
                 if self._with_chance_of(LevelParamAdjuster.chances_of_rocket_over_upgrade):
                     self._spawn_rocket_perk()
