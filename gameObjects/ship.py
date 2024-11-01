@@ -4,7 +4,8 @@ import pygame
 import Box2D
 from config import Colors, GlobalConfig, MiscConfig, ShipConfig
 from customEnum import ShipActions, Steering
-from gameStateController import GameStateController
+
+
 from utils.animation_handler import AnimationHandler
 from gameObjects.objectBase import ObjectBase
 from gameObjects.rocket import Rocket
@@ -33,6 +34,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self._is_colliding = False
         
         self._collision_force = 0
+        
       
         self.MAX_COLLISION_FORCE = ShipConfig.max_collision_force
       

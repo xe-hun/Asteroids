@@ -4,7 +4,8 @@ from Activity import Activity
 from config import ControllerConfig, EventConfig, MiscConfig
 from constant import END_GAME_EVENT, START_NEW_GAME_EVENT
 from gameObjects.rocket import Rocket
-from pages.mapButtonScreen import ShipActions
+from levelParamAdjuster import LevelParamAdjuster
+from shipParamAdjuster import ShipParamAdjuster
 from utils.helper import Helper
 from utils.delay import Delay
 
@@ -15,12 +16,12 @@ class GameStateController():
         self.NEW_LEVEL_POINT = ControllerConfig.new_level_point
         # self.LEVEL_TIME = ControllerConfig.level_time
         self.START_LIVES = 2
-        self.PERKS_PER_COMPLETION = ControllerConfig.upgrade_perk_completion
+        # self.PERKS_PER_COMPLETION = ControllerConfig.upgrade_perk_completion
         self.reset_game()
         
         self._high_score = 0
         self._game_score_counter = 0
-        self._asteroid_spawn_per_level = ControllerConfig.asteroid_spawn_per_level
+        # self._asteroid_spawn_per_level = ControllerConfig.asteroid_spawn_per_level
         self.music_on = False
         self.sound_on = False
         
@@ -30,11 +31,14 @@ class GameStateController():
         self.delay_before_new_level = Delay()
         self.counter_delay = Delay()
         self._upgrade_perk_collected = 0
-        self._upgrade_perk_completed = 0
+        # self._upgrade_perk_completed = 0
         self._ship_rocket_count = ControllerConfig.rocket_base_quantity
         
         self._game_paused = False
         self._load_key_map()
+        
+        # self._level_param_adjuster = LevelParamAdjuster()
+        # self._ship_param_adjuster = ShipParamAdjuster()
         
        
     def _load_key_map(self):        
@@ -83,17 +87,21 @@ class GameStateController():
     def ship_rocket_count(self):
         return self._ship_rocket_count   
     
-    @property
-    def upgrade_perk_completed(self):
-        return self._upgrade_perk_completed   
+    # @property
+    # def upgrade_perk_completed(self):
+    #     return self._upgrade_perk_completed   
     
     @property
     def upgrade_perk_collected(self):
         return self._upgrade_perk_collected
     
     @property
-    def level(self):
-        return self._level
+    def game_level(self):
+        return self._game_level
+    
+    @property
+    def ship_level(self):
+        return self._ship_level
     
     @property
     def high_score(self):
@@ -104,24 +112,30 @@ class GameStateController():
         return self._level_time <= 0 
     
     def goto_new_level(self):
-        self._level += 1
+        self._game_level += 1
+        self._level_param_adjuster.set_game_level()
         self._game_score += self.NEW_LEVEL_POINT
-        self.reset_level(self._level)
+        self.reset_new_level()
         pygame.event.post(pygame.event.Event(EventConfig.start_new_game_event))
         
-    def reset_level(self, level):
+        
+    def reset_new_level(self):
         # self.asteroids_remaining = float('inf')
         self._asteroid_spawned = 0
-        self._level_time = Helper.calculate_level_time(level)
+        # self._level_time = Helper.calculate_level_time(level)
+        self._level_time = LevelParamAdjuster.get_level_time(self.game_level)
         self._level_in_progress = False
+    
         
     def reset_game(self):
         self._number_of_asteroids_destroyed = 0
-        self._level = 1
+        self._game_level = 1
+        self._ship_level = 1
+      
         self._lives_remaining = self.START_LIVES
         self._game_score = 0
         self._game_paused = False
-        self.reset_level(self._level)
+        self.reset_new_level()
       
 
         
@@ -131,7 +145,8 @@ class GameStateController():
     
     @property
     def _asteroid_spawn_complete(self):
-        return self._asteroid_spawned >= self._asteroid_spawn_per_level
+        # return self._asteroid_spawned >= self._asteroid_spawn_per_level
+        return self._asteroid_spawned >= LevelParamAdjuster.asteroid_spawn_per_level(self.game_level)
     
     def _game_time_pulse(self):
         # if self.level_is_in_progress and not self.game_paused:
@@ -143,10 +158,11 @@ class GameStateController():
             
         
     def report_upgrade_perk_collected(self):
-        self._upgrade_perk_collected += 1/self.PERKS_PER_COMPLETION
+        # self._upgrade_perk_collected += 1/self.PERKS_PER_COMPLETION
+        self._upgrade_perk_collected += 1/ShipParamAdjuster.upgrade_perks_per_complition(self.ship_level)
         if self._upgrade_perk_collected >= 1:
             self._upgrade_perk_collected = 0
-            self._upgrade_perk_completed += 1
+            self._ship_level += 1
             
         return Activity.upgrade_collected()
         
@@ -200,7 +216,7 @@ class GameStateController():
                 
             
     def game_over(self):
-        self.reset_level(self.level)
+        self.reset_new_level()
         self._lives_remaining -= 1
         pygame.event.post(pygame.event.Event(EventConfig.end_game_event))
         

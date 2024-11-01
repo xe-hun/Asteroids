@@ -28,9 +28,6 @@ class Helper():
         body.linearVelocity = velocity
            
     
-    @staticmethod
-    def calculate_level_time(game_level:int):
-         return ControllerConfig.base_level_time + int(math.log(game_level) * 20)
      
     @staticmethod
     def save_key_map(file_name, key_map):
@@ -47,6 +44,16 @@ class Helper():
         except FileNotFoundError:
             print('file not found')
             return None
+        
+        
+    @staticmethod
+    def log_level(value):
+        return math.log(value)
+    
+    
+    @staticmethod
+    def asymptotic_value(min_value, max_value, rate, time):
+        return max_value - (max_value - min_value) * math.exp(-rate * time)
 
 
 def scale(surface: pygame.Surface, factor):

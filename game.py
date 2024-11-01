@@ -278,7 +278,7 @@ class Game():
             self._hud.update()
             self._update_reticle()
             self._update_perks()
-            self._spawn_strategy.update(self._controller.level_time, self._controller.level, self._controller.can_spawn_asteroid)
+            self._spawn_strategy.update(self._controller.level_time, self._controller.can_spawn_asteroid, self._controller.game_level)
             self._penalty_strategy.update(not self._ship.in_boundary)
             
             

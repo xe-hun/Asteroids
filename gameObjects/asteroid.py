@@ -60,8 +60,8 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
         initial_linear_velocity = self._direction * SPEED
         initial_angular_velocity = AsteroidConfig.min_initial_angular_velocity + random.random() * AsteroidConfig.max_initial_angular_velocity
    
-        lenght_displacement_range = self._asteroid_half_size * .3
-        angle_displacement_range = .05
+        # lenght_displacement_range = self._asteroid_half_size * .3
+        # angle_displacement_range = .05
         
         
       
@@ -96,16 +96,16 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
         
    
         
-    def _create_polygon_points(self, asteroid_half_size, num_side, lenght_displacement_range, angle_displacement_range):
-        # give the polygon uneven sides and angles
+    # def _create_polygon_points(self, asteroid_half_size, num_side, lenght_displacement_range, angle_displacement_range):
+    #     # give the polygon uneven sides and angles
        
-        displacement = [(asteroid_half_size - np.random.randint(0, lenght_displacement_range), asteroid_half_size -np.random.randint(0, lenght_displacement_range)) for _ in range(num_side)]
-        poly_angles = [np.random.randn() * angle_displacement_range + x for x in np.linspace(0, math.pi * 2 , num_side)]
+    #     displacement = [(asteroid_half_size - np.random.randint(0, lenght_displacement_range), asteroid_half_size -np.random.randint(0, lenght_displacement_range)) for _ in range(num_side)]
+    #     poly_angles = [np.random.randn() * angle_displacement_range + x for x in np.linspace(0, math.pi * 2 , num_side)]
         
-        # add displacement values to each sides and angles of the polygon
-        polygon_points = [(displacement[i][0] * math.cos(j), displacement[i][1] * math.sin(j)) for i, j in enumerate(poly_angles) if i < num_side - 1]
+    #     # add displacement values to each sides and angles of the polygon
+    #     polygon_points = [(displacement[i][0] * math.cos(j), displacement[i][1] * math.sin(j)) for i, j in enumerate(poly_angles) if i < num_side - 1]
        
-        return polygon_points
+    #     return polygon_points
         
         
     # def _create_asteroid_body_box2D(self, polygon_points, world:Box2D.b2World, position, linear_velocity, angular_velocity):
@@ -223,9 +223,6 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
             asteroidHalfSize = max(((self._asteroid_half_size + np.random.randn() * 10)/ 2), self._breakage_threshold)
             asteroid = Asteroid(self._world, self._camera, self._position, debug_draw, asteroidHalfSize)
             asteroids.append(asteroid)
-            # asteroidHalfSize = max(((self._asteroid_half_size + np.random.randn() * 10)/ 2), self._breakage_threshold)
-            # asteroidB = Asteroid(self._world, self._camera, self._position, debugDraw, asteroidHalfSize)
-            # return asteroidA, asteroidB
         return asteroids
         
        

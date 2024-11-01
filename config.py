@@ -78,7 +78,7 @@ class ControllerConfig():
     new_level_point = 2000
     
     # params
-    base_level_time = 3
+    # base_level_time = 3
     
     # asteroids
     asteroid_spawn_per_level = 30

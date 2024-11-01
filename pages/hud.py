@@ -17,7 +17,7 @@ class Hud():
     def __init__(self, controller:GameStateController) -> None:
         
         self._controller = controller
-        level = controller.level
+        level = controller.game_level
         
         game_font_50 = pygame.font.Font('font/quantum.ttf', 50)
         self._game_font_10 = pygame.font.Font('font/quantum.ttf', 10)
@@ -70,7 +70,7 @@ class Hud():
         self._pause_screen = None
         
         self._rocket_count_watcher = Watcher(self._on_rocket_count_change, self._controller.ship_rocket_count)
-        self._upgrade_perk_completed_watcher = Watcher(self._on_upgrade_perk_completed_change, self._controller.upgrade_perk_completed)
+        self._ship_level_watcher = Watcher(self._on_ship_level_change, self._controller.ship_level)
         self._upgrade_perk_collected_watcher = Watcher(self._on_upgrade_perk_collected_change, self._controller.upgrade_perk_collected)
         
      
@@ -80,7 +80,7 @@ class Hud():
     def _on_rocket_count_change(self, _):
         self._rocket_count_render_effect.activate()
         
-    def _on_upgrade_perk_completed_change(self, _):
+    def _on_ship_level_change(self, _):
         self._level_up_sequence_lerp = Lerp()
         self._perk_count_render_effect.activate()
         
@@ -174,7 +174,7 @@ class Hud():
         
         level_time =  self._controller.level_time
         ship_rocket_count = self._rocket_count_watcher.watch(self._controller.ship_rocket_count).new_value(150)
-        upgrade_perk_completed = self._upgrade_perk_completed_watcher.watch(self._controller.upgrade_perk_completed).new_value(150)
+        ship_level_count = self._ship_level_watcher.watch(self._controller.ship_level).new_value(150)
         self._upgrade_perk_collected_watcher.watch(self._controller.upgrade_perk_collected)
         
         
@@ -187,7 +187,7 @@ class Hud():
                             
             _ , game_time_render = self._render_text(f"{level_time:02d}", self._game_font_40)
             
-            perk_count_rect, perk_count_render = self._render_text(f" x {upgrade_perk_completed:02d}",
+            perk_count_rect, perk_count_render = self._render_text(f" x {ship_level_count:02d}",
                                                                    self._game_font_10,
                                                                    self._perk_count_render_effect.effect_1)
             if self._perk_count_rect == None:
