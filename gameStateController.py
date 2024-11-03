@@ -4,8 +4,8 @@ from Activity import Activity
 from config import ControllerConfig, EventConfig, MiscConfig
 from constant import END_GAME_EVENT, START_NEW_GAME_EVENT
 from gameObjects.rocket import Rocket
-from levelParamAdjuster import LevelParamAdjuster
-from shipParamAdjuster import ShipParamAdjuster
+from controllerParameter import ControllerParameter
+from shipParameter import ShipParameter
 from utils.helper import Helper
 from utils.delay import Delay
 
@@ -92,7 +92,7 @@ class GameStateController():
     #     return self._upgrade_perk_completed   
     
     @property
-    def upgrade_perk_collected(self):
+    def ship_upgrade_perk_collected(self):
         return self._upgrade_perk_collected
     
     @property
@@ -122,8 +122,8 @@ class GameStateController():
         # self.asteroids_remaining = float('inf')
         self._asteroid_spawned = 0
         # self._level_time = Helper.calculate_level_time(level)
-        self._level_time = LevelParamAdjuster.get_level_time(self.game_level)
-        self._level_in_progress = False
+        self._level_time = ControllerParameter.get_level_time(self.game_level)
+        self.set_level_in_progress(False)
     
         
     def reset_game(self):
@@ -143,9 +143,13 @@ class GameStateController():
         return self.level_is_in_progress and not self.game_paused
     
     @property
+    def level_completed(self):
+        return self._asteroid_spawn_complete and self.asteroids_alive == 0
+    
+    @property
     def _asteroid_spawn_complete(self):
         # return self._asteroid_spawned >= self._asteroid_spawn_per_level
-        return self._asteroid_spawned >= LevelParamAdjuster.asteroid_spawn_per_level(self.game_level)
+        return self._asteroid_spawned >= ControllerParameter.asteroid_spawn_per_level(self.game_level)
     
     def _game_time_pulse(self):
         # if self.level_is_in_progress and not self.game_paused:
@@ -158,7 +162,7 @@ class GameStateController():
         
     def report_upgrade_perk_collected(self):
         # self._upgrade_perk_collected += 1/self.PERKS_PER_COMPLETION
-        self._upgrade_perk_collected += 1/ShipParamAdjuster.upgrade_perks_per_complition(self.ship_level)
+        self._upgrade_perk_collected += 1/ShipParameter.ship_upgrade_perks_to_completion(self.ship_level)
         if self._upgrade_perk_collected >= 1:
             self._upgrade_perk_collected = 0
             self._ship_level += 1
@@ -187,14 +191,14 @@ class GameStateController():
             
     def update(self, asteroids_alive):
         
-        self.asteroids_alive = asteroids_alive
         
         if self.game_paused:
             return
         
         self._score_update()
         
-        if self._asteroid_spawn_complete and self.asteroids_alive == 0:
+        self.asteroids_alive = asteroids_alive
+        if self.level_completed:
            
             self.set_level_in_progress(False)
             self.delay_before_new_level.delay(2000, self.goto_new_level, True)

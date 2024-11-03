@@ -27,7 +27,7 @@ class ShootingStrategy():
         self.fire_rate_counter = 0 
         
     def can_fire(self):
-        if self.fire_rate_counter == 0:
+        if self.fire_rate_counter <= 0:
             self.fire_rate_counter = self.FPS / self.FIRE_COOL_DOWN
             return True 
         else:

@@ -39,8 +39,8 @@ class Hud():
         self._penalty_bar = ProgressBar(initial_progress = 1)
         self._penalty_bar_rect = self._penalty_bar.surface.get_rect()
         
-        self._perk_bar = ProgressBar(initial_progress = 0, bar_width= 100, bar_height = 10, fore_color = Colors.green_color, background_color=(51, 51, 51))
-        self.perk_bar_rect = self._perk_bar.surface.get_rect()
+        self._ship_level_bar = ProgressBar(initial_progress = controller.ship_upgrade_perk_collected, bar_width= 100, bar_height = 10, fore_color = Colors.green_color, background_color=(51, 51, 51))
+        self._ship_level_bar_rect = self._ship_level_bar.surface.get_rect()
         
         self._object_position_up = 0.1 * GlobalConfig.height
         self._object_position_down = 0.9 * GlobalConfig.height
@@ -71,10 +71,10 @@ class Hud():
         
         self._rocket_count_watcher = Watcher(self._on_rocket_count_change, self._controller.ship_rocket_count)
         self._ship_level_watcher = Watcher(self._on_ship_level_change, self._controller.ship_level)
-        self._upgrade_perk_collected_watcher = Watcher(self._on_upgrade_perk_collected_change, self._controller.upgrade_perk_collected)
+        self._upgrade_perk_collected_watcher = Watcher(self._on_upgrade_perk_collected_change, self._controller.ship_upgrade_perk_collected)
         
      
-        self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)
+        # self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)
        
        
     def _on_rocket_count_change(self, _):
@@ -85,7 +85,7 @@ class Hud():
         self._perk_count_render_effect.activate()
         
     def _on_upgrade_perk_collected_change(self, value):
-        self._perk_bar.set_progress(value)
+        self._ship_level_bar.set_progress(value)
         
     
     def _render_text(self, text, font:pygame.font.Font, effect:callable = None):
@@ -138,8 +138,7 @@ class Hud():
         else:
             self._controller.game_paused = True
           
-    def register_activity(self, activity_description):
-        self._timed_list.register_item(activity_description)
+  
         
     def handle_event(self, event):
         self.reticle.handle_event(event)
@@ -170,12 +169,12 @@ class Hud():
         
     def draw(self, screen):
         
-        self._timed_list.draw(screen)
+       
         
         level_time =  self._controller.level_time
         ship_rocket_count = self._rocket_count_watcher.watch(self._controller.ship_rocket_count).new_value(150)
         ship_level_count = self._ship_level_watcher.watch(self._controller.ship_level).new_value(150)
-        self._upgrade_perk_collected_watcher.watch(self._controller.upgrade_perk_collected)
+        self._upgrade_perk_collected_watcher.watch(self._controller.ship_upgrade_perk_collected)
         
         
         if self._start_sequence_lerp.control(self._controller.game_paused)\
@@ -209,13 +208,13 @@ class Hud():
             perk_count_y_pos =  y_up - self._perk_count_rect.height / 2
             
             perk_bar_x_pos =  self._perk_details_position[0] - self._perk_count_rect.width - spacing
-            perk_bar_y_pos = y_up - self.perk_bar_rect.height / 2
+            perk_bar_y_pos = y_up - self._ship_level_bar_rect.height / 2
             
             rocket_count_x_pos = perk_count_x_pos
-            rocket_count_y_pos = perk_count_y_pos - self.perk_bar_rect.height - spacing - rocket_count_rect.height / 2
+            rocket_count_y_pos = perk_count_y_pos - self._ship_level_bar_rect.height - spacing - rocket_count_rect.height / 2
             
             rocket_thumbnail_x_pos = perk_bar_x_pos
-            rocket_thumbnail_y_pos = perk_bar_y_pos - self.perk_bar_rect.height - spacing - rocket_thumbnail_rect.height / 2
+            rocket_thumbnail_y_pos = perk_bar_y_pos - self._ship_level_bar_rect.height - spacing - rocket_thumbnail_rect.height / 2
             
             penalty_bar_x_pos = self._penalty_bar_position[0]
             penalty_bar_y_pos =  y_down - self._penalty_bar_rect.height / 2
@@ -223,7 +222,7 @@ class Hud():
             
             
             screen.blit(perk_count_render,  perk_count_render.get_rect(topright = (perk_count_x_pos, perk_count_y_pos)))
-            screen.blit(self._perk_bar.surface,  self._perk_bar.surface.get_rect(topright = (perk_bar_x_pos, perk_bar_y_pos)))
+            screen.blit(self._ship_level_bar.surface,  self._ship_level_bar.surface.get_rect(topright = (perk_bar_x_pos, perk_bar_y_pos)))
             
             screen.blit(rocket_count_render,  rocket_count_render.get_rect(topright = (rocket_count_x_pos, rocket_count_y_pos)))
             screen.blit(self.rocket_thumbnail_surface,  self.rocket_thumbnail_surface.get_rect(topright = (rocket_thumbnail_x_pos, rocket_thumbnail_y_pos))) 

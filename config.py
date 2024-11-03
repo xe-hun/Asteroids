@@ -4,43 +4,40 @@ import pygame
 
 from customEnum import ShipActions
 
-class ShipConfig():
-    # collision variables
-    max_collision_force = 50
+# class ShipConfig():
+#     # collision variables
+#     max_collision_force = 50
     
     
-    # weapon settings
-    cannon_fire_cool_down = 2
-    cannon_burst_rate = 7
-    cannon_burst_count = 3
+#     # weapon settings
+#     cannon_fire_cool_down = 2
+#     cannon_burst_rate = 7
+#     cannon_burst_count = 3
     
-    rocket_fire_cool_down = 1
-    rocket_burst_rate = 5
-    rocket_burst_count = 2
+#     rocket_fire_cool_down = 1
+#     rocket_burst_rate = 5
+#     rocket_burst_count = 2
     
-    # movement
-    ship_max_speed = 20
-    turn_rate_degrees = 5
-    boost_force = 500
-    rocket_kick_back_range = 20
-    rocket_kick_back_force = 4000
+#     # movement
+#     ship_max_speed = 20
+#     turn_rate_degrees = 5
+#     boost_force = 500
+#     rocket_kick_back_range = 20
+#     rocket_kick_back_force = 4000
     
-    # dimension
-    ship_size_scale = .7
-    ship_width = 30
-    ship_hieght = 40
+   
     
-class AsteroidConfig():
-    min_size = 8
-    max_size = 30
-    min_life = 1
-    max_life = 5
-    min_sides = 7
-    max_sides = 12
-    min_speed = 7
-    max_speed = 15
-    min_initial_angular_velocity = 2
-    max_initial_angular_velocity = 7
+# class AsteroidConfig():
+#     min_size = 8
+#     max_size = 30
+#     min_life = 1
+#     max_life = 5
+#     min_sides = 7
+#     max_sides = 12
+#     min_speed = 7
+#     max_speed = 15
+#     min_initial_angular_velocity = 2
+#     max_initial_angular_velocity = 7
     
 class RocketConfig():
     image_path = 'images/rocket.png'
@@ -49,7 +46,7 @@ class RocketConfig():
     turn_rate_degrees = 4
     
     # in seconds
-    rocket_life = 10
+    rocket_life = 5
     
 class CannonConfig():
     size = 10

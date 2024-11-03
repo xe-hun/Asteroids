@@ -1,20 +1,19 @@
 import random
-from config import AsteroidConfig, Colors, GlobalConfig
-from constant import HEIGHT, WIDTH, WSCALE, outline_color, fill_color
+from asteroidParameter import AsteroidParameter
+from config import Colors, GlobalConfig
     
 import math
 import pygame
 import numpy as np
 import Box2D
 
-from gameObjects.explosion import Explosion
 from gameObjects.objectBase import ObjectBase
 from utils.camera import Camera
 from utils.helper import Helper, debug_draw_box2D_bodies, map_value, v_norm, to_box2D_position, v_to_component, to_pixel_position, wrap_box2D_object
 
 
 class Asteroid(pygame.sprite.Sprite, ObjectBase):
-    def __init__(self, world:Box2D.b2World, camera:Camera, position:tuple = None, debug_draw:bool = False, halfSize:float = None):
+    def __init__(self, world:Box2D.b2World, game_level:int, camera:Camera, position:tuple = None, debug_draw:bool = False, halfSize:float = None):
         debug_draw = False
         
         super().__init__()
@@ -29,19 +28,18 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
         creation_extension = 30 / GlobalConfig.world_scale
         
         # asteroid constants
-        MIN_SIZE = AsteroidConfig.min_size
-        MAX_SIZE = AsteroidConfig.max_size
-        MIN_LIFE = AsteroidConfig.min_life
-        MAX_LIFE = AsteroidConfig.max_life
-        MIN_SIDES = AsteroidConfig.min_sides
-        MAX_SIDES = AsteroidConfig.max_sides
+        MIN_SIZE = AsteroidParameter.min_size
+        MAX_SIZE = AsteroidParameter.max_size(game_level)
+        MIN_LIFE = AsteroidParameter.min_life
+        MAX_LIFE = AsteroidParameter.max_life(game_level)
+     
         
        
         stroke_width = 2
         self._breakage_threshold = MIN_SIZE
         
         self._asteroid_half_size =  np.random.randint(MIN_SIZE, MAX_SIZE) if halfSize is None else halfSize
-        num_side = np.random.randint(MIN_SIDES, MAX_SIDES)
+        # num_side = np.random.randint(MIN_SIDES, MAX_SIDES)
           # map the asteroid life according to its size
         self._asteroid_life = int(map_value(MIN_SIZE, MAX_SIZE, MIN_LIFE, MAX_LIFE, self._asteroid_half_size))
       
@@ -56,9 +54,9 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
             
         self._direction = direction
         
-        SPEED = AsteroidConfig.min_speed + random.random() * AsteroidConfig.max_speed
+        SPEED = AsteroidParameter.min_speed + random.random() * AsteroidParameter.max_speed
         initial_linear_velocity = self._direction * SPEED
-        initial_angular_velocity = AsteroidConfig.min_initial_angular_velocity + random.random() * AsteroidConfig.max_initial_angular_velocity
+        initial_angular_velocity = AsteroidParameter.min_initial_angular_velocity + random.random() * AsteroidParameter.max_initial_angular_velocity
    
         # lenght_displacement_range = self._asteroid_half_size * .3
         # angle_displacement_range = .05
@@ -215,13 +213,14 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
         return self._asteroid_half_size > self._breakage_threshold * 2
         
     
-    def break_apart(self, debug_draw:bool):
+    def break_apart(self, game_level, debug_draw:bool):
         # position = self.asteroidBodybox2D.position
-        break_parts = random.choices([2, 3, ],[5, 1])[0]
+        # break_parts = random.choices([2, 3, ],[5, 1])[0]
+        break_parts = AsteroidParameter.get_break_parts(game_level)
         asteroids = []
         for _ in range(break_parts):
             asteroidHalfSize = max(((self._asteroid_half_size + np.random.randn() * 10)/ 2), self._breakage_threshold)
-            asteroid = Asteroid(self._world, self._camera, self._position, debug_draw, asteroidHalfSize)
+            asteroid = Asteroid(self._world, game_level, self._camera, self._position, debug_draw, asteroidHalfSize)
             asteroids.append(asteroid)
         return asteroids
         
@@ -239,7 +238,7 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
         wrap_box2D_object(self._asteroid_body_box2D)  
         self._position = to_pixel_position(self._asteroid_body_box2D.position, GlobalConfig.world_scale, GlobalConfig.height) 
         self._position = self._camera.watch(self._position)
-        Helper.cap_box2D_body_speed(self._asteroid_body_box2D, AsteroidConfig.max_speed)
+        Helper.cap_box2D_body_speed(self._asteroid_body_box2D, AsteroidParameter.max_speed)
  
     def draw(self, screen:pygame.surface.Surface):
         

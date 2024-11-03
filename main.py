@@ -1,19 +1,20 @@
 from enum import Enum
 import pygame
+from config import GlobalConfig
 from constant import END_GAME_EVENT, EXIT_GAME_EVENT, FPS, HEIGHT, SHAKE_EVENT, START_NEW_GAME_EVENT, WIDTH, background_color
 from game import Game
 from globalResolver import GlobalResolver
 from pages.endGameScreen import EndGameScreen
 from pages.startScreen import StartScreen
 from gameStateController import GameStateController
-from test import Test
 from ui.button import Button
+from ui.timedList import TimedList
 
 class GameState(Enum):
     startScreen = 1
     game = 2
     endGame = 3
-    test = 4
+   
 
 
 class Main():
@@ -25,13 +26,11 @@ class Main():
         
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.controller = GameStateController()
-        self.initializeStartScreen(self.controller)
-        # self.initializeTest()
-        # self.onStartGame(self.controller)
         
-    def initializeTest(self):
-        self.gameState = GameState.test
-        self.test = Test()
+        self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)
+        self.initializeStartScreen(self.controller)
+      
+        
         
         
     def initializeStartScreen(self, controller:GameStateController):
@@ -100,8 +99,6 @@ class Main():
         elif self.gameState == GameState.game and not button_event:
             self.game.handle_events(event)
             
-        elif self.gameState == GameState.test:
-            self.test.handleEvent(event)
           
                 
             
@@ -115,8 +112,6 @@ class Main():
         elif self.gameState == GameState.endGame:
             self.endGameScreen.draw(self.screen)
             
-        elif self.gameState == GameState.test:
-            self.test.update(self.screen)
                  
            
     

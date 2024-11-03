@@ -1,6 +1,6 @@
 import random
 from config import ControllerConfig
-from levelParamAdjuster import LevelParamAdjuster
+from controllerParameter import ControllerParameter
 from utils.delay import Delay
 from utils.helper import Helper
 
@@ -29,15 +29,15 @@ class SpawnStrategy():
         if self._delay.delay(self._spawn_interval, reset=True).is_done:
             # can_spawn_asteroid = asteroids_alive < ControllerConfig.max_asteroid_on_screen
             
-            if self._with_chance_of(LevelParamAdjuster.chances_of_asteroid(game_level)) and can_spawn:
+            if self._with_chance_of(ControllerParameter.chances_of_asteroid(game_level)) and can_spawn:
                 self._spawn_asteroid()
-                print(LevelParamAdjuster.chances_of_asteroid(game_level))
+                # print(LevelParamAdjuster.chances_of_asteroid(game_level))
                 
             # this value decreases as time approaches level_time
             # minimises the advantage gained when for prolonging a level
-            decreasing_probability = (game_time / LevelParamAdjuster.get_level_time(game_level))
-            if self._with_chance_of(LevelParamAdjuster.chances_of_perk * decreasing_probability):
-                if self._with_chance_of(LevelParamAdjuster.chances_of_rocket_over_upgrade):
+            decreasing_probability = (game_time / ControllerParameter.get_level_time(game_level))
+            if self._with_chance_of(ControllerParameter.chances_of_perk * decreasing_probability):
+                if self._with_chance_of(ControllerParameter.chances_of_rocket_over_upgrade):
                     self._spawn_rocket_perk()
                 else:
                     self._spawn_update_perk()

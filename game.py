@@ -3,9 +3,10 @@ import random
 import numpy as np
 import pygame
 import Box2D
-from config import EventConfig
+from config import EventConfig, GlobalConfig
 from strategies.penaltyStrategy import PenaltyStrategy
 from strategies.spawnStrategy import SpawnStrategy
+from ui.timedList import TimedList
 from utils.lerp import Lerp
 from utils.delay import Delay
 from effects.worldStar import WorldStar
@@ -30,6 +31,7 @@ class Game():
         
         self._controller = controller
         self._hud = Hud(controller)
+        self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)
         
         self.VELOCITY_ITERATIONS = 10
         self.POSITION_ITERATIONS = 10
@@ -50,7 +52,7 @@ class Game():
         
         
         
-        self._ship = Ship(self._world, self._camera, self._register_projectile, self._register_ship_asteroid_collision, controller.report_projectile_fired, False)
+        self._ship = Ship(self._world, self._camera, self._register_projectile, self._register_ship_asteroid_collision, controller.report_projectile_fired, self._controller.ship_level, False)
   
         self._projectile_list = []
         self._asteroid_list = []
@@ -64,6 +66,7 @@ class Game():
         self._perk_delay = Delay()
        
         self._penalty_strategy = PenaltyStrategy(self._hud)
+
         
     def _create_world_boundary(self):
         
@@ -142,17 +145,29 @@ class Game():
                         self._particle_list.append(Explosion(asteroid.position))
                         self._controller.report_asteroid_destroyed()
                         if asteroid.can_break_apart():
-                            asteroids = asteroid.break_apart(debug_draw = False)
+                            asteroids = asteroid.break_apart(self._controller.game_level, debug_draw = False)
                             for a in asteroids:
                                 self._asteroid_list.append(a)
-                            # asteroidA, asteroidB = asteroid.break_apart(debugDraw=True)
-                            # self._asteroid_list.append(asteroidA)
-                            # self._asteroid_list.append(asteroidB)
+                       
                         asteroid.dispose()
                         collisionDetected = True
                         break
             if collisionDetected == True:
                 break;
+            
+        
+                    
+    def _collect_perk(self, perk):
+        if perk.perk_type == PerkType.upgrade:
+                
+            activity = self._controller.report_upgrade_perk_collected()
+            self._timed_list.register_item(activity)
+        
+        if perk.perk_type == PerkType.rocket:
+            activity = self._controller.report_rocket_perk_collected()
+            self._timed_list.register_item(activity)
+            
+        perk.dispose()
               
                    
     def _ship_perks_collision(self):
@@ -166,23 +181,22 @@ class Game():
                
             if pygame.sprite.collide_mask(perk, self._ship):
             
-                if perk.perk_type == PerkType.upgrade:
-                    # perks_collected, perks_completed = self._controller.report_rocket_perk_collected()
-                    # self._hud.update_upgrade_perk_bar(self._controller.report_upgrade_perk_collected())
-                    activity = self._controller.report_upgrade_perk_collected()
-                    self._hud.register_activity(activity)
-                
-                if perk.perk_type == PerkType.rocket:
-                    # self._hud.update_rocket_count(self._controller.report_rocket_perk_collected())
-                    activity = self._controller.report_rocket_perk_collected()
-                    self._hud.register_activity(activity)
-                
-                
+                self._collect_perk(perk)
                 
                 self._create_spark(perk.position, quantity=10, particle_size=1.5, max_perimeter = 65)
-                perk.dispose()
                 break;
             
+    def _handle_level_completed_case(self):
+        if self._controller.level_completed:
+            for perk in self._perks_list:
+                if perk.alive == False:
+                    continue
+                
+                self._collect_perk(perk)
+                
+         
+                
+                  
             
     def _filter_items(self):   
         self._asteroid_list = [ast for ast in self._asteroid_list if ast.alive == True]
@@ -193,7 +207,7 @@ class Game():
         
     def _spawn_asteroid(self):
         self._controller.report_asteroid_spawned()
-        asteroid = Asteroid(self._world, self._camera, debug_draw=True)
+        asteroid = Asteroid(self._world, self._controller.game_level, self._camera, debug_draw=True)
         self._asteroid_list.append(asteroid)
     
     
@@ -271,7 +285,7 @@ class Game():
             self._world.Step(1.0/60, self.VELOCITY_ITERATIONS, self.POSITION_ITERATIONS)
             self._projectile_asteroid_collision()
             self._ship_perks_collision()
-            self._ship.update()
+            self._ship.update(self._controller.ship_level)
             self._update_projectiles()
             self._update_asteroids()
             self._update_particles()
@@ -280,8 +294,15 @@ class Game():
             self._update_perks()
             self._spawn_strategy.update(self._controller.level_time, self._controller.can_spawn_asteroid, self._controller.game_level)
             self._penalty_strategy.update(not self._ship.in_boundary)
+            self._timed_list.update()
             
-            
+        print('level in progress',self._controller.level_is_in_progress)
+        print('game is paused',self._controller.game_paused)
+        
+        
+           
+        self._controller.update(asteroids_alive)
+        self._handle_level_completed_case()
         self._filter_items()
         self._hud.draw(screen)
         self._draw_perks(screen)
@@ -292,7 +313,11 @@ class Game():
         self._ship.draw(screen)
         self._hud.draw_pause_screen(screen)
         
-        self._controller.update(asteroids_alive)
+        if self._controller.level_is_in_progress:
+            self._timed_list.draw(screen) 
+        
+        
+        
         
     def handle_events(self, event:pygame.event.Event):
         

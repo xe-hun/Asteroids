@@ -42,22 +42,26 @@ class TimedList():
             self._lerp1 = Lerp()
             self._target_item = self._item_register_queue[0]
             
-        
-    def draw(self, screen:pygame.surface.Surface):
-        
+    def update(self):
         lerp_1 = self._lerp1.do(self._ingress_time, self._get_params, self._on_done)
 
         if lerp_1.is_done == False:
-            alpha, self._y_displacement = lerp_1.value
+            self._alpha, self._y_displacement = lerp_1.value
         else:
-            alpha = 255
+            self._alpha = 255
+        
+        
+        
+    def draw(self, screen:pygame.surface.Surface):
+        
+        
 
         if self._target_item != None:
             position, surface, delay = self._target_item
         
             if delay.delay(self._item_display_duration).is_done == False:
                 # print(alpha)
-                surface.set_alpha(alpha)
+                surface.set_alpha(self._alpha)
                 screen.blit(surface, surface.get_rect(center = position).topleft)
         
             for j in range(len(self._item_update_queue)-1, -1, -1):

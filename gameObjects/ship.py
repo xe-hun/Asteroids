@@ -2,32 +2,30 @@ import math
 import numpy as np
 import pygame
 import Box2D
-from config import Colors, GlobalConfig, MiscConfig, ShipConfig
+from config import Colors, GlobalConfig, MiscConfig
 from customEnum import ShipActions, Steering
 
 
-from utils.animation_handler import AnimationHandler
+from utils.animationHandler import AnimationHandler
 from gameObjects.objectBase import ObjectBase
 from gameObjects.rocket import Rocket
+from shipParameter import ShipParameter
 from strategies.shootingStrategy import ShootingStrategy
 from utils.camera import Camera
 from utils.box2DHelperClasses import RaycastCallback
 from utils.helper import Helper, v_angle_diff, check_box2D_object_in_bounds, clamp, v_dot, v_norm, v_rotate, scale, v_to_angle, v_to_component, to_box2D_position,\
-                        to_pixel_position, debug_draw_box2D_bodies,\
-                        wrap_box2D_object
-from constant import HEIGHT, SHAKE_EVENT, WIDTH,\
-                    WSCALE, outline_color,\
-                    fill_color
-
+                        to_pixel_position, debug_draw_box2D_bodies
 from gameObjects.cannon import Cannon
+from utils.watcher import Watcher
 
 
 
 class Ship(pygame.sprite.Sprite, ObjectBase):
     
-    def __init__(self, world:Box2D.b2Body,  camera:Camera, register_projectile:callable, register_damage:callable, report_projectile_fire:callable, debugDraw:bool = False):
+    def __init__(self, world:Box2D.b2Body,  camera:Camera, register_projectile:callable, register_damage:callable, report_projectile_fire:callable, ship_level:int = 1, debugDraw:bool = False):
         
         self._debugDraw = debugDraw
+        self._report_projectile_fire = report_projectile_fire
         self._alive = True
         self._steer_on = False
         self.in_boundary = True
@@ -36,33 +34,19 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self._collision_force = 0
         
       
-        self.MAX_COLLISION_FORCE = ShipConfig.max_collision_force
+        self.MAX_COLLISION_FORCE = ShipParameter.max_collision_force
       
-        CANNON_FIRE_COOL_DOWN = ShipConfig.cannon_fire_cool_down
-        CANNON_BURST_RATE = ShipConfig.cannon_burst_rate
-        CANNON_BURST_COUNT = ShipConfig.cannon_burst_count
-        
-        ROCKET_FIRE_COOL_DOWN = ShipConfig.rocket_fire_cool_down
-        ROCKET_BURST_RATE = ShipConfig.rocket_burst_rate
-        ROCKET_BURST_COUNT = ShipConfig.rocket_burst_count
-        
-        self._cannon_fire_strategy = ShootingStrategy(CANNON_FIRE_COOL_DOWN, CANNON_BURST_RATE, CANNON_BURST_COUNT, report_projectile_fire, Cannon)
-        self._rocket_fire_strategy = ShootingStrategy(ROCKET_FIRE_COOL_DOWN, ROCKET_BURST_RATE, ROCKET_BURST_COUNT, report_projectile_fire, Rocket)
-        
-        self.MAXSPEED = ShipConfig.ship_max_speed
-        # turn rate in degrees
-        self.TURN_RATE = math.radians(ShipConfig.turn_rate_degrees)
+        self._set_ship_parameters(ship_level)
         
         # ship dimensions
-        self.SHIP_SIZE_SCALE = ShipConfig.ship_size_scale
-        self.SHIP_WIDTH = ShipConfig.ship_width * self.SHIP_SIZE_SCALE
-        self.SHIP_HEIGHT = ShipConfig.ship_hieght * self.SHIP_SIZE_SCALE
+        self.SHIP_SIZE_SCALE = ShipParameter.ship_size_scale
+        self.SHIP_WIDTH = ShipParameter.ship_width * self.SHIP_SIZE_SCALE
+        self.SHIP_HEIGHT = ShipParameter.ship_hieght * self.SHIP_SIZE_SCALE
         self.SHIP_BASE_POINT = - self.SHIP_WIDTH / (2 * GlobalConfig.world_scale)
         
         # ship flags
         self._register_projectile = register_projectile
         self._register_damage = register_damage
-        self._report_projectile_fire = report_projectile_fire
         
         self._boosting = False
         self._steering = Steering.noSteering
@@ -71,13 +55,12 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
         # ship parameters
         self._turn_force = 0
-        self.BOOST_FORCE = ShipConfig.boost_force
         self._position = (GlobalConfig.width // 2, GlobalConfig.height // 2)
    
 
         # rocket kick back parameters
-        self.ROCKET_KICK_BACK_RANGE = ShipConfig.rocket_kick_back_range
-        self.ROCKET_KICK_BACK_FORCE = ShipConfig.rocket_kick_back_force
+        self.ROCKET_KICK_BACK_RANGE = ShipParameter.rocket_kick_back_range
+        self.ROCKET_KICK_BACK_FORCE = ShipParameter.rocket_kick_back_force
         
         # building the shop
         # polygon points for ship frame centered on zero
@@ -111,6 +94,31 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         # self.flare_image.set_alpha(.9)
         self.animation_handler = AnimationHandler('images/flame101x186.png', 101, 186, 5, .13)
 
+
+    def _set_ship_parameters(self, ship_level):
+        CANNON_FIRE_COOL_DOWN = ShipParameter.cannon_fire_cool_down(ship_level)
+        CANNON_BURST_RATE = ShipParameter.cannon_burst_rate(ship_level)
+        CANNON_BURST_COUNT = ShipParameter.cannon_burst_count(ship_level)
+
+        
+        ROCKET_FIRE_COOL_DOWN = ShipParameter.rocket_fire_cool_down(ship_level)
+        ROCKET_BURST_RATE = ShipParameter.rocket_burst_rate
+        ROCKET_BURST_COUNT = ShipParameter.rocket_burst_count(ship_level)
+     
+        
+        self._cannon_fire_strategy = ShootingStrategy(CANNON_FIRE_COOL_DOWN, CANNON_BURST_RATE, CANNON_BURST_COUNT, self._report_projectile_fire, Cannon)
+        self._rocket_fire_strategy = ShootingStrategy(ROCKET_FIRE_COOL_DOWN, ROCKET_BURST_RATE, ROCKET_BURST_COUNT, self._report_projectile_fire, Rocket)
+        
+        self.MAXSPEED = ShipParameter.ship_max_speed(ship_level)
+        # turn rate in degrees
+        self.TURN_RATE = math.radians(ShipParameter.turn_rate_degrees(ship_level))
+        self.BOOST_FORCE = ShipParameter.boost_force(ship_level)
+        
+        self._ship_level_watcher = Watcher(self._on_ship_level_change, ship_level)
+    
+    def _on_ship_level_change(self, value):
+        self._set_ship_parameters(value)
+        
        
 
         
@@ -141,7 +149,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         polygon_points_shifted = [(i[0] + ship_width / 2 , i[1] + ship_height / 2 ) for i in polygon_points]
         
         ship_surface = pygame.Surface((ship_width + stroke_size, ship_height + stroke_size), pygame.SRCALPHA)
-        pygame.draw.polygon(ship_surface, fill_color, polygon_points_shifted)
+        pygame.draw.polygon(ship_surface, Colors.fill_color, polygon_points_shifted)
         pygame.draw.polygon(ship_surface, Colors.drawing_color, polygon_points_shifted, stroke_size)
         rect = ship_surface.get_rect(center=(position))
 
@@ -243,8 +251,11 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self._ship_surface = None
         self._world.DestroyBody(self._ship_body_box2D)
 
+       
    
-    def update(self):
+    def update(self, ship_level):
+        
+        self._ship_level_watcher.watch(ship_level)
         
         self._steer_ship()
         

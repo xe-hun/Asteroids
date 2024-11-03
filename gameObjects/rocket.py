@@ -34,6 +34,8 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         self.flare_image = scale(pygame.image.load(RocketConfig.flare_path).convert_alpha(), .3)
         self.flare_delay = Delay()
         self.rocket_on = False
+        self._rocket_life = RocketConfig.rocket_life
+        self._rocket_life_delay = Delay()
         
         
     def to_world_pos(self, vec:tuple):
@@ -71,9 +73,17 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
             elif dotProd < 0:
                 self._direction = v_rotate(self._direction, self._turn_rate)
         
+    def _on_count_down(self):
+        self._rocket_life -= 1
+        if self._rocket_life <= 0:
+            self._rocket_life_delay = None
+            self.dispose()
         
     
     def update(self):
+        if self._rocket_life_delay != None:
+            self._rocket_life_delay.delay(1000, self._on_count_down, True)
+        
         self.rocket_on = self.flare_delay.delay(200).is_done
         
         if self.rocket_on:
