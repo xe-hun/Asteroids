@@ -11,9 +11,9 @@ from ui.button import Button
 from ui.timedList import TimedList
 
 class GameState(Enum):
-    startScreen = 1
+    start_screen = 1
     game = 2
-    endGame = 3
+    end_game = 3
    
 
 
@@ -25,26 +25,30 @@ class Main():
         pygame.display.set_caption('Asteroids')
         
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        self.controller = GameStateController()
-        
+        # self._controller = GameStateController()
         self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)
-        self.initializeStartScreen(self.controller)
+        self.initialize_start_screen()
       
         
         
         
-    def initializeStartScreen(self, controller:GameStateController):
-        controller.reset_game()
-        self.startScreen = StartScreen(controller.high_score)
-        self.gameState = GameState.startScreen
+    def initialize_start_screen(self):
+        # controller.reset_game()
+        # high_score = self._controller.high_score
+        self._controller = GameStateController()
+        self.startScreen = StartScreen(0)
+        self.gameState = GameState.start_screen
         
-    def initializeGame(self):
-        self.game = Game(self.controller)
+    def initialize_game(self):
+        if self._controller.bonus_time_activity != None:
+            self._timed_list.register_item(self._controller.bonus_time_activity)
+            
+        self.game = Game(self._timed_list, self._controller)
         self.gameState = GameState.game
         
-    def initializeEndGameScreen(self):
-        self.endGameScreen = EndGameScreen(self.controller.lives_remaining)
-        self.gameState = GameState.endGame
+    def initialize_end_game_screen(self):
+        self.endGameScreen = EndGameScreen(self._controller.lives_remaining)
+        self.gameState = GameState.end_game
     
     def logic(self):
         
@@ -61,9 +65,9 @@ class Main():
                 if event.type == pygame.QUIT:
                     run = False
                     break;  
-                self.handleEvents(event)
+                self.handle_event(event)
             
-            self.handleUpdates()
+            self.handle_update()
             
             pygame.display.flip()
                 
@@ -72,15 +76,15 @@ class Main():
             
             
             
-    def handleEvents(self, event):
+    def handle_event(self, event):
         
            
         if event.type == START_NEW_GAME_EVENT:
-            self.initializeGame()
+            self.initialize_game()
         if event.type == END_GAME_EVENT:
-            self.initializeEndGameScreen()
+            self.initialize_end_game_screen()
         if event.type == EXIT_GAME_EVENT:
-            self.initializeStartScreen(self.controller)
+            self.initialize_start_screen()
             
         button_event = False 
         for item in GlobalResolver.event_queue:
@@ -93,7 +97,7 @@ class Main():
         
             
             
-        if self.gameState == GameState.startScreen:
+        if self.gameState == GameState.start_screen:
             self.startScreen.handleEvents(event)
 
         elif self.gameState == GameState.game and not button_event:
@@ -102,14 +106,14 @@ class Main():
           
                 
             
-    def handleUpdates(self):
-        if self.gameState == GameState.startScreen:
+    def handle_update(self):
+        if self.gameState == GameState.start_screen:
             self.startScreen.draw(self.screen)
 
         elif self.gameState == GameState.game:
             self.game.update_and_draw(self.screen)
             
-        elif self.gameState == GameState.endGame:
+        elif self.gameState == GameState.end_game:
             self.endGameScreen.draw(self.screen)
             
                  

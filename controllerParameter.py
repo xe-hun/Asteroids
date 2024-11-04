@@ -4,6 +4,10 @@ from utils.helper import Helper
 class ControllerParameter():
     
     @staticmethod
+    def get_bonus_time(level_time):
+        return int(level_time / 3)
+    
+    @staticmethod
     def chances_of_asteroid(game_level:int):
         min_chance = .6
         max_chance = .9

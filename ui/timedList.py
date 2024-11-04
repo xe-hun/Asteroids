@@ -18,6 +18,7 @@ class TimedList():
         self._item_register_queue = []
         self._item_update_queue = []
         self._lerp1 = Lerp(activate=False)
+        # self._alpha = 0
         
     def _get_params(self, lerp:Lerp):
         alpha = lerp.ease_in(0, 255)
@@ -28,6 +29,7 @@ class TimedList():
         
         render = self._game_font_10.render(item_description, False, Colors.drawing_color)
         surface = pygame.Surface(render.get_size(), pygame.SRCALPHA)
+        # surface.set_alpha(0)
         surface.blit(render, (0, 0))
       
         
@@ -47,8 +49,8 @@ class TimedList():
 
         if lerp_1.is_done == False:
             self._alpha, self._y_displacement = lerp_1.value
-        else:
-            self._alpha = 255
+        # else:
+        #     self._alpha = 255
         
         
         
@@ -61,6 +63,7 @@ class TimedList():
         
             if delay.delay(self._item_display_duration).is_done == False:
                 # print(alpha)
+                print(self._alpha)
                 surface.set_alpha(self._alpha)
                 screen.blit(surface, surface.get_rect(center = position).topleft)
         

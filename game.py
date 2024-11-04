@@ -3,7 +3,8 @@ import random
 import numpy as np
 import pygame
 import Box2D
-from config import EventConfig, GlobalConfig
+from config import ControllerConfig, EventConfig, GlobalConfig
+from controllerParameter import ControllerParameter
 from strategies.penaltyStrategy import PenaltyStrategy
 from strategies.spawnStrategy import SpawnStrategy
 from ui.timedList import TimedList
@@ -27,11 +28,11 @@ from gameObjects.ship import Ship
 
 class Game():
     
-    def __init__(self, controller:GameStateController):
+    def __init__(self, timed_list:TimedList, controller:GameStateController):
         
         self._controller = controller
         self._hud = Hud(controller)
-        self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)
+        self._timed_list = timed_list
         
         self.VELOCITY_ITERATIONS = 10
         self.POSITION_ITERATIONS = 10
@@ -66,6 +67,9 @@ class Game():
         self._perk_delay = Delay()
        
         self._penalty_strategy = PenaltyStrategy(self._hud)
+        
+        # activity = self._controller.set_bonus_time(ControllerParameter.get_bonus_time(self._controller.previous_level_time))
+        # self._timed_list.register_item(activity)
 
         
     def _create_world_boundary(self):
@@ -187,7 +191,7 @@ class Game():
                 break;
             
     def _handle_level_completed_case(self):
-        if self._controller.level_completed:
+        if self._is_level_completed:
             for perk in self._perks_list:
                 if perk.alive == False:
                     continue
@@ -275,11 +279,17 @@ class Game():
     def _draw_reticle(self, screen):
         self._hud.reticle.draw(screen)
         
+    @property
+    def _can_spawn_asteroid(self):
+       return len(self._asteroid_list) < ControllerConfig.max_asteroid_on_screen and not self._controller.asteroid_spawn_complete 
    
+    @property
+    def _is_level_completed(self):
+        return self._controller.asteroid_spawn_complete and len(self._asteroid_list) <= 0
         
             
     def update_and_draw(self, screen):
-        asteroids_alive = len(self._asteroid_list)
+    
         if self._controller.level_is_in_progress_and_game_not_paused:
             
             self._world.Step(1.0/60, self.VELOCITY_ITERATIONS, self.POSITION_ITERATIONS)
@@ -292,16 +302,16 @@ class Game():
             self._hud.update()
             self._update_reticle()
             self._update_perks()
-            self._spawn_strategy.update(self._controller.level_time, self._controller.can_spawn_asteroid, self._controller.game_level)
+            self._spawn_strategy.update(self._controller.level_time, self._can_spawn_asteroid, self._controller.game_level)
             self._penalty_strategy.update(not self._ship.in_boundary)
             self._timed_list.update()
             
-        print('level in progress',self._controller.level_is_in_progress)
-        print('game is paused',self._controller.game_paused)
+        # print('level in progress',self._controller.level_is_in_progress)
+        # print('game is paused',self._controller.game_paused)
         
-        
+
            
-        self._controller.update(asteroids_alive)
+        self._controller.update(self._is_level_completed)
         self._handle_level_completed_case()
         self._filter_items()
         self._hud.draw(screen)

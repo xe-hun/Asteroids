@@ -2,7 +2,6 @@ import pygame
 
 from Activity import Activity
 from config import ControllerConfig, EventConfig, MiscConfig
-from constant import END_GAME_EVENT, START_NEW_GAME_EVENT
 from gameObjects.rocket import Rocket
 from controllerParameter import ControllerParameter
 from shipParameter import ShipParameter
@@ -14,31 +13,34 @@ class GameStateController():
     def __init__(self) -> None:
         self.ASTEROID_DESTROYED_POINT = 100
         self.NEW_LEVEL_POINT = ControllerConfig.new_level_point
-        # self.LEVEL_TIME = ControllerConfig.level_time
+
         self.START_LIVES = 2
-        # self.PERKS_PER_COMPLETION = ControllerConfig.upgrade_perk_completion
-        self.reset_game()
         
         self._high_score = 0
+        self._bonus_time = 0
+        self._level_time = 0
+        self._number_of_asteroids_destroyed = 0
+        self._game_level = 1
+        self._ship_level = 1
+      
+        self._lives_remaining = self.START_LIVES
+        self._game_score = 0
+        self._game_paused = False
+        self._set_new_level_parameters()
+        
+   
         self._game_score_counter = 0
-        # self._asteroid_spawn_per_level = ControllerConfig.asteroid_spawn_per_level
         self.music_on = False
         self.sound_on = False
-        
-        
-     
-        # self.resetGame = False
+   
         self.delay_before_new_level = Delay()
         self.counter_delay = Delay()
         self._upgrade_perk_collected = 0
-        # self._upgrade_perk_completed = 0
+       
         self._ship_rocket_count = ControllerConfig.rocket_base_quantity
         
         self._game_paused = False
         self._load_key_map()
-        
-        # self._level_param_adjuster = LevelParamAdjuster()
-        # self._ship_param_adjuster = ShipParamAdjuster()
         
        
     def _load_key_map(self):        
@@ -62,10 +64,7 @@ class GameStateController():
         
     def set_level_in_progress(self, value):
         self._level_in_progress = value
-        
-    @property
-    def can_spawn_asteroid(self):
-        return self.asteroids_alive < ControllerConfig.max_asteroid_on_screen and not self._asteroid_spawn_complete
+     
         
     @property
     def level_is_in_progress(self):
@@ -87,9 +86,6 @@ class GameStateController():
     def ship_rocket_count(self):
         return self._ship_rocket_count   
     
-    # @property
-    # def upgrade_perk_completed(self):
-    #     return self._upgrade_perk_completed   
     
     @property
     def ship_upgrade_perk_collected(self):
@@ -111,43 +107,46 @@ class GameStateController():
     def is_time_up(self):
         return self._level_time <= 0 
     
+    # def set_bonus_time(self, value):
+    #     self._bonus_time = value
+    
     def goto_new_level(self):
         self._game_level += 1
         self._game_score += self.NEW_LEVEL_POINT
-        self.reset_new_level()
+        self._set_new_level_parameters()
         pygame.event.post(pygame.event.Event(EventConfig.start_new_game_event))
+        print('new level')
         
         
-    def reset_new_level(self):
-        # self.asteroids_remaining = float('inf')
+    def _set_new_level_parameters(self):
         self._asteroid_spawned = 0
-        # self._level_time = Helper.calculate_level_time(level)
-        self._level_time = ControllerParameter.get_level_time(self.game_level)
+        self._bonus_time = ControllerParameter.get_bonus_time(self._level_time)
+        print('zen')
+        print(self._bonus_time)
+        self._level_time = ControllerParameter.get_level_time(self.game_level) + self._bonus_time
+        # + self._bonus_time
         self.set_level_in_progress(False)
     
         
-    def reset_game(self):
-        self._number_of_asteroids_destroyed = 0
-        self._game_level = 1
-        self._ship_level = 1
+   
+       
       
-        self._lives_remaining = self.START_LIVES
-        self._game_score = 0
-        self._game_paused = False
-        self.reset_new_level()
-      
-
+    @property
+    def bonus_time_activity(self):
+        if self._bonus_time <= 0:
+            return None
+        else: return Activity.bonus_time_added(self._bonus_time)
         
     @property
     def level_is_in_progress_and_game_not_paused(self):
         return self.level_is_in_progress and not self.game_paused
     
-    @property
-    def level_completed(self):
-        return self._asteroid_spawn_complete and self.asteroids_alive == 0
+    # @property
+    # def level_completed(self):
+    #     return self.asteroid_spawn_complete and self.asteroids_alive == 0
     
     @property
-    def _asteroid_spawn_complete(self):
+    def asteroid_spawn_complete(self):
         # return self._asteroid_spawned >= self._asteroid_spawn_per_level
         return self._asteroid_spawned >= ControllerParameter.asteroid_spawn_per_level(self.game_level)
     
@@ -189,7 +188,7 @@ class GameStateController():
     def report_upgrade_perk_spawned(self):
         pass
             
-    def update(self, asteroids_alive):
+    def update(self, level_completed):
         
         
         if self.game_paused:
@@ -197,9 +196,8 @@ class GameStateController():
         
         self._score_update()
         
-        self.asteroids_alive = asteroids_alive
-        if self.level_completed:
-           
+       
+        if level_completed:
             self.set_level_in_progress(False)
             self.delay_before_new_level.delay(2000, self.goto_new_level, True)
                 
@@ -219,7 +217,7 @@ class GameStateController():
                 
             
     def game_over(self):
-        self.reset_new_level()
+        self._set_new_level_parameters()
         self._lives_remaining -= 1
         pygame.event.post(pygame.event.Event(EventConfig.end_game_event))
         
