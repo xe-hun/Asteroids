@@ -146,11 +146,7 @@ class Hud():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self._pause_game()
-                
-        # if event.type == pygame.MOUSEBUTTONUP:
-        #     self._mock_event += 1
-        #     self._timed_list.register_item(f'event {self._mock_event}')
-                
+        
       
      
         

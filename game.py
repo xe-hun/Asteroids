@@ -306,10 +306,7 @@ class Game():
             self._penalty_strategy.update(not self._ship.in_boundary)
             self._timed_list.update()
             
-        # print('level in progress',self._controller.level_is_in_progress)
-        # print('game is paused',self._controller.game_paused)
-        
-
+      
            
         self._controller.update(self._is_level_completed)
         self._handle_level_completed_case()
