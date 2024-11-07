@@ -18,7 +18,8 @@ class TimedList():
         self._item_register_queue = []
         self._item_update_queue = []
         self._lerp1 = Lerp(activate=False)
-        # self._alpha = 0
+        
+        self._alpha = 0
         
     def _get_params(self, lerp:Lerp):
         alpha = lerp.ease_in(0, 255)
@@ -62,8 +63,6 @@ class TimedList():
             position, surface, delay = self._target_item
         
             if delay.delay(self._item_display_duration).is_done == False:
-                # print(alpha)
-                print(self._alpha)
                 surface.set_alpha(self._alpha)
                 screen.blit(surface, surface.get_rect(center = position).topleft)
         
@@ -87,6 +86,7 @@ class TimedList():
             new_position = (position[0], position[1] + self._y_displacement)
             self._item_update_queue[i] = (new_position, surface, _)
         self._y_displacement = 0
+        self._alpha = 0
         
         
         
