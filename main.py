@@ -36,7 +36,7 @@ class Main():
         # controller.reset_game()
         # high_score = self._controller.high_score
         self._controller = GameStateController()
-        self.startScreen = StartScreen(0)
+        self.startScreen = StartScreen(self._controller.high_score, self._controller.key_map)
         self.gameState = GameState.start_screen
         
     def initialize_game(self):

@@ -5,6 +5,7 @@ import pygame
 import Box2D
 from config import ControllerConfig, EventConfig, GlobalConfig
 from controllerParameter import ControllerParameter
+from pages.mapButtonScreen import MapButtonScreen
 from pages.pauseScreen import PauseScreen
 from strategies.penaltyStrategy import PenaltyStrategy
 from strategies.spawnStrategy import SpawnStrategy
@@ -68,6 +69,7 @@ class Game():
         self._perk_delay = Delay()
        
         self._penalty_strategy = PenaltyStrategy(self._hud)
+        
         
         # activity = self._controller.set_bonus_time(ControllerParameter.get_bonus_time(self._controller.previous_level_time))
         # self._timed_list.register_item(activity)
@@ -304,6 +306,8 @@ class Game():
             self._pause_screen.draw(screen)
         else:
             self._pause_screen = None
+            
+ 
             
             
             
