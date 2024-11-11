@@ -1,10 +1,11 @@
 from config import Colors, EventConfig, GlobalConfig
 import pygame
 from pages.mapButtonScreen import MapButtonScreen
+from pages.page_base import PageBase
 from ui.uiFactory import UiFactory
 
 
-class StartScreen():
+class StartScreen(PageBase):
     
     def __init__(self, highScore:int, key_map:dict) -> None:
         
@@ -40,7 +41,10 @@ class StartScreen():
             self._text_quit.draw(screen, self._text_quit_position)
             screen.blit(self.msg_score, self.msg_score_rect)
         
-    def handleEvents(self, event:pygame.event.Event):
+    def handle_event(self, event:pygame.event.Event):
+        pass
+    
+    def update(self, paused):
         pass
      
     

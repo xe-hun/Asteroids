@@ -5,7 +5,9 @@ import pygame
 import Box2D
 from config import ControllerConfig, EventConfig, GlobalConfig
 from controllerParameter import ControllerParameter
+from gRouter import GRouter
 from pages.mapButtonScreen import MapButtonScreen
+from pages.page_base import PageBase
 from pages.pauseScreen import PauseScreen
 from strategies.penaltyStrategy import PenaltyStrategy
 from strategies.spawnStrategy import SpawnStrategy
@@ -28,7 +30,7 @@ from pages.hud import Hud
 from gameObjects.ship import Ship
 
 
-class Game():
+class Game(PageBase):
     
     def __init__(self, timed_list:TimedList, controller:GameStateController):
         
@@ -290,11 +292,14 @@ class Game():
     def _is_level_completed(self):
         return self._controller.asteroid_spawn_complete and len(self._asteroid_list) <= 0
         
-    def _pause_game(self):
-        if self._controller.game_paused:
-            self._controller.game_paused = False 
-        else:
+    def toggle_pause_state(self):
+        if self._controller.game_paused == False:
             self._controller.game_paused = True
+            index = GRouter.push(PauseScreen(self._controller))
+        else:
+            self._controller.game_paused = False 
+            print('loban')
+            GRouter.pop(index)
             
     def _set_level_in_progress(self):
         self._controller.set_level_in_progress(True)
@@ -311,7 +316,7 @@ class Game():
             
             
             
-    def update_and_draw(self, screen):
+    def update(self, game_paused):
     
         if self._controller.level_is_in_progress_and_game_not_paused:
             
@@ -334,29 +339,34 @@ class Game():
         self._controller.update(self._is_level_completed)
         self._handle_level_completed_case()
         self._filter_items()
+       
+        
+      
+        
+    def draw(self, screen):
         self._hud.draw(screen, self._controller.level_time,
                        self._controller.ship_rocket_count, self._controller.ship_level,
                        self._controller.ship_upgrade_perk_collected,
                        self._controller.game_paused,
                        self._controller.is_time_up,  self._set_level_in_progress)
-        
         self._draw_perks(screen)
         self._draw_projectiles(screen)
         self._draw_asteroids(screen)
         self._draw_particles(screen)
         self._draw_reticle(screen)
         self._ship.draw(screen)
-        self._draw_pause_screen(screen)
+        # self._draw_pause_screen(screen)
         
         if self._controller.level_is_in_progress:
             self._timed_list.draw(screen) 
         
+    def handle_event(self, event:pygame.event.Event):
         
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.toggle_pause_state()
         
-        
-    def handle_events(self, event:pygame.event.Event):
-        
-        self._hud.handle_event(event, self._pause_game)
+        self._hud.handle_event(event)
         self._camera.handle_event(event)
         
         self._ship.handle_event(event, self._controller.key_map)

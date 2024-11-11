@@ -4,6 +4,7 @@ from Activity import Activity
 from config import ControllerConfig, EventConfig, MiscConfig
 from gameObjects.rocket import Rocket
 from controllerParameter import ControllerParameter
+from gRouter import GRouter
 from shipParameter import ShipParameter
 from utils.helper import Helper
 from utils.delay import Delay
@@ -212,6 +213,7 @@ class GameStateController():
     @game_paused.setter
     def game_paused(self, value:bool):
         self._game_paused = value
+        GRouter.game_paused = value
         # self._level_in_progress = not value
         
                 

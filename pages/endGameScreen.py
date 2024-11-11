@@ -3,10 +3,11 @@ from constant import EXIT_GAME_EVENT, HEIGHT, START_NEW_GAME_EVENT, WIDTH, backg
 
 import pygame
 
+from pages.page_base import PageBase
 from ui.uiFactory import UiFactory
 
 
-class EndGameScreen():
+class EndGameScreen(PageBase):
     
     def __init__(self, livesRemaining:int) -> None:
         
@@ -25,6 +26,13 @@ class EndGameScreen():
         screen.blit(self.game_over_text, self.game_over_text.get_rect(center = (GlobalConfig.width / 2, .5 * GlobalConfig.height,)))
         # self.continue_button.draw(screen, center = (GlobalConfig.width / 2, .5 * GlobalConfig.height,))
         self.exit_button.draw(screen, center = (GlobalConfig.width / 2, .8 * GlobalConfig.height,))
+        
+          
+    def handle_event(self, event:pygame.event.Event):
+        pass
+    
+    def update(self, paused):
+        pass
         
     
     def continue_game(self):

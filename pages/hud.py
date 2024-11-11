@@ -132,12 +132,10 @@ class Hud():
           
   
         
-    def handle_event(self, event, on_game_paused:callable):
+    def handle_event(self, event):
         self.reticle.handle_event(event)
         
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                on_game_paused()
+      
                 # self._pause_game()
         
       

@@ -3,12 +3,13 @@ from config import Colors, EventConfig, GlobalConfig
 
 from gameStateController import GameStateController
 from pages.mapButtonScreen import MapButtonScreen
+from pages.page_base import PageBase
 from ui.button import Button
 from ui.uiFactory import UiFactory
 from utils.lerp import Lerp
 
 
-class PauseScreen():
+class PauseScreen(PageBase):
     def __init__(self, controller:GameStateController) -> None:
         
         self._controller = controller
@@ -85,6 +86,12 @@ class PauseScreen():
             self._sound_button.draw(screen, (self._m_SOUND_position[0], y_sound))
             self._map_button.draw(screen, (self._m_MAP_BUTTON_position[0], y_map_button))
             self._back_button.draw(screen, (self._m_QUIT_position[0], y_quit))
+            
+    def update(self, _):
+        pass
+    
+    def handle_event(self, _):
+        pass
         
        
       

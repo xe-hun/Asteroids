@@ -32,7 +32,7 @@ class ObjectBase(ABC):
 class ProjectileBase(ABC):
     
     @abstractmethod
-    def is_out_of_screen():
+    def is_out_of_screen(self):
         pass
-    
+   
     
