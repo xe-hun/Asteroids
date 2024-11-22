@@ -41,11 +41,11 @@ class StartScreen(PageBase):
             self._text_quit.draw(screen, self._text_quit_position)
             screen.blit(self.msg_score, self.msg_score_rect)
         
-    def handle_event(self, event:pygame.event.Event):
-        pass
+    # def handle_event(self, event:pygame.event.Event):
+    #     pass
     
-    def update(self, paused):
-        pass
+    # def update(self, paused):
+    #     pass
      
     
     def _start_game(self):

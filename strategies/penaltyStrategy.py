@@ -3,7 +3,6 @@
 
 from constant import FPS
 from utils.delay import Delay
-from utils.lerp import Lerp
 from pages.hud import Hud
 
 

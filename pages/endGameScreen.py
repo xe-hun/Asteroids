@@ -28,11 +28,11 @@ class EndGameScreen(PageBase):
         self.exit_button.draw(screen, center = (GlobalConfig.width / 2, .8 * GlobalConfig.height,))
         
           
-    def handle_event(self, event:pygame.event.Event):
-        pass
+    # def handle_event(self, event:pygame.event.Event):
+    #     pass
     
-    def update(self, paused):
-        pass
+    # def update(self, paused):
+    #     pass
         
     
     def continue_game(self):

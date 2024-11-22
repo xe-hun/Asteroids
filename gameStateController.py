@@ -4,7 +4,7 @@ from Activity import Activity
 from config import ControllerConfig, EventConfig, MiscConfig
 from gameObjects.rocket import Rocket
 from controllerParameter import ControllerParameter
-from gRouter import GRouter
+from gRouter import G_Router
 from shipParameter import ShipParameter
 from utils.helper import Helper
 from utils.delay import Delay
@@ -116,13 +116,13 @@ class GameStateController():
         self._game_score += self.NEW_LEVEL_POINT
         self._set_new_level_parameters()
         pygame.event.post(pygame.event.Event(EventConfig.start_new_game_event))
-        print('new level')
+       
         
         
     def _set_new_level_parameters(self):
         self._asteroid_spawned = 0
         self._bonus_time = ControllerParameter.get_bonus_time(self._level_time)
-        print('zen')
+      
         print(self._bonus_time)
         self._level_time = ControllerParameter.get_level_time(self.game_level) + self._bonus_time
         # + self._bonus_time
@@ -213,7 +213,7 @@ class GameStateController():
     @game_paused.setter
     def game_paused(self, value:bool):
         self._game_paused = value
-        GRouter.game_paused = value
+        G_Router.game_paused = value
         # self._level_in_progress = not value
         
                 

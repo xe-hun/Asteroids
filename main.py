@@ -3,7 +3,7 @@ import pygame
 from config import GlobalConfig
 from constant import END_GAME_EVENT, EXIT_GAME_EVENT, FPS, HEIGHT, SHAKE_EVENT, START_NEW_GAME_EVENT, WIDTH, background_color
 from game import Game
-from gRouter import GRouter
+from gRouter import G_Router
 from globalResolver import GlobalResolver
 from pages.endGameScreen import EndGameScreen
 from pages.startScreen import StartScreen
@@ -28,7 +28,7 @@ class Main():
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         # self._controller = GameStateController()
         self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)
-        self.g_router = GRouter()
+        self.g_router = G_Router()
         self.initialize_start_screen()
       
         
@@ -71,6 +71,7 @@ class Main():
                     break;  
                 self.handle_event(event)
                 self.g_router.handle_event(event)
+                self.g_router.handle_event_2(event)
             
             # self.handle_update()
             self.g_router.update()

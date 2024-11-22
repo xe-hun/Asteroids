@@ -44,8 +44,7 @@ class MapButtonScreen():
         Helper.save_key_map(self._save_button_map_location, self.key_map)
         pygame.event.post(pygame.event.Event(EventConfig.save_button_map_event))
         self._on_back_pressed()
-        print('back')
-        
+      
         
     def _render_key_button_labels(self):
         self.boost_key_text_render = UiFactory.create_text(self.key_map[ShipActions.Boost])

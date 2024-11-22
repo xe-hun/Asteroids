@@ -1,10 +1,10 @@
 import pygame
 from config import Colors, EventConfig, GlobalConfig
 
+from gRouter import G_Router
 from gameStateController import GameStateController
 from pages.mapButtonScreen import MapButtonScreen
 from pages.page_base import PageBase
-from ui.button import Button
 from ui.uiFactory import UiFactory
 from utils.lerp import Lerp
 
@@ -12,6 +12,7 @@ from utils.lerp import Lerp
 class PauseScreen(PageBase):
     def __init__(self, controller:GameStateController) -> None:
         
+        self.is_transparent = True
         self._controller = controller
         self._map_button_screen = None
         
@@ -30,10 +31,11 @@ class PauseScreen(PageBase):
         self._music_button = UiFactory.create_button('MUSIC', self._on_music_control, is_active = self._controller.music_on)
         self._sound_button = UiFactory.create_button('SOUND', self._on_sound_control, is_active = self._controller.sound_on)
         self._map_button = UiFactory.create_button('MAP BUTTON', self._on_map_button)
-        self._back_button = UiFactory.create_button('BACK', self._on_back)
+        self._quit_button = UiFactory.create_button('QUIT', self._on_back)
        
     def _on_continue(self): 
         self._controller.game_paused = False
+        G_Router.pop()
         
     def _on_music_control(self):
         self._controller.music_on = not self._controller.music_on
@@ -43,9 +45,9 @@ class PauseScreen(PageBase):
             self._music_button = UiFactory.create_button('MUSIC', on_clicked=self._on_music_control, is_active = False)
             
     def _on_map_button(self):
-        def on_back_pressed():
+        def on_quit_pressed():
             self._map_button_screen = None
-        self._map_button_screen = MapButtonScreen(on_back_pressed, self._controller.key_map)
+        self._map_button_screen = MapButtonScreen(on_quit_pressed, self._controller.key_map)
             
     def _on_sound_control(self):
         self._controller.sound_on = not self._controller.sound_on
@@ -85,13 +87,13 @@ class PauseScreen(PageBase):
             self._music_button.draw(screen, (self._m_MUSIC_position[0], y_music))
             self._sound_button.draw(screen, (self._m_SOUND_position[0], y_sound))
             self._map_button.draw(screen, (self._m_MAP_BUTTON_position[0], y_map_button))
-            self._back_button.draw(screen, (self._m_QUIT_position[0], y_quit))
+            self._quit_button.draw(screen, (self._m_QUIT_position[0], y_quit))
             
-    def update(self, _):
-        pass
+    # def update(self, _):
+    #     pass
     
-    def handle_event(self, _):
-        pass
+    # def handle_event(self, _):
+    #     pass
         
        
       

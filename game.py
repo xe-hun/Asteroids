@@ -5,7 +5,7 @@ import pygame
 import Box2D
 from config import ControllerConfig, EventConfig, GlobalConfig
 from controllerParameter import ControllerParameter
-from gRouter import GRouter
+from gRouter import G_Router
 from pages.mapButtonScreen import MapButtonScreen
 from pages.page_base import PageBase
 from pages.pauseScreen import PauseScreen
@@ -71,6 +71,8 @@ class Game(PageBase):
         self._perk_delay = Delay()
        
         self._penalty_strategy = PenaltyStrategy(self._hud)
+        
+        self.page_index:int = None
         
         
         # activity = self._controller.set_bonus_time(ControllerParameter.get_bonus_time(self._controller.previous_level_time))
@@ -295,22 +297,21 @@ class Game(PageBase):
     def toggle_pause_state(self):
         if self._controller.game_paused == False:
             self._controller.game_paused = True
-            index = GRouter.push(PauseScreen(self._controller))
+            self.page_index = G_Router.push(PauseScreen(self._controller))
         else:
             self._controller.game_paused = False 
-            print('loban')
-            GRouter.pop(index)
+            G_Router.pop(self.page_index)
             
     def _set_level_in_progress(self):
         self._controller.set_level_in_progress(True)
         
-    def _draw_pause_screen(self, screen):
-        if self._controller.game_paused:
-            if self._pause_screen == None:
-                self._pause_screen = PauseScreen(self._controller)
-            self._pause_screen.draw(screen)
-        else:
-            self._pause_screen = None
+    # def _draw_pause_screen(self, screen):
+    #     if self._controller.game_paused:
+    #         if self._pause_screen == None:
+    #             self._pause_screen = PauseScreen(self._controller)
+    #         self._pause_screen.draw(screen)
+    #     else:
+    #         self._pause_screen = None
             
  
             
@@ -362,14 +363,15 @@ class Game(PageBase):
         
     def handle_event(self, event:pygame.event.Event):
         
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                self.toggle_pause_state()
-        
         self._hud.handle_event(event)
         self._camera.handle_event(event)
         
         self._ship.handle_event(event, self._controller.key_map)
         self._controller.handle_event(event)
+        
+    def handle_event_2(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.toggle_pause_state()
         
         
