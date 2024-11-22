@@ -14,7 +14,6 @@ class PauseScreen(PageBase):
         
         self.is_transparent = True
         self._controller = controller
-        self._map_button_screen = None
         
         self.transparent_screen = pygame.surface.Surface((GlobalConfig.width, GlobalConfig.height), pygame.SRCALPHA)
         
@@ -45,9 +44,7 @@ class PauseScreen(PageBase):
             self._music_button = UiFactory.create_button('MUSIC', on_clicked=self._on_music_control, is_active = False)
             
     def _on_map_button(self):
-        def on_quit_pressed():
-            self._map_button_screen = None
-        self._map_button_screen = MapButtonScreen(on_quit_pressed, self._controller.key_map)
+        G_Router.push(MapButtonScreen(self._controller.key_map))
             
     def _on_sound_control(self):
         self._controller.sound_on = not self._controller.sound_on
@@ -74,27 +71,18 @@ class PauseScreen(PageBase):
         
     def draw(self, screen):
         
-        if self._map_button_screen != None:
-            self._map_button_screen.draw(screen)
-        else:
-            y_continue, y_music, y_sound, y_map_button, y_quit, screen_alpha = self._start_sequence_lerp.do(500, self._start_sequence).value
-            
-            self.transparent_screen.fill(Colors.background_color)
-            self.transparent_screen.set_alpha(screen_alpha)
-            screen.blit(self.transparent_screen, self.transparent_screen.get_rect(topleft = (0, 0)))
-            
-            self._continue_button.draw(screen, (self._m_CONTINUE_position[0], y_continue))
-            self._music_button.draw(screen, (self._m_MUSIC_position[0], y_music))
-            self._sound_button.draw(screen, (self._m_SOUND_position[0], y_sound))
-            self._map_button.draw(screen, (self._m_MAP_BUTTON_position[0], y_map_button))
-            self._quit_button.draw(screen, (self._m_QUIT_position[0], y_quit))
-            
-    # def update(self, _):
-    #     pass
-    
-    # def handle_event(self, _):
-    #     pass
+        y_continue, y_music, y_sound, y_map_button, y_quit, screen_alpha = self._start_sequence_lerp.do(500, self._start_sequence).value
         
+        self.transparent_screen.fill(Colors.background_color)
+        self.transparent_screen.set_alpha(screen_alpha)
+        screen.blit(self.transparent_screen, self.transparent_screen.get_rect(topleft = (0, 0)))
+        
+        self._continue_button.draw(screen, (self._m_CONTINUE_position[0], y_continue))
+        self._music_button.draw(screen, (self._m_MUSIC_position[0], y_music))
+        self._sound_button.draw(screen, (self._m_SOUND_position[0], y_sound))
+        self._map_button.draw(screen, (self._m_MAP_BUTTON_position[0], y_map_button))
+        self._quit_button.draw(screen, (self._m_QUIT_position[0], y_quit))
+       
        
       
      

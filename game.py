@@ -6,7 +6,6 @@ import Box2D
 from config import ControllerConfig, EventConfig, GlobalConfig
 from controllerParameter import ControllerParameter
 from gRouter import G_Router
-from pages.mapButtonScreen import MapButtonScreen
 from pages.page_base import PageBase
 from pages.pauseScreen import PauseScreen
 from strategies.penaltyStrategy import PenaltyStrategy
@@ -356,7 +355,6 @@ class Game(PageBase):
         self._draw_particles(screen)
         self._draw_reticle(screen)
         self._ship.draw(screen)
-        # self._draw_pause_screen(screen)
         
         if self._controller.level_is_in_progress:
             self._timed_list.draw(screen) 

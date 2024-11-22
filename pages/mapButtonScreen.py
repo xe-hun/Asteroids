@@ -2,17 +2,19 @@
 import pygame
 from config import Colors, EventConfig, GlobalConfig, MiscConfig
 from customEnum import ShipActions
+from gRouter import G_Router
 from globalResolver import GlobalResolver
+from pages.page_base import PageBase
 from utils.helper import Helper
 from ui.button import Button
 from ui.uiFactory import UiFactory
 
 
 
-class MapButtonScreen():
-    def __init__(self, on_back_pressed:callable, key_map:dict) -> None:
+class MapButtonScreen(PageBase):
+    def __init__(self, key_map:dict) -> None:
         
-        self._on_back_pressed = on_back_pressed
+        # self.is_transparent = True
         
         self._save_button_map_location = MiscConfig.map_button_save_location
         
@@ -43,7 +45,7 @@ class MapButtonScreen():
     def _on_go_back(self):
         Helper.save_key_map(self._save_button_map_location, self.key_map)
         pygame.event.post(pygame.event.Event(EventConfig.save_button_map_event))
-        self._on_back_pressed()
+        G_Router.pop()
       
         
     def _render_key_button_labels(self):
