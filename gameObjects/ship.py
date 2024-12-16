@@ -222,11 +222,11 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
        
     def _fire_cannon(self):
+        self._sound_strategy.channel1().play(self._sound_strategy.shoot_laser_sound())
         cannon_position = to_pixel_position(self._ship_body_box2D.GetWorldPoint((-5/GlobalConfig.world_scale, 15/GlobalConfig.world_scale)), GlobalConfig.world_scale, GlobalConfig.height)
         cannon_position = self._camera.watch(cannon_position)
         cannon = Cannon(self.direction, cannon_position, self._camera)
         self._register_projectile(cannon)
-        self._sound_strategy.shoot().play()
         
     def _fire_missile(self):
         xPos = -10 if self.rocket_alternate else 10
@@ -236,6 +236,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         rocket_position = self._camera.watch(rocket_position)
         missile = Rocket(rocket_position, self.direction, self._camera)
         self._register_projectile(missile)
+        self._sound_strategy.channel1().play(self._sound_strategy.shoot_rocket_sound())
         
     @property
     def position(self):
@@ -312,12 +313,21 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         screen.blit(self.flare_image, rect)
    
     def _boost_ship(self, ship_body:Box2D.b2Body, boosting:bool, boost_force:int, ship_base_position:float):
+        
+        if self._sound_strategy.channel2().get_busy() == False and boosting == True:
+            print('zen')
+            self._sound_strategy.channel2().play(self._sound_strategy.ship_movement_sound())
+        elif self._sound_strategy.channel2().get_busy() == True and boosting == False:
+            print('turia')
+            self._sound_strategy.channel2().stop()
+        
         if boosting == False:
             return
         
         force_point = ship_body.GetWorldPoint((0, ship_base_position))
         thrust_vector = boost_force * v_to_component(ship_body.angle + math.pi / 2)
         ship_body.ApplyForce(thrust_vector, force_point, True)
+        
         
       
         

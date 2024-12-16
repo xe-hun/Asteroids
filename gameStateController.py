@@ -22,7 +22,7 @@ class GameStateController():
         self._level_time = 0
         self._number_of_asteroids_destroyed = 0
         self._game_level = 1
-        self._ship_level = 1
+        self._ship_level = 10
       
         self._lives_remaining = self.START_LIVES
         self._game_score = 0

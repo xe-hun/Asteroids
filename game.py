@@ -57,7 +57,10 @@ class Game(PageBase):
         
         
         
-        self._sound_strategy = SoundStrategy(shoot_file_path='sound/shoot.wav')
+        self._sound_strategy = SoundStrategy(laser_fire_sound_filepath='sound/laser_fire2.wav',
+                                             rocket_fire_sound_filepath='sound/rocket_fire.wav',
+                                             ship_movement_sound_filepath='sound/ship_movement.wav'
+                                             )
         self._ship = Ship(self._world, self._camera, self._sound_strategy, self._register_projectile, self._register_ship_asteroid_collision, controller.report_projectile_fired, self._controller.ship_level, False)
   
         self._projectile_list = []
