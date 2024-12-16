@@ -9,6 +9,7 @@ from gRouter import G_Router
 from pages.page_base import PageBase
 from pages.pauseScreen import PauseScreen
 from strategies.penaltyStrategy import PenaltyStrategy
+from strategies.soundStrategy import SoundStrategy
 from strategies.spawnStrategy import SpawnStrategy
 from ui.timedList import TimedList
 from utils.lerp import Lerp
@@ -56,7 +57,8 @@ class Game(PageBase):
         
         
         
-        self._ship = Ship(self._world, self._camera, self._register_projectile, self._register_ship_asteroid_collision, controller.report_projectile_fired, self._controller.ship_level, False)
+        self._sound_strategy = SoundStrategy(shoot_file_path='sound/shoot.wav')
+        self._ship = Ship(self._world, self._camera, self._sound_strategy, self._register_projectile, self._register_ship_asteroid_collision, controller.report_projectile_fired, self._controller.ship_level, False)
   
         self._projectile_list = []
         self._asteroid_list = []
@@ -72,6 +74,7 @@ class Game(PageBase):
         self._penalty_strategy = PenaltyStrategy(self._hud)
         
         self.page_index:int = None
+        
         
         
         # activity = self._controller.set_bonus_time(ControllerParameter.get_bonus_time(self._controller.previous_level_time))

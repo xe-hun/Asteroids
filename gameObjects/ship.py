@@ -6,6 +6,7 @@ from config import Colors, GlobalConfig, MiscConfig
 from customEnum import ShipActions, Steering
 
 
+from strategies.soundStrategy import SoundStrategy
 from utils.animationHandler import AnimationHandler
 from gameObjects.objectBase import ObjectBase
 from gameObjects.rocket import Rocket
@@ -22,10 +23,11 @@ from utils.watcher import Watcher
 
 class Ship(pygame.sprite.Sprite, ObjectBase):
     
-    def __init__(self, world:Box2D.b2Body,  camera:Camera, register_projectile:callable, register_damage:callable, report_projectile_fire:callable, ship_level:int = 1, debugDraw:bool = False):
+    def __init__(self, world:Box2D.b2Body,  camera:Camera, sound_strategy:SoundStrategy, register_projectile:callable, register_damage:callable, report_projectile_fire:callable, ship_level:int = 1, debugDraw:bool = False):
         
         self._debugDraw = debugDraw
         self._report_projectile_fire = report_projectile_fire
+        self._sound_strategy = sound_strategy
         self._alive = True
         self._steer_on = False
         self.in_boundary = True
@@ -224,6 +226,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         cannon_position = self._camera.watch(cannon_position)
         cannon = Cannon(self.direction, cannon_position, self._camera)
         self._register_projectile(cannon)
+        self._sound_strategy.shoot().play()
         
     def _fire_missile(self):
         xPos = -10 if self.rocket_alternate else 10

@@ -23,6 +23,7 @@ class Main():
     def __init__(self) -> None:
       
         pygame.init()
+        pygame.mixer.init()
         pygame.display.set_caption('Asteroids')
         
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
