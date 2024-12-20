@@ -1,4 +1,5 @@
 import math
+import random
 import numpy as np
 import pygame
 import Box2D
@@ -316,10 +317,14 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
         if self._sound_strategy.channel2().get_busy() == False and boosting == True:
             print('zen')
-            self._sound_strategy.channel2().play(self._sound_strategy.ship_movement_sound())
+            # self._sound_strategy.channel2().play(self._sound_strategy.ship_movement_sound())
+            self._sound_strategy.channel2().play(self._sound_strategy.ship_movement_sound(), -1, fade_ms=500)
+            # pygame.mixer.music.set_pos(random.random())
+
         elif self._sound_strategy.channel2().get_busy() == True and boosting == False:
             print('turia')
             self._sound_strategy.channel2().stop()
+            
         
         if boosting == False:
             return
