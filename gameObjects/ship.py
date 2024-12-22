@@ -7,7 +7,7 @@ from config import Colors, GlobalConfig, MiscConfig
 from customEnum import ShipActions, Steering
 
 
-from strategies.soundStrategy import SoundStrategy
+from soundController import SoundController
 from utils.animationHandler import AnimationHandler
 from gameObjects.objectBase import ObjectBase
 from gameObjects.rocket import Rocket
@@ -24,11 +24,10 @@ from utils.watcher import Watcher
 
 class Ship(pygame.sprite.Sprite, ObjectBase):
     
-    def __init__(self, world:Box2D.b2Body,  camera:Camera, sound_strategy:SoundStrategy, register_projectile:callable, register_damage:callable, report_projectile_fire:callable, ship_level:int = 1, debugDraw:bool = False):
+    def __init__(self, world:Box2D.b2Body,  camera:Camera, register_projectile:callable, register_damage:callable, report_projectile_fire:callable, ship_level:int = 1, debugDraw:bool = False):
         
         self._debugDraw = debugDraw
         self._report_projectile_fire = report_projectile_fire
-        self._sound_strategy = sound_strategy
         self._alive = True
         self._steer_on = False
         self.in_boundary = True
@@ -223,7 +222,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
        
     def _fire_cannon(self):
-        self._sound_strategy.channel1().play(self._sound_strategy.shoot_laser_sound())
+        SoundController.ship_weapon_channel().play(SoundController.shoot_laser_sound())
         cannon_position = to_pixel_position(self._ship_body_box2D.GetWorldPoint((-5/GlobalConfig.world_scale, 15/GlobalConfig.world_scale)), GlobalConfig.world_scale, GlobalConfig.height)
         cannon_position = self._camera.watch(cannon_position)
         cannon = Cannon(self.direction, cannon_position, self._camera)
@@ -237,7 +236,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         rocket_position = self._camera.watch(rocket_position)
         missile = Rocket(rocket_position, self.direction, self._camera)
         self._register_projectile(missile)
-        self._sound_strategy.channel1().play(self._sound_strategy.shoot_rocket_sound())
+        SoundController.ship_weapon_channel().play(SoundController.shoot_rocket_sound())
         
     @property
     def position(self):
@@ -315,15 +314,15 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
    
     def _boost_ship(self, ship_body:Box2D.b2Body, boosting:bool, boost_force:int, ship_base_position:float):
         
-        if self._sound_strategy.channel2().get_busy() == False and boosting == True:
+        if SoundController.ship_boost_channel().get_busy() == False and boosting == True:
             print('zen')
             # self._sound_strategy.channel2().play(self._sound_strategy.ship_movement_sound())
-            self._sound_strategy.channel2().play(self._sound_strategy.ship_movement_sound(), -1, fade_ms=500)
+            SoundController.ship_boost_channel().play(SoundController.ship_movement_sound(), -1, fade_ms=500)
             # pygame.mixer.music.set_pos(random.random())
 
-        elif self._sound_strategy.channel2().get_busy() == True and boosting == False:
+        elif SoundController.ship_boost_channel().get_busy() == True and boosting == False:
             print('turia')
-            self._sound_strategy.channel2().stop()
+            SoundController.ship_boost_channel().stop()
             
         
         if boosting == False:

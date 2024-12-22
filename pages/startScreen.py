@@ -3,6 +3,7 @@ import pygame
 from gRouter import G_Router
 from pages.mapButtonScreen import MapButtonScreen
 from pages.page_base import PageBase
+from soundController import SoundController
 from ui.uiFactory import UiFactory
 
 
@@ -17,7 +18,7 @@ class StartScreen(PageBase):
         self._text_map_button = UiFactory.create_button('MAP BUTTON', self._on_map_button, 30)
         self._text_map_button_position = (GlobalConfig.width / 2, 0.5 * GlobalConfig.height)
         
-        self._text_quit = UiFactory.create_button('QUIT', self._quit_game, 30)
+        self._text_quit = UiFactory.create_button('EXIT', self._quit_game, 30)
         self._text_quit_position = (GlobalConfig.width / 2, 0.6 * GlobalConfig.height)
         
         font = pygame.font.Font('font/quantum.ttf', 30)

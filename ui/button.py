@@ -1,12 +1,13 @@
 import pygame
 
+from soundController import SoundController
 from utils.delay import Delay
 from globalResolver import GlobalResolver
 from utils.lerp import Lerp
 
 
 class Button():
-    def __init__(self, text:str, dimension:tuple, on_click:callable, color:tuple = (0, 0, 0, 0), click_color:tuple = None, hover_color:tuple = None, text_color:tuple = (255, 255, 255), font_size:int = 30, font:pygame.font.Font = None):
+    def __init__(self, text:str, dimension:tuple, on_click:callable, color:tuple = (0, 0, 0, 0), click_color:tuple = None, hover_color:tuple = None, text_color:tuple = (255, 255, 255), font_size:int = 30, font:pygame.font.Font = None, with_sound:bool = True):
         
         self._font = font if font != None else pygame.font.Font(None, font_size)
         self._on_click = on_click
@@ -15,6 +16,8 @@ class Button():
         self._click_color = click_color
         self._hover_color = hover_color
         self._text_color = text_color
+        self._can_play_hover_sound = False
+        self._with_sound = with_sound
         
         self._surface = pygame.Surface(dimension, pygame.SRCALPHA)
         self._surface.fill(color)
@@ -63,6 +66,8 @@ class Button():
         screen.blit(text_render, self._text_rect.topleft)
         
         self._on_click_delay.delay(200, self._on_click)
+        
+        self.play_hover_sound()
             
         
     def _fill_hover_color(self):
@@ -72,6 +77,16 @@ class Button():
             self._surface.fill(self._hover_color)
         else:
             self._surface.fill(self._color)
+            
+    def play_hover_sound(self):
+        if self._with_sound == False:
+            return
+        
+        if self._hover == True and self._can_play_hover_sound == True:
+            SoundController.game_effect_channel().play(SoundController.cursor_hover_sound())
+            self._can_play_hover_sound = False
+        if self._hover == False:
+            self._can_play_hover_sound = True
         
     
     def handle_event(self, event):
@@ -94,3 +109,5 @@ class Button():
                 self._is_clicked = False
                 self._click_lerp = Lerp()
                 self._on_click_delay = Delay()
+                if self._with_sound:
+                    SoundController.game_effect_channel().play(SoundController.cursor_click_sound())

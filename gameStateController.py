@@ -6,6 +6,7 @@ from gameObjects.rocket import Rocket
 from controllerParameter import ControllerParameter
 from gRouter import G_Router
 from shipParameter import ShipParameter
+from soundController import SoundController
 from utils.helper import Helper
 from utils.delay import Delay
 
@@ -31,8 +32,9 @@ class GameStateController():
         
    
         self._game_score_counter = 0
-        self.music_on = False
-        self.sound_on = False
+        SoundController.set_music(True)
+        SoundController.set_sound(True)
+        
    
         self.delay_before_new_level = Delay()
         self.counter_delay = Delay()

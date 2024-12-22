@@ -9,7 +9,7 @@ from gRouter import G_Router
 from pages.page_base import PageBase
 from pages.pauseScreen import PauseScreen
 from strategies.penaltyStrategy import PenaltyStrategy
-from strategies.soundStrategy import SoundStrategy
+from soundController import SoundController
 from strategies.spawnStrategy import SpawnStrategy
 from ui.timedList import TimedList
 from utils.lerp import Lerp
@@ -32,10 +32,10 @@ from gameObjects.ship import Ship
 
 class Game(PageBase):
     
-    def __init__(self, timed_list:TimedList, controller:GameStateController):
+    def __init__(self, timed_list:TimedList, game_controller:GameStateController):
         
-        self._controller = controller
-        self._hud = Hud(controller.game_level, controller.ship_rocket_count, controller.ship_level, controller.ship_upgrade_perk_collected)
+        self._game_controller = game_controller
+        self._hud = Hud(game_controller.game_level, game_controller.ship_rocket_count, game_controller.ship_level, game_controller.ship_upgrade_perk_collected)
         self._timed_list = timed_list
         
         self.VELOCITY_ITERATIONS = 10
@@ -57,11 +57,8 @@ class Game(PageBase):
         
         
         
-        self._sound_strategy = SoundStrategy(laser_fire_sound_filepath='sound/laser_fire2.wav',
-                                             rocket_fire_sound_filepath='sound/rocket_fire.wav',
-                                             ship_movement_sound_filepath='sound/ship_movement.wav'
-                                             )
-        self._ship = Ship(self._world, self._camera, self._sound_strategy, self._register_projectile, self._register_ship_asteroid_collision, controller.report_projectile_fired, self._controller.ship_level, False)
+   
+        self._ship = Ship(self._world, self._camera, self._register_projectile, self._register_ship_asteroid_collision, game_controller.report_projectile_fired, self._game_controller.ship_level, False)
   
         self._projectile_list = []
         self._asteroid_list = []
@@ -159,9 +156,9 @@ class Game(PageBase):
                     
                     if asteroid.alive == False:
                         self._particle_list.append(Explosion(asteroid.position))
-                        self._controller.report_asteroid_destroyed()
+                        self._game_controller.report_asteroid_destroyed()
                         if asteroid.can_break_apart():
-                            asteroids = asteroid.break_apart(self._controller.game_level, debug_draw = False)
+                            asteroids = asteroid.break_apart(self._game_controller.game_level, debug_draw = False)
                             for a in asteroids:
                                 self._asteroid_list.append(a)
                        
@@ -176,11 +173,11 @@ class Game(PageBase):
     def _collect_perk(self, perk):
         if perk.perk_type == PerkType.upgrade:
                 
-            activity = self._controller.report_upgrade_perk_collected()
+            activity = self._game_controller.report_upgrade_perk_collected()
             self._timed_list.register_item(activity)
         
         if perk.perk_type == PerkType.rocket:
-            activity = self._controller.report_rocket_perk_collected()
+            activity = self._game_controller.report_rocket_perk_collected()
             self._timed_list.register_item(activity)
             
         perk.dispose()
@@ -222,8 +219,8 @@ class Game(PageBase):
            
         
     def _spawn_asteroid(self):
-        self._controller.report_asteroid_spawned()
-        asteroid = Asteroid(self._world, self._controller.game_level, self._camera, debug_draw=True)
+        self._game_controller.report_asteroid_spawned()
+        asteroid = Asteroid(self._world, self._game_controller.game_level, self._camera, debug_draw=True)
         self._asteroid_list.append(asteroid)
     
     
@@ -231,14 +228,14 @@ class Game(PageBase):
         spawn_position = (50 + random.random() * (WIDTH - 100), 50 + random.random() * (HEIGHT - 100))
         perk = Perk.rocket(spawn_position, self._camera)
         self._perks_list.append(perk)
-        self._controller.report_rocket_perk_spawned()
+        self._game_controller.report_rocket_perk_spawned()
         
         
     def _spawn_upgrade_perk(self):
         spawn_position = (50 + random.random() * (WIDTH - 100), 50 + random.random() * (HEIGHT - 100))
         perk = Perk.upgrade(spawn_position, self._camera)
         self._perks_list.append(perk)
-        self._controller.report_upgrade_perk_spawned()
+        self._game_controller.report_upgrade_perk_spawned()
                 
         
     def _create_spark(self, position, quantity:int = 5, start_perimeter:int = 6, max_perimeter:int = 60, particle_size:float = 1):
@@ -293,22 +290,22 @@ class Game(PageBase):
         
     @property
     def _can_spawn_asteroid(self):
-       return len(self._asteroid_list) < ControllerConfig.max_asteroid_on_screen and not self._controller.asteroid_spawn_complete 
+       return len(self._asteroid_list) < ControllerConfig.max_asteroid_on_screen and not self._game_controller.asteroid_spawn_complete 
    
     @property
     def _is_level_completed(self):
-        return self._controller.asteroid_spawn_complete and len(self._asteroid_list) <= 0
+        return self._game_controller.asteroid_spawn_complete and len(self._asteroid_list) <= 0
         
     def toggle_pause_state(self):
-        if self._controller.game_paused == False:
-            self._controller.game_paused = True
-            self.page_index = G_Router.push(PauseScreen(self._controller))
+        if self._game_controller.game_paused == False:
+            self._game_controller.game_paused = True
+            self.page_index = G_Router.push(PauseScreen(self._game_controller))
         else:
-            self._controller.game_paused = False 
+            self._game_controller.game_paused = False 
             G_Router.pop(self.page_index)
             
     def _set_level_in_progress(self):
-        self._controller.set_level_in_progress(True)
+        self._game_controller.set_level_in_progress(True)
         
     # def _draw_pause_screen(self, screen):
     #     if self._controller.game_paused:
@@ -324,25 +321,25 @@ class Game(PageBase):
             
     def update(self, game_paused):
     
-        if self._controller.level_is_in_progress_and_game_not_paused:
+        if self._game_controller.level_is_in_progress_and_game_not_paused:
             
             self._world.Step(1.0/60, self.VELOCITY_ITERATIONS, self.POSITION_ITERATIONS)
             self._projectile_asteroid_collision()
             self._ship_perks_collision()
-            self._ship.update(self._controller.ship_level)
+            self._ship.update(self._game_controller.ship_level)
             self._update_projectiles()
             self._update_asteroids()
             self._update_particles()
             self._hud.update()
             self._update_reticle()
             self._update_perks()
-            self._spawn_strategy.update(self._controller.level_time, self._can_spawn_asteroid, self._controller.game_level)
+            self._spawn_strategy.update(self._game_controller.level_time, self._can_spawn_asteroid, self._game_controller.game_level)
             self._penalty_strategy.update(not self._ship.in_boundary)
             self._timed_list.update()
             
       
            
-        self._controller.update(self._is_level_completed)
+        self._game_controller.update(self._is_level_completed)
         self._handle_level_completed_case()
         self._filter_items()
        
@@ -350,11 +347,11 @@ class Game(PageBase):
       
         
     def draw(self, screen):
-        self._hud.draw(screen, self._controller.level_time,
-                       self._controller.ship_rocket_count, self._controller.ship_level,
-                       self._controller.ship_upgrade_perk_collected,
-                       self._controller.game_paused,
-                       self._controller.is_time_up,  self._set_level_in_progress)
+        self._hud.draw(screen, self._game_controller.level_time,
+                       self._game_controller.ship_rocket_count, self._game_controller.ship_level,
+                       self._game_controller.ship_upgrade_perk_collected,
+                       self._game_controller.game_paused,
+                       self._game_controller.is_time_up,  self._set_level_in_progress)
         self._draw_perks(screen)
         self._draw_projectiles(screen)
         self._draw_asteroids(screen)
@@ -362,7 +359,7 @@ class Game(PageBase):
         self._draw_reticle(screen)
         self._ship.draw(screen)
         
-        if self._controller.level_is_in_progress:
+        if self._game_controller.level_is_in_progress:
             self._timed_list.draw(screen) 
         
     def handle_event(self, event:pygame.event.Event):
@@ -370,8 +367,8 @@ class Game(PageBase):
         self._hud.handle_event(event)
         self._camera.handle_event(event)
         
-        self._ship.handle_event(event, self._controller.key_map)
-        self._controller.handle_event(event)
+        self._ship.handle_event(event, self._game_controller.key_map)
+        self._game_controller.handle_event(event)
         
     def handle_event_2(self, event):
         if event.type == pygame.KEYDOWN:

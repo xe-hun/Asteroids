@@ -25,5 +25,5 @@ class UiFactory():
         if is_active:
             return Button(text, dimension = dimension, on_click=on_clicked, click_color = UiFactory._click_color, hover_color=UiFactory._hover_color, font = font)
         else:
-            return Button(text, dimension = dimension, on_click=on_clicked, click_color = UiFactory._click_color, hover_color=None, font = font, text_color = UiFactory._text_deactivate_color)
+            return Button(text, dimension = dimension, on_click=on_clicked, click_color = UiFactory._click_color, hover_color=None, font = font, text_color = UiFactory._text_deactivate_color, with_sound = False)
             
