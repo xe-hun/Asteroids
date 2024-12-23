@@ -3,7 +3,7 @@ import random
 
 import pygame
 
-from constant import HEIGHT, WIDTH
+from config import GlobalConfig
 
 
 class WorldStar():
@@ -13,7 +13,7 @@ class WorldStar():
     
     def __init__(self) -> None:
       
-        self.starList = [(random.random() * WIDTH, random.random() * HEIGHT,\
+        self.starList = [(random.random() * GlobalConfig.width, random.random() * GlobalConfig.height,\
             1 + random.random() * 2) for i in range(WorldStar.NUM_STARS)]
     
     

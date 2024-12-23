@@ -25,7 +25,7 @@ class GameStateController():
         self._game_level = 1
         self._ship_level = 10
       
-        self._lives_remaining = self.START_LIVES
+        # self._lives_remaining = self.START_LIVES
         self._game_score = 0
         self._game_paused = False
         self._set_new_level_parameters()
@@ -77,9 +77,9 @@ class GameStateController():
     def level_time(self):
         return self._level_time
     
-    @property
-    def lives_remaining(self):
-        return self._lives_remaining
+    # @property
+    # def lives_remaining(self):
+    #     return self._lives_remaining
     
     @property
     def game_score_counter(self):
@@ -113,7 +113,7 @@ class GameStateController():
     # def set_bonus_time(self, value):
     #     self._bonus_time = value
     
-    def goto_new_level(self):
+    def _goto_new_level(self):
         self._game_level += 1
         self._game_score += self.NEW_LEVEL_POINT
         self._set_new_level_parameters()
@@ -124,8 +124,6 @@ class GameStateController():
     def _set_new_level_parameters(self):
         self._asteroid_spawned = 0
         self._bonus_time = ControllerParameter.get_bonus_time(self._level_time)
-      
-        print(self._bonus_time)
         self._level_time = ControllerParameter.get_level_time(self.game_level) + self._bonus_time
         # + self._bonus_time
         self.set_level_in_progress(False)
@@ -193,7 +191,6 @@ class GameStateController():
             
     def update(self, level_completed):
         
-        
         if self.game_paused:
             return
         
@@ -202,11 +199,11 @@ class GameStateController():
        
         if level_completed:
             self.set_level_in_progress(False)
-            self.delay_before_new_level.delay(2000, self.goto_new_level, True)
+            self.delay_before_new_level.delay(2000, self._goto_new_level, True)
                 
         if self.is_time_up:
             self.set_level_in_progress(False)
-            self.delay_before_new_level.delay(2000, self.game_over, True)
+            self.delay_before_new_level.delay(2000, self._game_over, True)
          
     @property       
     def game_paused(self):
@@ -220,9 +217,9 @@ class GameStateController():
         
                 
             
-    def game_over(self):
+    def _game_over(self):
         self._set_new_level_parameters()
-        self._lives_remaining -= 1
+        # self._lives_remaining -= 1
         pygame.event.post(pygame.event.Event(EventConfig.end_game_event))
         
         

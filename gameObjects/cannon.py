@@ -4,7 +4,6 @@ import numpy as np
 import pygame
 
 from config import CannonConfig, Colors, GlobalConfig
-from constant import HEIGHT, WIDTH, outline_color
 from gameObjects.objectBase import ObjectBase, ProjectileBase
 from utils.helper import v_to_angle
 from utils.camera import Camera
@@ -53,8 +52,8 @@ class Cannon(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         screen.blit(self.surface_r, self.rect.topleft)
         
     def is_out_of_screen(self):
-        if self._position[0] > WIDTH or self._position[0] < 0 or \
-            self._position[1] > HEIGHT or self._position[1] < 0:
+        if self._position[0] > GlobalConfig.width or self._position[0] < 0 or \
+            self._position[1] > GlobalConfig.height or self._position[1] < 0:
                 return True
         else:
             return False

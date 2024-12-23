@@ -27,6 +27,7 @@ class ControllerParameter():
     
     @staticmethod
     def get_level_time(game_level:int):
+     
         min_level_time = 100
         max_level_time = 200
         return int(Helper.asymptotic_value(min_level_time, max_level_time, 0.1, game_level))

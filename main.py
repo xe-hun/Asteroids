@@ -1,8 +1,8 @@
 from enum import Enum
 import os
 import pygame
-from config import GlobalConfig
-from constant import END_GAME_EVENT, EXIT_GAME_EVENT, FPS, HEIGHT, SHAKE_EVENT, START_NEW_GAME_EVENT, WIDTH, background_color
+from config import Colors, EventConfig, GlobalConfig
+from constant import FPS
 from game import Game
 from gRouter import G_Router
 from globalResolver import GlobalResolver
@@ -34,7 +34,7 @@ class Main():
         # pygame.mixer.init()
         pygame.display.set_caption('Asteroids')
         
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.screen = pygame.display.set_mode((GlobalConfig.width, GlobalConfig.height))
         
         SoundController.load_resources(
             laser_fire_sound_filepath = os.path.join('sound', 'game', 'laser_fire.wav'),
@@ -63,23 +63,21 @@ class Main():
         
     def initialize_game(self):
         
-        # if SoundController.sound_track_channel().get_busy() == True:
-        #     SoundController.sound_track_channel().fadeout(5000)
-        SoundController.sound_track_channel().play(SoundController.game_sound_track(), -1, fade_ms=10000)
+       
+        SoundController.sound_track_channel().play(SoundController.game_sound_track(), -1, fade_ms=3000)
             
         
         if self._game_controller.bonus_time_activity != None:
             self._timed_list.register_item(self._game_controller.bonus_time_activity)
             
-        self.game = Game(self._timed_list, self._game_controller)
-        self.g_router.replace(self.game)
+        game = Game(self._timed_list, self._game_controller)
+        self.g_router.replace(game)
 
-        # self.gameState = GameState.game
         
     def initialize_end_game_screen(self):
-        self.endGameScreen = EndGameScreen(self._game_controller.lives_remaining)
-        self.g_router.replace(self.game)
-        # self.gameState = GameState.end_game
+        
+        endGameScreen = EndGameScreen()
+        self.g_router.replace(endGameScreen)
     
     def logic(self):
         
@@ -90,7 +88,7 @@ class Main():
         run = True
         while run:
             clock.tick(FPS)
-            self.screen.fill(background_color)
+            self.screen.fill(Colors.background_color)
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -115,11 +113,11 @@ class Main():
     def handle_event(self, event):
         
            
-        if event.type == START_NEW_GAME_EVENT:
+        if event.type == EventConfig.start_new_game_event:
             self.initialize_game()
-        if event.type == END_GAME_EVENT:
+        if event.type == EventConfig.end_game_event:
             self.initialize_end_game_screen()
-        if event.type == EXIT_GAME_EVENT:
+        if event.type == EventConfig.exit_game_event:
             self.initialize_start_screen()
             
         button_event = False 

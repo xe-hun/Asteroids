@@ -25,7 +25,7 @@ from utils.camera import Camera
 from utils.box2DHelperClasses import CollisionFilter, ContactListener
 from gameObjects.asteroid import Asteroid
 from gameObjects.cannon import Cannon
-from constant import MAX_ASTEROID_PER_LEVEL, SHAKE_DURATION, SHAKE_EVENT, SHAKE_FREQUENCY, SHAKE_INTENSITY, WIDTH, HEIGHT, WSCALE, outline_color, background_color, FPS
+from constant import MAX_ASTEROID_PER_LEVEL, SHAKE_DURATION, SHAKE_EVENT, SHAKE_FREQUENCY, SHAKE_INTENSITY, WIDTH, HEIGHT, WSCALE
 from pages.hud import Hud
 from gameObjects.ship import Ship
 
@@ -41,9 +41,7 @@ class Game(PageBase):
         self.VELOCITY_ITERATIONS = 10
         self.POSITION_ITERATIONS = 10
         
-        self.TIME_TO_RESET_PENALTY = 4000
 
-        self._max_asteroid_per_level = MAX_ASTEROID_PER_LEVEL        
         self._number_of_asteroid_spawned = 0
       
         self._camera = Camera(SHAKE_DURATION, SHAKE_INTENSITY, SHAKE_FREQUENCY)

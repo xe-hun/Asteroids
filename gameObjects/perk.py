@@ -4,8 +4,8 @@ from enum import Enum
 import random
 
 import numpy as np
-from config import Colors
-from constant import HEIGHT, WIDTH, outline_color
+from config import Colors, GlobalConfig
+
 
 
 import pygame
@@ -139,8 +139,8 @@ class Perk(ObjectBase, ProjectileBase):
     
     
     def is_out_of_screen(self):
-        if self._position[0] > WIDTH or self._position[0] < 0 or \
-            self._position[1] > HEIGHT or self._position[1] < 0:
+        if self._position[0] > GlobalConfig.width or self._position[0] < 0 or \
+            self._position[1] > GlobalConfig.height or self._position[1] < 0:
                 return True
         else:
             return False

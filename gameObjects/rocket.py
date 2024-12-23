@@ -2,12 +2,11 @@
 import math
 import numpy as np
 import pygame
-from config import RocketConfig
+from config import GlobalConfig, RocketConfig
 from utils.delay import Delay
 from gameObjects.objectBase import ObjectBase, ProjectileBase
 from gameObjects.smoke import Smoke
 from utils.camera import Camera
-from constant import HEIGHT, WIDTH
 from utils.helper import v_angle_diff, v_dot, v_norm, v_rotate, scale
 
 
@@ -130,8 +129,8 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         self._alive = False
         
     def is_out_of_screen(self):
-        if self._position[0] > WIDTH or self._position[0] < 0 or \
-            self._position[1] > HEIGHT or self._position[1] < 0:
+        if self._position[0] > GlobalConfig.width or self._position[0] < 0 or \
+            self._position[1] > GlobalConfig.height or self._position[1] < 0:
                 return True
         else:
             return False
