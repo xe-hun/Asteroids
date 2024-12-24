@@ -32,8 +32,8 @@ class GameStateController():
         
    
         self._game_score_counter = 0
-        SoundController.set_music(True)
-        SoundController.set_sound(True)
+        SoundController.set_music_on(True)
+        SoundController.set_sound_on(True)
         
    
         self.delay_before_new_level = Delay()

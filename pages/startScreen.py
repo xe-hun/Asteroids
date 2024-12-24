@@ -3,7 +3,6 @@ import pygame
 from gRouter import G_Router
 from pages.mapButtonScreen import MapButtonScreen
 from pages.page_base import PageBase
-from soundController import SoundController
 from ui.uiFactory import UiFactory
 
 

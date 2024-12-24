@@ -83,7 +83,7 @@ class Button():
             return
         
         if self._hover == True and self._can_play_hover_sound == True:
-            SoundController.game_effect_channel().play(SoundController.cursor_hover_sound())
+            SoundController.game_effect_channel().play(SoundController.cursor_hover_sound)
             self._can_play_hover_sound = False
         if self._hover == False:
             self._can_play_hover_sound = True
@@ -110,4 +110,4 @@ class Button():
                 self._click_lerp = Lerp()
                 self._on_click_delay = Delay()
                 if self._with_sound:
-                    SoundController.game_effect_channel().play(SoundController.cursor_click_sound())
+                    SoundController.game_effect_channel().play(SoundController.cursor_click_sound)

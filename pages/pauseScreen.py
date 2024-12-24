@@ -28,8 +28,8 @@ class PauseScreen(PageBase):
         self._start_sequence_lerp = Lerp()
         
         self._continue_button = UiFactory.create_button('CONTINUE', self._on_continue)
-        self._music_button = UiFactory.create_button('MUSIC', self._on_music_control, is_active = SoundController.get_music())
-        self._sound_button = UiFactory.create_button('SOUND', self._on_sound_control, is_active = SoundController.get_sound())
+        self._music_button = UiFactory.create_button('MUSIC', self._on_music_control, is_active = SoundController.music_on())
+        self._sound_button = UiFactory.create_button('SOUND', self._on_sound_control, is_active = SoundController.sound_on())
         self._map_button = UiFactory.create_button('MAP BUTTON', self._on_map_button)
         self._quit_button = UiFactory.create_button('QUIT', self._on_back)
        
@@ -38,8 +38,8 @@ class PauseScreen(PageBase):
         G_Router.pop()
         
     def _on_music_control(self):
-        SoundController.set_music(not SoundController.get_music())
-        if SoundController.get_music() == True:
+        SoundController.set_music_on(not SoundController.music_on())
+        if SoundController.music_on() == True:
             self._music_button = UiFactory.create_button('MUSIC', on_clicked=self._on_music_control)
         else:
             self._music_button = UiFactory.create_button('MUSIC', on_clicked=self._on_music_control, is_active = False)
@@ -48,8 +48,8 @@ class PauseScreen(PageBase):
         G_Router.push(MapButtonScreen(self._controller.key_map))
             
     def _on_sound_control(self):
-        SoundController.set_sound(not SoundController.get_sound())
-        if SoundController.get_sound() == True:
+        SoundController.set_sound_on(not SoundController.sound_on())
+        if SoundController.sound_on() == True:
             self._sound_button = UiFactory.create_button('SOUND', on_clicked=self._on_sound_control)
         else:
             self._sound_button = UiFactory.create_button('SOUND', on_clicked=self._on_sound_control, is_active = False)
