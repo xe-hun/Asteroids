@@ -1,12 +1,21 @@
-from enum import Enum
+import contextlib
+
+
+# This suppresses the `Hello from pygame` message.
+with contextlib.redirect_stdout(None):
+    import pygame
+
 import os
 from time import sleep
-import pygame
-from config import Colors, EventConfig, GlobalConfig
+# import pygame
+from config.global_config import GlobalConfig
+from config.event_config import EventConfig
+from utils.colors import Colors
 from constant import FPS
 from game import Game
 from gRouter import G_Router
 from globalResolver import GlobalResolver
+from utils.helper import Helper
 from pages.endGameScreen import EndGameScreen
 from pages.startScreen import StartScreen
 from gameStateController import GameStateController
@@ -14,14 +23,11 @@ from soundController import SoundController
 from ui.button import Button
 from ui.timedList import TimedList
 
-class GameState(Enum):
-    start_screen = 1
-    game = 2
-    end_game = 3
-   
 
 
 class Main():
+    
+  
     
     def __init__(self) -> None:
       
@@ -40,16 +46,20 @@ class Main():
         # pygame.mixer.init()
         pygame.display.set_caption('Asteroids')
         
-        self.screen = pygame.display.set_mode((GlobalConfig.width, GlobalConfig.height))
         
+        self.screen = pygame.display.set_mode((GlobalConfig.width, GlobalConfig.height))
+        self.glow_screen = pygame.Surface((GlobalConfig.width, GlobalConfig.height)).convert()
+
         SoundController.load_resources(
-            laser_fire_sound_filepath = os.path.join('sound', 'game', 'laser_fire.wav'),
-            rocket_fire_sound_filepath = os.path.join('sound', 'game', 'rocket_fire.wav'),
-            ship_movement_sound_filepath = os.path.join('sound', 'game', 'ship_movement.wav'),
-            cursor_hover_sound_filepath = os.path.join('sound', 'ui', 'cursor_hover_sound.mp3'),
-            cursor_click_sound_filepath = os.path.join('sound', 'ui', 'cursor_click_sound.mp3'),
-            menu_sound_track_filepath = os.path.join('sound', 'ui', 'menu_sound_track.wav'),
-            game_sound_track_filepath = os.path.join('sound', 'ui', 'game_sound_track.wav'),
+            laser_fire_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'laser_fire.wav'),
+            rocket_fire_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'rocket_fire.wav'),
+            ship_movement_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'ship_movement.wav'),
+            cursor_hover_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'ui', 'cursor_hover_sound.mp3'),
+            cursor_click_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'ui', 'cursor_click_sound.mp3'),
+            menu_sound_track_filepath = os.path.join(Helper.resource_path(), 'sound', 'ui', 'menu_sound_track.wav'),
+            game_sound_track_filepath = os.path.join(Helper.resource_path(), 'sound', 'ui', 'game_sound_track.wav'),
+            perk_collected_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'collect_perk.mp3'),
+            level_up_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'level_up.mp3'),
         )
         # self._controller = GameStateController()
         self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)
@@ -85,6 +95,7 @@ class Main():
         
         endGameScreen = EndGameScreen()
         self.g_router.replace(endGameScreen)
+       
     
     def logic(self):
         
@@ -96,6 +107,8 @@ class Main():
         while run:
             clock.tick(FPS)
             self.screen.fill(Colors.background_color)
+            self.glow_screen.fill(Colors.background_color)
+           
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -107,13 +120,13 @@ class Main():
             
             # self.handle_update()
             self.g_router.update()
-            self.g_router.draw(self.screen)
+            self.g_router.draw(self.screen, glow_screen = self.glow_screen)
             
             pygame.display.flip()
                 
         pygame.quit()
         pygame.mixer.quit()
-        quit()
+    
             
             
             

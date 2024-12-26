@@ -1,4 +1,7 @@
-from config import Colors, EventConfig, GlobalConfig
+from config.global_config import GlobalConfig
+from config.event_config import EventConfig
+from utils.fonts import Fonts
+from utils.colors import Colors
 import pygame
 from gRouter import G_Router
 from pages.mapButtonScreen import MapButtonScreen
@@ -20,7 +23,7 @@ class StartScreen(PageBase):
         self._text_quit = UiFactory.create_button('EXIT', self._quit_game, 30)
         self._text_quit_position = (GlobalConfig.width / 2, 0.6 * GlobalConfig.height)
         
-        font = pygame.font.Font('font/quantum.ttf', 30)
+        font = Fonts.quantum(30)
         self.msg_score = font.render(f'High Score : {highScore}', False, Colors.drawing_color)
         self.msg_score_rect = self.msg_score.get_rect(center=(GlobalConfig.width / 2, 0.8 * GlobalConfig.height))
         
@@ -29,7 +32,7 @@ class StartScreen(PageBase):
  
         
     
-    def draw(self, screen:pygame.surface):
+    def draw(self, screen:pygame.surface, **kwargs):
         
       
         screen.fill(Colors.background_color)

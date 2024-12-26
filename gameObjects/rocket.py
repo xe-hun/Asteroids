@@ -2,7 +2,9 @@
 import math
 import numpy as np
 import pygame
-from config import GlobalConfig, RocketConfig
+from config.global_config import GlobalConfig
+from config.rocket_config import RocketConfig
+# from rocketConfig import RocketConfig
 from utils.delay import Delay
 from gameObjects.objectBase import ObjectBase, ProjectileBase
 from gameObjects.smoke import Smoke
@@ -99,7 +101,7 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
 
         
     
-    def draw(self, screen:pygame.surface.Surface):
+    def draw(self, screen:pygame.surface.Surface, glow_screen:pygame.surface.Surface):
         
         if self.rocket_on:
             self._draw_flare(screen)

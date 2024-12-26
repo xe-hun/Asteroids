@@ -2,7 +2,8 @@
 
 
 import pygame
-from constant import outline_color
+# from constant import outline_color
+from utils.colors import Colors
 from utils.lerp import Lerp
 
 
@@ -43,7 +44,7 @@ class Explosion():
     
     def draw(self, screen:pygame.surface.Surface):
         self._surface.fill((0, 0, 0, 0))
-        pygame.draw.circle(self._surface, (*(outline_color), self._alpha), (self._max_radius,) * 2, self._r1, self._w1)
+        pygame.draw.circle(self._surface, (*(Colors.drawing_color), self._alpha), (self._max_radius,) * 2, self._r1, self._w1)
         rect = self._surface.get_rect(center=self._position)
         screen.blit(self._surface, rect.topleft)
 

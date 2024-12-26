@@ -3,9 +3,10 @@
 import random
 import numpy as np
 import pygame
+from config.rocket_config import RocketConfig
 from constant import FPS
 from utils.lerp import Lerp
-from utils.helper import clamp, scale
+from utils.helper import scale
 
 
 class Smoke:
@@ -14,7 +15,7 @@ class Smoke:
         self.tail = tail
         self.particles = []
         self.frames = 0
-        self.img = pygame.image.load('images/smoke.png').convert_alpha()
+        self.img = pygame.image.load(RocketConfig.smoke_path).convert_alpha()
         
     def update(self, direction:tuple, velocity:tuple, position:tuple):
         self.particles = [i for i in self.particles if i.alive]

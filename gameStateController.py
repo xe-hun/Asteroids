@@ -1,11 +1,13 @@
 import pygame
 
 from Activity import Activity
-from config import ControllerConfig, EventConfig, MiscConfig
+from config.buttonMapConfig import MiscConfig
+from config.event_config import EventConfig
+from config.controller_config import ControllerConfig
 from gameObjects.rocket import Rocket
-from controllerParameter import ControllerParameter
+from config.controller_config import ControllerConfig
 from gRouter import G_Router
-from shipParameter import ShipParameter
+from config.shipConfig import ShipConfig
 from soundController import SoundController
 from utils.helper import Helper
 from utils.delay import Delay
@@ -123,8 +125,8 @@ class GameStateController():
         
     def _set_new_level_parameters(self):
         self._asteroid_spawned = 0
-        self._bonus_time = ControllerParameter.get_bonus_time(self._level_time)
-        self._level_time = ControllerParameter.get_level_time(self.game_level) + self._bonus_time
+        self._bonus_time = ControllerConfig.get_bonus_time(self._level_time)
+        self._level_time = ControllerConfig.get_level_time(self.game_level) + self._bonus_time
         # + self._bonus_time
         self.set_level_in_progress(False)
     
@@ -149,7 +151,7 @@ class GameStateController():
     @property
     def asteroid_spawn_complete(self):
         # return self._asteroid_spawned >= self._asteroid_spawn_per_level
-        return self._asteroid_spawned >= ControllerParameter.asteroid_spawn_per_level(self.game_level)
+        return self._asteroid_spawned >= ControllerConfig.asteroid_spawn_per_level(self.game_level)
     
     def _game_time_pulse(self):
         # if self.level_is_in_progress and not self.game_paused:
@@ -162,7 +164,7 @@ class GameStateController():
         
     def report_upgrade_perk_collected(self):
         # self._upgrade_perk_collected += 1/self.PERKS_PER_COMPLETION
-        self._upgrade_perk_collected += 1/ShipParameter.ship_upgrade_perks_to_completion(self.ship_level)
+        self._upgrade_perk_collected += 1/ShipConfig.ship_upgrade_perks_to_completion(self.ship_level)
         if self._upgrade_perk_collected >= 1:
             self._upgrade_perk_collected = 0
             self._ship_level += 1

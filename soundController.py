@@ -15,9 +15,14 @@ class SoundController():
         
     def set_sound_on(value:bool):
         SoundController._sound_on = value
+        
+        for i in SoundController._effect_channels:
+            i.set_volume(float(value))
+        
         SoundController.ship_boost_channel().set_volume(float(value))
-        SoundController.game_effect_channel().set_volume(float(value))
+        # SoundController.game_effect_channel().set_volume(float(value))
         SoundController.ship_weapon_channel().set_volume(float(value))
+        SoundController.achievement_channel().set_volume(float(value))
         
         
     
@@ -56,6 +61,8 @@ class SoundController():
                        cursor_click_sound_filepath,
                        menu_sound_track_filepath,
                        game_sound_track_filepath,
+                       perk_collected_sound_filepath,
+                       level_up_sound_filepath
                        ):
         
         SoundController.rocket_fire_sound = SoundController.load_sound(rocket_fire_sound_filepath)
@@ -65,71 +72,48 @@ class SoundController():
         SoundController.cursor_click_sound = SoundController.load_sound(cursor_click_sound_filepath)
         SoundController.menu_sound_track = SoundController.load_sound(menu_sound_track_filepath)
         SoundController.game_sound_track = SoundController.load_sound(game_sound_track_filepath)
+        SoundController.perk_collected_sound = SoundController.load_sound(perk_collected_sound_filepath)
+        SoundController.level_up_sound = SoundController.load_sound(level_up_sound_filepath)
         
-        pygame.mixer.set_num_channels(4)
-        
-        # _effect_channels = [pygame.mixer.Channel(i) for i in range(1, 4)]
-        # _current_effect_channel = 0
+        pygame.mixer.set_num_channels(8)
+        SoundController._effect_channels = [pygame.mixer.Channel(i) for i in range(1, SoundController._num_effect_channel)]
+    
+    _num_effect_channel = 4
+    _effect_channels = []
+    _current_effect_channel = 0
         
     @staticmethod
     def load_sound(path):
         return pygame.mixer.Sound(path)
         
         
-    # @staticmethod
-    # def shoot_laser_sound():
-    #     return pygame.mixer.Sound(SoundController.laser_fire_sound_filepath)
-    
-    # @staticmethod
-    # def shoot_rocket_sound():
-    #     return pygame.mixer.Sound(SoundController.rocket_fire_sound_filepath)
-    
-    # @staticmethod
-    # def ship_movement_sound():
-    #     return pygame.mixer.Sound(SoundController.ship_movement_sound_filepath)
-    
-    # @staticmethod
-    # def cursor_hover_sound():
-    #     return pygame.mixer.Sound(SoundController.cursor_hover_sound_filepath)
-        
-    # @staticmethod
-    # def cursor_click_sound():
-    #     return pygame.mixer.Sound(SoundController.cursor_click_sound_filepath)
-    
-    # @staticmethod
-    # def menu_sound_track():
-    #     return pygame.mixer.Sound(SoundController.menu_sound_track_filepath)
-    
-    # @staticmethod
-    # def game_sound_track():
-    #     return pygame.mixer.Sound(SoundController.game_sound_track_filepath)
-    
-    @staticmethod
-    def ship_weapon_channel():
-        return pygame.mixer.Channel(0)
-    
-    @staticmethod
-    def ship_boost_channel():
-        return pygame.mixer.Channel(1)
-    
-   
-    
-    # @staticmethod
-    # def game_effect_channel():
-    #     channel = SoundController._effect_channels[SoundController._current_effect_channel]
-    #     SoundController._current_effect_channel = (SoundController._current_channel + 1) % len(SoundController._effect_channels)
-    #     return channel
-    
-    # def play_effect(self, sound):
-    #     # Round-robin through effect channels
-    #     channel = self.effect_channels[self.current_channel]
-    #     self.current_channel = (self.current_channel + 1) % len(self.effect_channels)
-    #     channel.play(sound)
     
     @staticmethod
     def game_effect_channel():
-        return pygame.mixer.Channel(2)
+        channel = SoundController._effect_channels[SoundController._current_effect_channel]
+        SoundController._current_effect_channel = (SoundController._current_effect_channel) % (SoundController._num_effect_channel - 1)
+        return channel
+    
+    @staticmethod
+    def ship_weapon_channel():
+        return pygame.mixer.Channel(SoundController._num_effect_channel + 0)
+    
+    @staticmethod
+    def ship_boost_channel():
+        return pygame.mixer.Channel(SoundController._num_effect_channel + 1)
+    
+   
+    
+
+    
+    # @staticmethod
+    # def game_effect_channel():
+    #     return pygame.mixer.Channel(6)
     
     @staticmethod
     def sound_track_channel():
-        return pygame.mixer.Channel(3)
+        return pygame.mixer.Channel(SoundController._num_effect_channel + 2)
+    
+    @staticmethod
+    def achievement_channel():
+        return pygame.mixer.Channel(SoundController._num_effect_channel + 3)

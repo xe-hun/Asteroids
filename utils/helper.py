@@ -1,34 +1,36 @@
 
 
-from collections import namedtuple
+
 import json
 import math
+import os
+import sys
 import Box2D
 import numpy as np
 import pygame
 
-from config import Colors, ControllerConfig, GlobalConfig
-from constant import HEIGHT, SHAKE_EVENT, WIDTH, WSCALE
+from config.global_config import GlobalConfig
+from utils.colors import Colors
 from customEnum import ShipActions
 
 
 class Helper():
     def __init__(self):
         pass
-    
-    @staticmethod
-    def cap_box2D_body_speed(body:Box2D.b2Body, max_speed):
-        velocity = body.linearVelocity
-        velocity_magnitude = velocity.length
         
-        if velocity_magnitude > max_speed:
-            velocity.Normalize()
-            velocity *= max_speed
-            
-        body.linearVelocity = velocity
-           
+        
+    def resource_path():
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+        
+        return base_path
+        
     
-     
+    
     @staticmethod
     def save_key_map(file_name, key_map):
         serialized_key_map = {key.value: value for key, value in key_map.items()}
@@ -54,6 +56,18 @@ class Helper():
     @staticmethod
     def asymptotic_value(min_value, max_value, rate, time):
         return max_value - (max_value - min_value) * math.exp(-rate * time)
+
+
+    @staticmethod
+    def cap_box2D_body_speed(body:Box2D.b2Body, max_speed):
+        velocity = body.linearVelocity
+        velocity_magnitude = velocity.length
+        
+        if velocity_magnitude > max_speed:
+            velocity.Normalize()
+            velocity *= max_speed
+            
+        body.linearVelocity = velocity
 
 
 def scale(surface: pygame.Surface, factor):
@@ -168,30 +182,34 @@ def get_body_bounds(body:Box2D.b2Body):
     return (left, top, right, bottom)
             
 def wrap_box2D_object(body:Box2D.b2Body):
-        left, top, right, bottom = get_body_bounds(body)
-        buffer = 10
-        
-        position = body.position
-        bodyWidth = right - left
-        bodyHeight = top - bottom
-        if right < 0:
-            body.position = ((WIDTH - buffer) / WSCALE + (bodyWidth ) / 2, position.y)
-        elif left > WIDTH/WSCALE:
-            body.position = ((-bodyWidth + buffer)/ 2, position.y)
-        
-        if top < 0:
-            body.position = (position.x, (HEIGHT - buffer) / WSCALE + (bodyHeight) / 2)
-        elif bottom > HEIGHT / WSCALE:
-            body.position = (position.x, (-bodyHeight + buffer) / 2)
+    left, top, right, bottom = get_body_bounds(body)
+    buffer = 10
+    
+    position = body.position
+    bodyWidth = right - left
+    bodyHeight = top - bottom
+    if right < 0:
+        body.position = ((GlobalConfig.width - buffer) / GlobalConfig.world_scale + (bodyWidth ) / 2, position.y)
+    elif left > GlobalConfig.width/GlobalConfig.world_scale:
+        body.position = ((-bodyWidth + buffer)/ 2, position.y)
+    
+    if top < 0:
+        body.position = (position.x, (GlobalConfig.height - buffer) / GlobalConfig.world_scale + (bodyHeight) / 2)
+    elif bottom > GlobalConfig.height / GlobalConfig.world_scale:
+        body.position = (position.x, (-bodyHeight + buffer) / 2)
             
             
 def check_box2D_object_in_bounds(body:Box2D.b2Body):
-        left, top, right, bottom = get_body_bounds(body)
-        
-        if right < 0 or left > WIDTH/WSCALE or top < 0 or bottom > HEIGHT / WSCALE:
-            return False
+    left, top, right, bottom = get_body_bounds(body)
+    
+    if right < 0 or left > GlobalConfig.width/GlobalConfig.world_scale or top < 0 or bottom > GlobalConfig.height / GlobalConfig.world_scale:
+        return False
 
-        return True
+    return True
+    
+
+    
+
             
 
 def get_target_within_range(object_position:tuple, target_list:list, target_range:int):
@@ -218,6 +236,245 @@ def get_target_within_range(object_position:tuple, target_list:list, target_rang
         
     
                 
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+
+    # @staticmethod
+    # def draw_with_glow(screen:pygame.surface.Surface, blur_screen:pygame.surface.Surface, item:pygame.surface.Surface, pos:tuple = (0, 0)):
+    #     aux_scale = .3
+    #     aux_dimension = int(GlobalConfig.width * aux_scale), int(GlobalConfig.height * aux_scale)
+    #     blur_screen.blit(item, pos)
+    #     resized = pygame.transform.scale(blur_screen, aux_dimension)
+    #     img_str = pygame.image.tostring(resized, "RGB", False)
+    #     im1 = Image.frombytes('RGB', aux_dimension, img_str)
+        
+    #     im1 = im1.filter(ImageFilter.GaussianBlur(6))
+        
+    #     im1 = im1.tobytes()
+    #     pil_blured = pygame.image.fromstring(im1, aux_dimension, "RGB")
+    #     # pil_blured = pygame.image.fromstring(im1, (230, 110), "RGB")
+    #     final = pygame.transform.scale(pil_blured, (GlobalConfig.width, GlobalConfig.height))
+        
+    #     screen.blit(blur_screen, (0, 0))
+    #     screen.blit(final, (0,0), special_flags = pygame.BLEND_RGBA_ADD)
+        
+    # @staticmethod
+    # def draw_with_glow_2(screen:pygame.surface.Surface, surface:pygame.surface.Surface, pos:tuple, glow_color:tuple, blur_radius:int):
+       
+    #     glow_surface = surface.copy()
+    #     # glow_surface.fill((255, 255, 255))
+    #     # pygame.draw.circle(glow_surface, glow_color, (surface.get_width() // 2, surface.get_height() // 2), 50)
+        
+    #     glow_array = pygame.surfarray.array3d(glow_surface)
+    #     # glow_array = pygame.image.tostring(glow_surface, "RGB", False)
+    #     print(glow_array)
+    #     cv2.GaussianBlur(glow_array, ksize=(9, 9), sigmaX=10, sigmaY=10, dst=glow_array)
+    #     # cv2.blur(glow_array, ksize=(5, 5), dst=glow_array)
+    #     # glow_array = cv2.GaussianBlur(glow_array, (0, 0), blur_radius)
+    #     glow_surface = pygame.surfarray.make_surface(glow_array)
+        
+    #     screen.blit(surface, pos)
+    #     screen.blit(glow_surface, pos, special_flags = pygame.BLEND_ADD)
+            
+        
+        
+        
+        
+        
+            
+    # @staticmethod   
+    # def simple_blur(surface, blur_radius=5):
+    #     """Apply a simple box blur to a surface"""
+    #     target = surface.copy()
+    #     size = surface.get_size()
+        
+    #     surf_array = pygame.surfarray.pixels3d(target)
+    #     for x in range(blur_radius, size[0] - blur_radius):
+    #         for y in range(blur_radius, size[1] - blur_radius):
+    #             # Average the surrounding pixels
+    #             for c in range(3):  # For each color channel
+    #                 total = 0
+    #                 for dx in range(-blur_radius, blur_radius + 1):
+    #                     for dy in range(-blur_radius, blur_radius + 1):
+    #                         total += surf_array[x + dx, y + dy, c]
+    #                 surf_array[x, y, c] = total // ((blur_radius * 2 + 1) ** 2)
+        
+    #     del surf_array
+    #     return target
+
+    # @staticmethod
+    # def create_bloom(surface, blur_passes=3, blur_radius=3, intensity=2.0):
+    #     """Create a bloom effect by blurring multiple times"""
+    #     bloom = surface.copy()
+        
+    #     # Apply multiple passes of blur
+    #     for _ in range(blur_passes):
+    #         bloom = Helper.simple_blur(bloom, blur_radius)
+        
+    #     # Increase the brightness
+    #     bloom_array = pygame.surfarray.pixels3d(bloom)
+    #     bloom_array[:] = np.minimum(bloom_array * intensity, 255)
+    #     del bloom_array
+        
+    #     return bloom
+            
+        
+        
+        
+        
+    # @staticmethod
+    # def create_bloom_surface(surface, intensity=3.0, threshold=50, blur_size=31, sigma=10):
+    #     """
+    #     Creates a bloom effect from the given surface with enhanced parameters.
+        
+    #     Args:
+    #         surface: The pygame surface to apply bloom to
+    #         intensity: Bloom intensity (default: 2.0)
+    #         threshold: Brightness threshold for bloom (default: 50)
+    #         blur_size: Size of the blur kernel (default: 31)
+    #         sigma: Gaussian blur sigma (default: 10)
+        
+    #     Returns:
+    #         A new surface with the bloom effect applied
+    #     """
+    #     surf_array = pygame.surfarray.array3d(surface)
+    #     grayscale = np.mean(surf_array, axis=2)
+    #     bright_mask = grayscale > threshold
+        
+    #     bloom_surf = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+    #     bloom_array = pygame.surfarray.pixels3d(bloom_surf)
+        
+    #     x, y = np.meshgrid(np.linspace(-blur_size, blur_size, 2*blur_size+1),
+    #                     np.linspace(-blur_size, blur_size, 2*blur_size+1))
+    #     gaussian = np.exp(-(x**2 + y**2)/(2*sigma**2))
+    #     gaussian = gaussian / gaussian.sum()
+        
+    #     for i in range(3):
+    #         channel = surf_array[:,:,i] * bright_mask
+    #         blurred = np.zeros_like(channel)
+            
+    #         for x in range(blur_size, channel.shape[0]-blur_size):
+    #             for y in range(blur_size, channel.shape[1]-blur_size):
+    #                 if bright_mask[x,y]:
+    #                     window = channel[x-blur_size:x+blur_size+1,
+    #                                 y-blur_size:y+blur_size+1]
+    #                     blurred[x,y] = np.sum(window * gaussian)
+            
+    #         bloom_array[:,:,i] = blurred * intensity
+        
+    #     del bloom_array
+    #     del surf_array
+        
+    #     return bloom_surf
+        
+        
+    # @staticmethod
+    # def create_bloom_surface(surface, intensity=1.0, threshold=128):
+    #     """
+    #     Creates a bloom effect from the given surface.
+        
+    #     Args:
+    #         surface: The pygame surface to apply bloom to
+    #         intensity: Bloom intensity (default: 1.0)
+    #         threshold: Brightness threshold for bloom (default: 128)
+        
+    #     Returns:
+    #         A new surface with the bloom effect applied
+    #     """
+    #     # Convert surface to array for manipulation
+    #     surf_array = pygame.surfarray.array3d(surface)
+        
+    #     # Create grayscale version to determine brightness
+    #     grayscale = np.mean(surf_array, axis=2)
+        
+    #     # Create mask for bright pixels
+    #     bright_mask = grayscale > threshold
+        
+    #     # Create bloom surface
+    #     bloom_surf = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+    #     bloom_array = pygame.surfarray.pixels3d(bloom_surf)
+
+        
+    #     # Apply gaussian blur to bright areas
+    #     blur_size = 15
+    #     sigma = 5
+        
+    #     # Create gaussian kernel
+    #     x, y = np.meshgrid(np.linspace(-blur_size, blur_size, 2*blur_size+1),
+    #                     np.linspace(-blur_size, blur_size, 2*blur_size+1))
+    #     gaussian = np.exp(-(x**2 + y**2)/(2*sigma**2))
+    #     gaussian = gaussian / gaussian.sum()
+        
+    #     # Apply blur to each color channel
+    #     for i in range(3):
+    #         channel = surf_array[:,:,i] * bright_mask
+    #         blurred = np.zeros_like(channel)
+            
+    #         # Convolve with gaussian kernel
+    #         for x in range(blur_size, channel.shape[0]-blur_size):
+    #             for y in range(blur_size, channel.shape[1]-blur_size):
+    #                 if bright_mask[x,y]:
+    #                     window = channel[x-blur_size:x+blur_size+1,
+    #                                 y-blur_size:y+blur_size+1]
+    #                     blurred[x,y] = np.sum(window * gaussian)
+            
+    #         # surfarray.pixels3d(bloom_surf)[:,:,i] = blurred * intensity
+    #         bloom_array[:,:,i] = blurred * intensity
+            
+    #     del bloom_array
+    #     del surf_array
+        
+    #     return bloom_surf
+            
+    # @staticmethod
+    # def apply_bloom(surface, bloom_surface):
+    #     """
+    #     Combines the original surface with its bloom effect.
+        
+    #     Args:
+    #         surface: Original surface
+    #         bloom_surface: Pre-computed bloom surface
+        
+    #     Returns:
+    #         New surface with bloom effect applied
+    #     """
+    #     result = surface.copy()
+    #     result.blit(bloom_surface, (0,0), special_flags=pygame.BLEND_RGB_ADD)
+    #     return result
+            
+            
         
             
             

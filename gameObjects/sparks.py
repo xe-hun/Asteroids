@@ -5,7 +5,6 @@ import math
 import random
 import numpy as np
 import pygame
-from constant import outline_color
 from utils.helper import v_rotate, v_to_component
 from utils.lerp import Lerp
 

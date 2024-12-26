@@ -1,6 +1,9 @@
 
 import pygame
-from config import Colors, EventConfig, GlobalConfig, MiscConfig
+from config.global_config import GlobalConfig
+from config.buttonMapConfig import MiscConfig
+from config.event_config import EventConfig
+from utils.colors import Colors
 from customEnum import ShipActions
 from gRouter import G_Router
 from globalResolver import GlobalResolver

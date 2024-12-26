@@ -1,5 +1,8 @@
-from config import EventConfig, GlobalConfig
-from constant import background_color
+from config.global_config import GlobalConfig
+from config.event_config import EventConfig
+from utils.fonts import Fonts
+from utils.colors import Colors
+
 
 import pygame
 
@@ -15,14 +18,14 @@ class EndGameScreen(PageBase):
         # self.livesRemaining = livesRemaining
         
        
-        font = pygame.font.Font('font/quantum.ttf', 40)
+        font = Fonts.quantum(40)
         self.game_over_text = UiFactory.create_text('GAME OVER!!', font = font)
         # self.continue_button = UiFactory.create_button('CONTINUE', self.continue_game)
         self.exit_button = UiFactory.create_button('EXIT', self.exit_game, 25)
 
     
     def draw(self, screen:pygame.surface):
-        screen.fill(background_color)
+        screen.fill(Colors.background_color)
         
         screen.blit(self.game_over_text, self.game_over_text.get_rect(center = (GlobalConfig.width / 2, .5 * GlobalConfig.height,)))
         # self.continue_button.draw(screen, center = (GlobalConfig.width / 2, .5 * GlobalConfig.height,))

@@ -1,6 +1,7 @@
 import random
-from asteroidParameter import AsteroidParameter
-from config import Colors, GlobalConfig
+from config.asteroidConfig import AsteroidConfig
+from config.global_config import GlobalConfig
+from utils.colors import Colors
     
 import math
 import pygame
@@ -28,10 +29,10 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
         creation_extension = 30 / GlobalConfig.world_scale
         
         # asteroid constants
-        MIN_SIZE = AsteroidParameter.min_size
-        MAX_SIZE = AsteroidParameter.max_size(game_level)
-        MIN_LIFE = AsteroidParameter.min_life
-        MAX_LIFE = AsteroidParameter.max_life(game_level)
+        MIN_SIZE = AsteroidConfig.min_size
+        MAX_SIZE = AsteroidConfig.max_size(game_level)
+        MIN_LIFE = AsteroidConfig.min_life
+        MAX_LIFE = AsteroidConfig.max_life(game_level)
      
         
        
@@ -54,9 +55,9 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
             
         self._direction = direction
         
-        SPEED = AsteroidParameter.min_speed + random.random() * AsteroidParameter.max_speed
+        SPEED = AsteroidConfig.min_speed + random.random() * AsteroidConfig.max_speed
         initial_linear_velocity = self._direction * SPEED
-        initial_angular_velocity = AsteroidParameter.min_initial_angular_velocity + random.random() * AsteroidParameter.max_initial_angular_velocity
+        initial_angular_velocity = AsteroidConfig.min_initial_angular_velocity + random.random() * AsteroidConfig.max_initial_angular_velocity
    
         # lenght_displacement_range = self._asteroid_half_size * .3
         # angle_displacement_range = .05
@@ -216,7 +217,7 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
     def break_apart(self, game_level, debug_draw:bool):
         # position = self.asteroidBodybox2D.position
         # break_parts = random.choices([2, 3, ],[5, 1])[0]
-        break_parts = AsteroidParameter.get_break_parts(game_level)
+        break_parts = AsteroidConfig.get_break_parts(game_level)
         asteroids = []
         for _ in range(break_parts):
             asteroidHalfSize = max(((self._asteroid_half_size + np.random.randn() * 10)/ 2), self._breakage_threshold)
@@ -238,13 +239,14 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
         wrap_box2D_object(self._asteroid_body_box2D)  
         self._position = to_pixel_position(self._asteroid_body_box2D.position, GlobalConfig.world_scale, GlobalConfig.height) 
         self._position = self._camera.watch(self._position)
-        Helper.cap_box2D_body_speed(self._asteroid_body_box2D, AsteroidParameter.max_speed)
+        Helper.cap_box2D_body_speed(self._asteroid_body_box2D, AsteroidConfig.max_speed)
  
     def draw(self, screen:pygame.surface.Surface):
         
         angleRad = self._asteroid_body_box2D.angle
         self.image = pygame.transform.rotate(self._surface, math.degrees(angleRad - math.pi))
         self.rect = self.image.get_rect(center=self._position)
+        
         screen.blit(self.image, self.rect.topleft)  
         
         if self.debug_draw:

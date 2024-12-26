@@ -1,7 +1,26 @@
+
+
+
 from utils.helper import Helper
 
 
-class ControllerParameter():
+class ControllerConfig():
+
+    new_level_point = 2000
+    
+    # params
+    # base_level_time = 3
+    
+    # asteroids
+    # asteroid_spawn_per_level = 30
+    max_asteroid_on_screen = 12
+    
+    # perk
+    upgrade_perk_completion = 10
+    
+    # weapons
+    rocket_base_quantity = 20
+    
     
     @staticmethod
     def get_bonus_time(level_time):

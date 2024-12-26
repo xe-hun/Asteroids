@@ -1,6 +1,8 @@
  
 from abc import ABC, abstractmethod
 
+import pygame
+
 
 class PageBase(ABC):
     
@@ -11,7 +13,7 @@ class PageBase(ABC):
         pass
     
     @abstractmethod
-    def draw(self, screen):
+    def draw(self, screen:pygame.surface.Surface, **kwargs):
         pass
     
     def handle_event(self, event):

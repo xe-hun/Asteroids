@@ -4,7 +4,9 @@ from enum import Enum
 import random
 
 import numpy as np
-from config import Colors, GlobalConfig
+from config.global_config import GlobalConfig
+from utils.colors import Colors
+from utils.fonts import Fonts
 
 
 
@@ -18,7 +20,8 @@ from utils.lerp import Lerp
 
 class Perk(ObjectBase, ProjectileBase):
     def __init__(self):
-        self._game_font_30 = pygame.font.Font('font/pixeltype.ttf', 25)
+        self._game_font_25 = Fonts.pixel_type(25)
+        
         self._vertices1 = [
             (5, 5), (5, 15), (10, 20),(15, 15), (15, 5)
         ]
@@ -47,7 +50,7 @@ class Perk(ObjectBase, ProjectileBase):
         
         
     def _create_rocket_perk(self, position, camera):
-        self.label_render = self._game_font_30.render('R', False, Colors.background_color)
+        self.label_render = self._game_font_25.render('R', False, Colors.background_color)
         self._draw_polygon(Colors.green_color)
         self._position = np.array(position)
         self._camera = camera
@@ -61,7 +64,7 @@ class Perk(ObjectBase, ProjectileBase):
         
        
     def _create_upgrade_perk(self, position, camera):
-        self.label_render = self._game_font_30.render('S', False, Colors.background_color)
+        self.label_render = self._game_font_25.render('S', False, Colors.background_color)
         self._draw_polygon(Colors.blue_color)
         self._position = np.array(position)
         self._camera = camera

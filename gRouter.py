@@ -30,19 +30,19 @@ class G_Router():
     def update(self):
         G_Router._page_list[-1].update(G_Router.game_paused)
      
-    def draw(self, screen):
+    def draw(self, screen, **kwargs):
         page = G_Router._page_list[-1]
         page_index = len(G_Router._page_list) - 1
-        self._recursive_draw(page_index - 1, page.is_transparent, screen)
-        page.draw(screen)
+        self._recursive_draw(page_index - 1, page.is_transparent, screen, **kwargs)
+        page.draw(screen, **kwargs)
         
-    def _recursive_draw(self, page_index:int, previous_page_is_transparent, screen):
+    def _recursive_draw(self, page_index:int, previous_page_is_transparent, screen, **kwargs):
         if previous_page_is_transparent == False or page_index < 0:
             return
         
         page = G_Router._page_list[page_index]
-        self._recursive_draw(page_index - 1, page.is_transparent, screen)
-        page.draw(screen)
+        self._recursive_draw(page_index - 1, page.is_transparent, screen, **kwargs)
+        page.draw(screen, **kwargs)
             
         
         

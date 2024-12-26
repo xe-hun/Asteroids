@@ -2,7 +2,7 @@ import random
 from utils.helper import Helper
 
 
-class AsteroidParameter():
+class AsteroidConfig():
 
     min_size = 8
     min_life = 1

@@ -1,14 +1,15 @@
 
 
+import os
 from utils.helper import Helper
 
 
-class ShipParameter():
+class ShipConfig():
    
     max_collision_force = 50
     
     rocket_burst_rate = 5
-     # dimension
+      
     ship_size_scale = .7
     
     ship_width = 30
@@ -18,6 +19,10 @@ class ShipParameter():
     rocket_kick_back_range = 20
     
     rocket_kick_back_force = 4000
+    
+    flare_path = os.path.join(Helper.resource_path(), 'images', 'flare109.png')
+    
+    flame_path = os.path.join(Helper.resource_path(), 'images', 'flame101x186.png')
     
 
     @staticmethod

@@ -1,6 +1,9 @@
 import pygame
-from config import Colors, GlobalConfig
-from constant import HEIGHT, outline_color, WIDTH
+from config.global_config import GlobalConfig
+from config.rocket_config import RocketConfig
+from soundController import SoundController
+from utils.fonts import Fonts
+from utils.colors import Colors
 from ui.uiFactory import UiFactory
 from utils.effect import Effect
 from gameObjects.reticle import Reticle
@@ -13,10 +16,10 @@ from utils.watcher import Watcher
 class Hud():
     def __init__(self, game_level:int, ship_rocket_count:int, ship_level:int, ship_upgrade_perk_collected:int) -> None:
        
-        game_font_50 = pygame.font.Font('font/quantum.ttf', 50)
-        self._game_font_10 = pygame.font.Font('font/quantum.ttf', 10)
-        self._game_font_40 = pygame.font.Font('font/quantum.ttf', 40)
-        game_font_30 = pygame.font.Font('font/quantum.ttf', 30)
+        game_font_50 = Fonts.quantum(50)
+        self._game_font_10 = Fonts.quantum(10)
+        self._game_font_40 = Fonts.quantum(40)
+        game_font_30 = Fonts.quantum(30)
       
         self._m_READY_Render = UiFactory.create_text('READY', font = game_font_50)
         
@@ -28,7 +31,7 @@ class Hud():
         
         self._m_TIME_UP_Render = UiFactory.create_text(f"TIME UP !!", font = game_font_30)
         
-        self.rocket_thumbnail_surface = scale(pygame.image.load('images/rocket.png'), .5)
+        self.rocket_thumbnail_surface = scale(pygame.image.load(RocketConfig.image_path), .5)
         
         self._penalty_bar = ProgressBar(initial_progress = 1)
         self._penalty_bar_rect = self._penalty_bar.surface.get_rect()
@@ -77,6 +80,7 @@ class Hud():
     def _on_ship_level_change(self, _):
         self._level_up_sequence_lerp = Lerp()
         self._perk_count_render_effect.activate()
+        SoundController.achievement_channel().play(SoundController.level_up_sound)
         
     def _on_upgrade_perk_collected_change(self, value):
         self._ship_level_bar.set_progress(value)
@@ -101,7 +105,7 @@ class Hud():
         
         surface.set_alpha(alpha)
         render_scaled = scale(surface, scale_factor)        
-        rect = render_scaled.get_rect(center = (WIDTH / 2, HEIGHT / 2))
+        rect = render_scaled.get_rect(center = (GlobalConfig.width / 2, GlobalConfig.height / 2))
         screen.blit(render_scaled, rect)
         
         
@@ -121,7 +125,7 @@ class Hud():
             self._animate_sequence(lerp, screen, self._m_Go_Render)
             
             y_up = lerp.cubic_ease_out(0, self._object_position_up)
-            y_down = lerp.cubic_ease_out(HEIGHT, self._object_position_down)
+            y_down = lerp.cubic_ease_out(GlobalConfig.height, self._object_position_down)
             
             return y_up, y_down
         
@@ -241,7 +245,7 @@ class Hud():
         factor = lerp.ease_in_out(1, 1.8)
         surface = scale(self._m_TIME_UP_Render, factor)
         surface.set_alpha(alpha)
-        rect = surface.get_rect(center = (WIDTH / 2, HEIGHT / 2))
+        rect = surface.get_rect(center = (GlobalConfig.width / 2, GlobalConfig.height / 2))
         return surface, rect
     
         

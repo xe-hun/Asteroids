@@ -1,11 +1,15 @@
 
 import math
+# import cv2
 import numpy as np
 import pygame
 
-from config import CannonConfig, Colors, GlobalConfig
+from config.global_config import GlobalConfig
+from config.cannon_config import CannonConfig
+from utils.colors import Colors
+
 from gameObjects.objectBase import ObjectBase, ProjectileBase
-from utils.helper import v_to_angle
+from utils.helper import Helper, v_to_angle
 from utils.camera import Camera
 
 
@@ -26,7 +30,26 @@ class Cannon(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         self._direction = np.array(direction)
         self._position = np.array(startPosition)
         self._alive = True
+        
+        self.glow_screen = pygame.Surface((GlobalConfig.width, GlobalConfig.height)).convert()
+        
     
+    # def create_glow(surface, glow_color, blur_radius):
+    #     glow_surface = surface.copy()
+    #     glow_surface.fill((0, 0, 0))  # Clear the surface
+
+    #     # Draw the bright object on the glow surface
+    #     pygame.draw.circle(glow_surface, glow_color, (surface.get_width() // 2, surface.get_height() // 2), 50)
+
+    #     # Convert to numpy array for OpenCV processing
+    #     glow_array = pygame.surfarray.array3d(glow_surface)    
+
+    #     # Apply Gaussian blur
+    #     glow_array = cv2.GaussianBlur(glow_array, (0, 0), blur_radius)
+
+    #     # Convert back to Pygame surface
+    #     glow_surface = pygame.surfarray.make_surface(glow_array)
+    #     return glow_surface
         
     @property
     def position(self):
@@ -47,8 +70,10 @@ class Cannon(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         self._position = self._camera.watch(self._position)
     
         
-    def draw(self, screen:pygame.surface.Surface):
+    def draw(self, screen:pygame.surface.Surface, glow_screen:pygame.surface.Surface):
         self.rect = self.surface_r.get_rect(center = self._position)
+        # self.blur_screen.fill(Colors.background_color)
+        # Helper.draw_with_glow(screen, glow_screen, self.surface_r, self.rect.topleft)
         screen.blit(self.surface_r, self.rect.topleft)
         
     def is_out_of_screen(self):

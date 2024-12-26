@@ -22,7 +22,7 @@ class ObjectBase(ABC):
         pass
     
     @abstractmethod
-    def draw(self, screen:pygame.surface.Surface):
+    def draw(self, screen:pygame.surface.Surface, **kwargs):
         pass
    
     @abstractmethod

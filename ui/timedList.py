@@ -1,7 +1,8 @@
 
 
 import pygame
-from config import Colors
+from utils.fonts import Fonts
+from utils.colors import Colors
 from utils.delay import Delay
 from utils.lerp import Lerp
 
@@ -9,7 +10,7 @@ from utils.lerp import Lerp
 class TimedList():
     def __init__(self, position:tuple, ingress_time:int = 1000, item_display_duration:int = 3000):
         
-        self._game_font_10 = pygame.font.Font('font/quantum.ttf', 10)
+        self._game_font_10 = Fonts.quantum(10)
         self._ingress_time = ingress_time
         self._item_display_duration = item_display_duration
         self._position = position
