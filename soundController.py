@@ -62,7 +62,8 @@ class SoundController():
                        menu_sound_track_filepath,
                        game_sound_track_filepath,
                        perk_collected_sound_filepath,
-                       level_up_sound_filepath
+                       level_up_sound_filepath,
+                       ready_sound_filepath,
                        ):
         
         SoundController.rocket_fire_sound = SoundController.load_sound(rocket_fire_sound_filepath)
@@ -74,6 +75,7 @@ class SoundController():
         SoundController.game_sound_track = SoundController.load_sound(game_sound_track_filepath)
         SoundController.perk_collected_sound = SoundController.load_sound(perk_collected_sound_filepath)
         SoundController.level_up_sound = SoundController.load_sound(level_up_sound_filepath)
+        SoundController.ready_sound = SoundController.load_sound(ready_sound_filepath)
         
         pygame.mixer.set_num_channels(8)
         SoundController._effect_channels = [pygame.mixer.Channel(i) for i in range(1, SoundController._num_effect_channel)]

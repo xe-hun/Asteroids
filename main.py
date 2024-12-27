@@ -60,6 +60,7 @@ class Main():
             game_sound_track_filepath = os.path.join(Helper.resource_path(), 'sound', 'ui', 'game_sound_track.wav'),
             perk_collected_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'collect_perk.mp3'),
             level_up_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'level_up.mp3'),
+            ready_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'ready.mp3'),
         )
         # self._controller = GameStateController()
         self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)

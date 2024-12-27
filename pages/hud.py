@@ -139,12 +139,6 @@ class Hud():
     def handle_event(self, event):
         self.reticle.handle_event(event)
         
-      
-                # self._pause_game()
-        
-      
-     
-        
         
     def update_penalty_bar_ship_collision(self, penalty_point):
         self._penalty_bar.lerp_progress(1 - penalty_point)
@@ -152,8 +146,8 @@ class Hud():
     def update_penalty_bar_out_of_bound(self, penalty_point):
         self._penalty_bar.set_progress(1 - penalty_point)
         
-    # def update_upgrade_perk_bar(self, perks_collected, perks_count):
-    #     self._perk_bar.set_progress(perks_collected)
+    def _play_ready_sound(self):
+        SoundController.game_effect_channel().play(SoundController.ready_sound)
     
     def update(self):
         self._penalty_bar.update()
@@ -169,11 +163,11 @@ class Hud():
         
         
         if self._start_sequence_lerp.control(game_paused)\
-            .wait(300).and_then(1000, self._sequence1, screen=screen)\
-            .and_then(1000, self._sequence2, screen=screen).is_done:
+            .wait(300).and_then(1000, self._sequence1, on_begin = self._play_ready_sound, screen=screen)\
+            .and_then(1000, self._sequence2, on_begin = self._play_ready_sound, screen=screen).is_done:
                 
                 
-            y_up, y_down = self._sequence3_lerp.control(game_paused).do(1000, self._sequence3, set_level_in_progress, screen = screen).value
+            y_up, y_down = self._sequence3_lerp.control(game_paused).do(1000, self._sequence3,  set_level_in_progress, on_begin = self._play_ready_sound, screen = screen).value
                             
             _ , game_time_render = self._render_text(f"{level_time:02d}", self._game_font_40)
             
@@ -224,7 +218,7 @@ class Hud():
                 
             
         if is_time_up:
-            end_sequence = self._end_sequence_lerp.control(game_paused).wait(300).and_then(1000, self.endSequence1)
+            end_sequence = self._end_sequence_lerp.control(game_paused).wait(300).and_then(1000, self.end_sequence_1)
             if end_sequence.is_done == False and end_sequence.value != None:
                 surface, rect = end_sequence.value
                 screen.blit(surface, rect)
@@ -240,7 +234,7 @@ class Hud():
         self._level_up_sequence_lerp = None
     
     
-    def endSequence1(self, lerp:Lerp):    
+    def end_sequence_1(self, lerp:Lerp):    
         alpha = lerp.ease_in(0, 255)
         factor = lerp.ease_in_out(1, 1.8)
         surface = scale(self._m_TIME_UP_Render, factor)

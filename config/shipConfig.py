@@ -39,7 +39,6 @@ class ShipConfig():
         return Helper.asymptotic_value(min_value, max_value, 0.1, ship_level)
     
 
-
     @staticmethod
     def cannon_burst_rate(ship_level:int):
         min_value = 5
@@ -54,15 +53,11 @@ class ShipConfig():
         return int(Helper.asymptotic_value(min_count, max_count, 0.2, ship_level))
 
     
-
     @staticmethod
     def rocket_fire_cool_down(ship_level:int):
         min_value = 0.5
         max_value = 1
         return Helper.asymptotic_value(min_value, max_value, 0.1, ship_level)
-
-    
-    # rocket_burst_rate = 5
 
 
     @staticmethod

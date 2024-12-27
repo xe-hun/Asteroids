@@ -95,7 +95,7 @@ class MapButtonScreen(PageBase):
     
     
     
-    def draw(self, screen:pygame.surface.Surface):
+    def draw(self, screen:pygame.surface.Surface, **kwargs):
         GlobalResolver.event_queue.add(self)
         screen.blit(self.background_screen, (0, 0))
         

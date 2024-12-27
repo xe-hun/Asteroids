@@ -72,7 +72,7 @@ class PauseScreen(PageBase):
         return y_continue, y_music, y_sound, y_map_button, y_quit, screen_alpha
         
         
-    def draw(self, screen):
+    def draw(self, screen:pygame.surface.Surface, **kwargs):
         
         y_continue, y_music, y_sound, y_map_button, y_quit, screen_alpha = self._start_sequence_lerp.do(500, self._start_sequence).value
         

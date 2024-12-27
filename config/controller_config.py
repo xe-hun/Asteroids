@@ -19,12 +19,12 @@ class ControllerConfig():
     upgrade_perk_completion = 10
     
     # weapons
-    rocket_base_quantity = 20
+    start_rocket_quantity = 20
     
     
     @staticmethod
     def get_bonus_time(level_time):
-        return int(level_time / 3)
+        return level_time // 3
     
     @staticmethod
     def chances_of_asteroid(game_level:int):
@@ -34,10 +34,10 @@ class ControllerConfig():
     
     @staticmethod
     def asteroid_spawn_per_level(game_level:int):
-        # min_qty = 15
-        min_qty = 3
-        # max_qty = 40
-        max_qty = 4
+        min_qty = 15
+        # min_qty = 3
+        max_qty = 40
+        # max_qty = 4
         return int(Helper.asymptotic_value(min_qty, max_qty, 0.2, game_level))
     
     chances_of_perk = .8
@@ -47,8 +47,8 @@ class ControllerConfig():
     @staticmethod
     def get_level_time(game_level:int):
      
-        min_level_time = 100
-        max_level_time = 200
+        min_level_time = 80
+        max_level_time = 250
         return int(Helper.asymptotic_value(min_level_time, max_level_time, 0.1, game_level))
     
    

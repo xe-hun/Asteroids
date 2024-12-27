@@ -24,7 +24,7 @@ class EndGameScreen(PageBase):
         self.exit_button = UiFactory.create_button('EXIT', self.exit_game, 25)
 
     
-    def draw(self, screen:pygame.surface):
+    def draw(self, screen:pygame.surface, **kwargs):
         screen.fill(Colors.background_color)
         
         screen.blit(self.game_over_text, self.game_over_text.get_rect(center = (GlobalConfig.width / 2, .5 * GlobalConfig.height,)))

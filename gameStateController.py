@@ -25,7 +25,8 @@ class GameStateController():
         self._level_time = 0
         self._number_of_asteroids_destroyed = 0
         self._game_level = 1
-        self._ship_level = 10
+        # self._ship_level = 10
+        self._ship_level = 1
       
         # self._lives_remaining = self.START_LIVES
         self._game_score = 0
@@ -42,7 +43,7 @@ class GameStateController():
         self.counter_delay = Delay()
         self._upgrade_perk_collected = 0
        
-        self._ship_rocket_count = ControllerConfig.rocket_base_quantity
+        self._ship_rocket_count = ControllerConfig.start_rocket_quantity
         
         self._game_paused = False
         self._load_key_map()
