@@ -34,8 +34,10 @@ class ShootingStrategy():
             return False
         
           
-    def update(self, fire_weapon:callable):
+    def update(self, penalty_active:bool, fire_weapon:callable):
         
+        if penalty_active == True:
+            self.shooting = False
       
         if self.shooting and self.can_fire():
             self.bursting = True

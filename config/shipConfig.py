@@ -5,6 +5,11 @@ from utils.helper import Helper
 
 
 class ShipConfig():
+    
+    # unit in ms
+    ship_out_of_bound_delay_before_penalty = 2000
+    
+    penalty_expires = 4000
    
     max_collision_force = 50
     

@@ -21,17 +21,19 @@ class PauseScreen(PageBase):
         self.transparent_screen = pygame.surface.Surface((GlobalConfig.width, GlobalConfig.height), pygame.SRCALPHA)
         
         
-        self._m_CONTINUE_position = (GlobalConfig.width / 2, .3 * GlobalConfig.height)
-        self._m_MUSIC_position = (GlobalConfig.width / 2, .4 * GlobalConfig.height)
-        self._m_SOUND_position = (GlobalConfig.width / 2, .5 * GlobalConfig.height)
+        self._m_CONTINUE_position = (GlobalConfig.width / 2, .2 * GlobalConfig.height)
+        self._m_MUSIC_position = (GlobalConfig.width / 2, .3 * GlobalConfig.height)
+        self._m_SOUND_OF_SPACE_position = (GlobalConfig.width / 2, .4 * GlobalConfig.height)
+        self._m_SOUND_EFFECT_position = (GlobalConfig.width / 2, .5 * GlobalConfig.height)
         self._m_MAP_BUTTON_position = (GlobalConfig.width / 2, .6 * GlobalConfig.height)
         self._m_QUIT_position = (GlobalConfig.width / 2, .7 * GlobalConfig.height)
         
         self._start_sequence_lerp = Lerp()
         
         self._continue_button = UiFactory.create_button('CONTINUE', self._on_continue)
-        self._music_button = UiFactory.create_button('MUSIC', self._on_music_control, is_active = SoundController.music_on())
-        self._sound_button = UiFactory.create_button('SOUND', self._on_sound_control, is_active = SoundController.sound_on())
+        self._music_button = UiFactory.create_button('MUSIC', self._on_music_control, is_active = SoundController.is_music_on())
+        self._sound_effect_button = UiFactory.create_button('SOUND EFFECT', self._on_sound_effect_control, is_active = SoundController.is_sound_effect_on())
+        self._sound_of_space_button = UiFactory.create_button('SOUND OF SPACE', self._on_sound_of_space_control, is_active = SoundController.is_sound_of_space_on())
         self._map_button = UiFactory.create_button('MAP BUTTON', self._on_map_button)
         self._quit_button = UiFactory.create_button('QUIT', self._on_back)
        
@@ -40,21 +42,20 @@ class PauseScreen(PageBase):
         G_Router.pop()
         
     def _on_music_control(self):
-        SoundController.set_music_on(not SoundController.music_on())
-        if SoundController.music_on() == True:
-            self._music_button = UiFactory.create_button('MUSIC', on_clicked=self._on_music_control)
-        else:
-            self._music_button = UiFactory.create_button('MUSIC', on_clicked=self._on_music_control, is_active = False)
+        SoundController.set_music(not SoundController.is_music_on())
+        self._music_button = UiFactory.create_button('MUSIC', on_clicked=self._on_music_control, is_active = SoundController.is_music_on())
             
     def _on_map_button(self):
         G_Router.push(MapButtonScreen(self._controller.key_map))
             
-    def _on_sound_control(self):
-        SoundController.set_sound_on(not SoundController.sound_on())
-        if SoundController.sound_on() == True:
-            self._sound_button = UiFactory.create_button('SOUND', on_clicked=self._on_sound_control)
-        else:
-            self._sound_button = UiFactory.create_button('SOUND', on_clicked=self._on_sound_control, is_active = False)
+    def _on_sound_effect_control(self):
+        SoundController.set_sound_effect(not SoundController.is_sound_effect_on())
+        self._sound_effect_button = UiFactory.create_button('SOUND EFFECT', on_clicked=self._on_sound_effect_control, is_active = SoundController.is_sound_effect_on())
+            
+    def _on_sound_of_space_control(self):
+        SoundController.set_sound_of_space(not SoundController.is_sound_of_space_on())
+        self._sound_of_space_button = UiFactory.create_button('SOUND OF SPACE', on_clicked=self._on_sound_of_space_control, is_active = SoundController.is_sound_of_space_on())
+       
             
         
     def _on_back(self):
@@ -64,17 +65,18 @@ class PauseScreen(PageBase):
     def _start_sequence(self, lerp:Lerp):
         y_continue = lerp.cubic_ease_out(0, self._m_CONTINUE_position[1])
         y_music = lerp.cubic_ease_out(0, self._m_MUSIC_position[1])
-        y_sound = lerp.cubic_ease_out(0, self._m_SOUND_position[1])
+        y_sound_effect = lerp.cubic_ease_out(0, self._m_SOUND_EFFECT_position[1])
+        y_sound_of_space = lerp.cubic_ease_out(0, self._m_SOUND_OF_SPACE_position[1])
         y_map_button = lerp.cubic_ease_out(0, self._m_MAP_BUTTON_position[1])
         y_quit = lerp.cubic_ease_out(0, self._m_QUIT_position[1])
         screen_alpha = lerp.cubic_ease_out(0, 230)
         
-        return y_continue, y_music, y_sound, y_map_button, y_quit, screen_alpha
+        return y_continue, y_music, y_sound_effect, y_sound_of_space, y_map_button, y_quit, screen_alpha
         
         
     def draw(self, screen:pygame.surface.Surface, **kwargs):
         
-        y_continue, y_music, y_sound, y_map_button, y_quit, screen_alpha = self._start_sequence_lerp.do(500, self._start_sequence).value
+        y_continue, y_music, y_sound_effect, y_sound_of_space, y_map_button, y_quit, screen_alpha = self._start_sequence_lerp.do(500, self._start_sequence).value
         
         self.transparent_screen.fill(Colors.background_color)
         self.transparent_screen.set_alpha(screen_alpha)
@@ -82,7 +84,8 @@ class PauseScreen(PageBase):
         
         self._continue_button.draw(screen, (self._m_CONTINUE_position[0], y_continue))
         self._music_button.draw(screen, (self._m_MUSIC_position[0], y_music))
-        self._sound_button.draw(screen, (self._m_SOUND_position[0], y_sound))
+        self._sound_effect_button.draw(screen, (self._m_SOUND_EFFECT_position[0], y_sound_effect))
+        self._sound_of_space_button.draw(screen, (self._m_SOUND_OF_SPACE_position[0], y_sound_of_space))
         self._map_button.draw(screen, (self._m_MAP_BUTTON_position[0], y_map_button))
         self._quit_button.draw(screen, (self._m_QUIT_position[0], y_quit))
        

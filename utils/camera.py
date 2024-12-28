@@ -1,6 +1,6 @@
 
 import numpy as np
-from constant import SHAKE_EVENT
+from config.event_config import EventConfig
 from utils.lerp import Lerp
 
 
@@ -10,29 +10,34 @@ class Camera():
         self.intensity = intensity
         self.frequency = frequency
         self.lerp = None
+        self._displacement = 0
         
     
     def handle_event(self, event):
-        if event.type == SHAKE_EVENT:
+        if event.type == EventConfig.shake_event:
             self.lerp = Lerp()
             
-    def shake(self, x:float):
-        if self.lerp == None:
-            return x
+    def update(self):
         
-        lerp = self.lerp.do(self.duration, self.shakeFunction, x=x)
-        if lerp.is_done == False:
-            return lerp.value
-        else:
-            return x
+        if self.lerp == None:
+            self._displacement = 0
+        else: 
+            self._displacement = self.lerp.do(self.duration, self.shake_function).value
             
-    def watch(self, x):
-        return np.array(list(map(self.shake, x)))
+        # lerp_object = self.lerp.do(4000, self.shake_function)
+        # if not lerp_object.is_done:
+        #     self._displacement = lerp_object.value
+        # else:
+        #     self._displacement = 0
+            
+            
+    def watch(self, pos):
+        return self._displacement + np.array(list(pos))
        
             
         
-    def shakeFunction(self, lerp:Lerp, x):
+    def shake_function(self, lerp:Lerp):
         displacement = lerp.sinusoidal(-self.intensity, self.intensity, self.frequency) * lerp.ease_out(1, 0)
-        return x + displacement
+        return displacement
         
         

@@ -5,6 +5,7 @@ import pygame
 import Box2D
 from config.event_config import  EventConfig
 from config.controller_config import ControllerConfig
+from config.global_config import GlobalConfig
 from gRouter import G_Router
 from gameObjects.objectBase import ObjectBase
 from pages.page_base import PageBase
@@ -26,7 +27,7 @@ from utils.camera import Camera
 from utils.box2DHelperClasses import CollisionFilter, ContactListener
 from gameObjects.asteroid import Asteroid
 from gameObjects.cannon import Cannon
-from constant import MAX_ASTEROID_PER_LEVEL, SHAKE_DURATION, SHAKE_EVENT, SHAKE_FREQUENCY, SHAKE_INTENSITY, WIDTH, HEIGHT, WSCALE
+from constant import SHAKE_EVENT, WIDTH, HEIGHT, WSCALE
 from pages.hud import Hud
 from gameObjects.ship import Ship
 
@@ -45,7 +46,7 @@ class Game(PageBase):
 
         self._number_of_asteroid_spawned = 0
       
-        self._camera = Camera(SHAKE_DURATION, SHAKE_INTENSITY, SHAKE_FREQUENCY)
+        self._camera = Camera(GlobalConfig.camera_shake_duration, GlobalConfig.camera_shake_intensity, GlobalConfig.camera_shake_frequency)
         self._world = Box2D.b2World((0, 0), doSleep=True)
         self._world.contactFilter = CollisionFilter()
         self._world.contactListener = ContactListener()
@@ -57,6 +58,7 @@ class Game(PageBase):
         
         
    
+        self._ship_penalty_strategy = PenaltyStrategy(self._report_ship_collision_for_hud, self._report_ship_out_of_bound_for_hud, self._reset_ship_penalty_for_hud)
         self._ship = Ship(self._world, self._camera, self._register_projectile, self._register_ship_asteroid_collision, game_controller.report_projectile_fired, self._game_controller.ship_level, False)
   
         self._projectile_list = [ObjectBase]
@@ -70,14 +72,9 @@ class Game(PageBase):
         self._update_reticle()
         self._perk_delay = Delay()
        
-        self._penalty_strategy = PenaltyStrategy(self._hud)
         
         self.page_index:int = None
         
-        
-        
-        # activity = self._controller.set_bonus_time(ControllerParameter.get_bonus_time(self._controller.previous_level_time))
-        # self._timed_list.register_item(activity)
 
         
     def _create_world_boundary(self):
@@ -100,6 +97,16 @@ class Game(PageBase):
             
         )
       
+      
+    def _report_ship_collision_for_hud(self, penalty_point):
+        self._hud.update_penalty_bar_ship_collision(penalty_point)
+    
+    def _report_ship_out_of_bound_for_hud(self, penalty_point):
+        self._hud.update_penalty_bar_out_of_bound(penalty_point)
+    
+    def _reset_ship_penalty_for_hud(self):
+        self._hud.update_penalty_bar_ship_collision(0)
+
     
         
     def _register_projectile(self, projectile:Cannon | Rocket):
@@ -108,7 +115,7 @@ class Game(PageBase):
     def _register_ship_asteroid_collision(self, penalty):
         pygame.event.post(pygame.event.Event(SHAKE_EVENT))
         self._create_spark(self._ship.position)
-        self._penalty_strategy.penalise_collision(penalty)
+        self._ship_penalty_strategy.penalise_collision(penalty)
      
         
     def _update_projectiles(self):
@@ -226,14 +233,14 @@ class Game(PageBase):
     
     
     def _spawn_rocket_perk(self):
-        spawn_position = (50 + random.random() * (WIDTH - 100), 50 + random.random() * (HEIGHT - 100))
+        spawn_position = (50 + random.random() * (GlobalConfig.width - 100), 50 + random.random() * (GlobalConfig.height - 100))
         perk = Perk.rocket(spawn_position, self._camera)
         self._perks_list.append(perk)
         self._game_controller.report_rocket_perk_spawned()
         
         
     def _spawn_upgrade_perk(self):
-        spawn_position = (50 + random.random() * (WIDTH - 100), 50 + random.random() * (HEIGHT - 100))
+        spawn_position = (50 + random.random() * (GlobalConfig.width - 100), 50 + random.random() * (GlobalConfig.height - 100))
         perk = Perk.upgrade(spawn_position, self._camera)
         self._perks_list.append(perk)
         self._game_controller.report_upgrade_perk_spawned()
@@ -327,7 +334,7 @@ class Game(PageBase):
             self._world.Step(1.0/60, self.VELOCITY_ITERATIONS, self.POSITION_ITERATIONS)
             self._projectile_asteroid_collision()
             self._ship_perks_collision()
-            self._ship.update(self._game_controller.ship_level)
+            self._ship.update(self._game_controller.ship_level, self._ship_penalty_strategy.penalty_active())
             self._update_projectiles()
             self._update_asteroids()
             self._update_particles()
@@ -335,8 +342,9 @@ class Game(PageBase):
             self._update_reticle()
             self._update_perks()
             self._spawn_strategy.update(self._game_controller.level_time, self._can_spawn_asteroid, self._game_controller.game_level)
-            self._penalty_strategy.update(not self._ship.in_boundary)
+            self._ship_penalty_strategy.update(not self._ship.in_boundary)
             self._timed_list.update()
+            self._camera.update()
             
       
            

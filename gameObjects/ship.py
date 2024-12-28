@@ -267,7 +267,9 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
 
        
    
-    def update(self, ship_level):
+    def update(self, ship_level, is_penalty_active):
+        
+        self._penalty_active = is_penalty_active
         
         self._ship_level_watcher.watch(ship_level)
         
@@ -275,9 +277,10 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
         self.in_boundary = check_box2D_object_in_bounds(self._ship_body_box2D)
         
-        if self.in_boundary:
-            self._cannon_fire_strategy.update(self._fire_cannon)
-            self._rocket_fire_strategy.update(self._fire_missile)
+        # if self.in_boundary:
+        is_ship_in_penalty = not self.in_boundary or is_penalty_active
+        self._cannon_fire_strategy.update(is_ship_in_penalty, self._fire_cannon)
+        self._rocket_fire_strategy.update(is_ship_in_penalty, self._fire_missile)
           
     
         self._boost_ship(self._ship_body_box2D, self._boosting, self.BOOST_FORCE, self.SHIP_BASE_POINT)
@@ -314,6 +317,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
             
     def _draw_flame(self, screen:pygame.surface.Surface, angle:float):
         rocket_pos = to_pixel_position(self._ship_body_box2D .GetWorldPoint((.2, self.SHIP_BASE_POINT - 2)), GlobalConfig.world_scale, GlobalConfig.height)
+        rocket_pos = self._camera.watch(rocket_pos)
         self.animation_handler.animate(rocket_pos, angle, screen)
         
         

@@ -43,6 +43,7 @@ class Perk(ObjectBase, ProjectileBase):
         self._target:ObjectBase = None
         self._delay_duration = random.randint(3000, 5000)
         self._attraction_lerp = Lerp()
+        self._camera_adjusted_position = (0, 0)
         
     @classmethod
     def rocket(cls, position, camera): 
@@ -115,7 +116,7 @@ class Perk(ObjectBase, ProjectileBase):
     def update(self):
         self._scale, _displacement = self._time_to_die_lerp.do(self._time_to_die, self._scale_and_displacement, self.check_and_dispose).value
         if self._target == None:
-            self._position = (self.position[0], self.position[1] + _displacement)
+            self._position = (self._position[0], self._position[1] + _displacement)
         else:
             position_difference = self._target.position - self.position 
             direction_to_target = v_norm(position_difference)
@@ -124,16 +125,16 @@ class Perk(ObjectBase, ProjectileBase):
             attraction_factor = self._attraction_lerp.do(1000, lambda lerp: lerp.cubic_ease_in(0, 1)).value
             self._position += direction_to_target * distance_to_target * attraction_factor
              
-        self._position = self._camera.watch(self.position)
+        self._camera_adjusted_position = self._camera.watch(self._position)
         
         
     def draw(self, screen:pygame.surface.Surface):
         self.image = scale(self._surface, self._scale)
-        self.rect = self.image.get_rect(center = self._position)
+        self.rect = self.image.get_rect(center = self._camera_adjusted_position)
         screen.blit(self.image, self.rect.topleft)
         
         label_render = scale(self.label_render, self._scale)
-        label_rect = label_render.get_rect(center = (self._position[0] + 1.4, self.position[1] + 2.8))
+        label_rect = label_render.get_rect(center = (self._camera_adjusted_position[0] + 1.4, self._camera_adjusted_position[1] + 2.8))
         screen.blit(label_render, label_rect.topleft)
         
         

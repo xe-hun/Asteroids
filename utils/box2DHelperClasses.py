@@ -2,7 +2,7 @@
 import Box2D
 import pygame
 
-from constant import SHAKE_EVENT
+
 # import gameObjects.asteroid as asteroid
 import gameObjects as g_o
 

@@ -6,41 +6,47 @@ import pygame
 
 class SoundController():
     
-    _music_on = False
-    _sound_on = False
+    _is_music_on = False
+    _is_sound_effect_on = False
+    _is_sound_of_space_on = False
     
-    def set_music_on(value:bool):
-        SoundController._music_on = value
+    def set_music(value:bool):
+        SoundController._is_music_on = value
         SoundController.sound_track_channel().set_volume(float(value))
         
-    def set_sound_on(value:bool):
-        SoundController._sound_on = value
+    def set_sound_effect(value:bool):
+        SoundController._is_sound_effect_on = value
         
         for i in SoundController._effect_channels:
             i.set_volume(float(value))
         
-        SoundController.ship_boost_channel().set_volume(float(value))
-        # SoundController.game_effect_channel().set_volume(float(value))
-        SoundController.ship_weapon_channel().set_volume(float(value))
+      
         SoundController.achievement_channel().set_volume(float(value))
+        
+    def set_sound_of_space(value:bool):
+        SoundController._is_sound_of_space_on = value
+        SoundController.ship_boost_channel().set_volume(float(value))
+        SoundController.ship_weapon_channel().set_volume(float(value))
         
         
     
    
-    def music_on ():
-        return SoundController._music_on
+    def is_music_on ():
+        return SoundController._is_music_on
    
    
     # @music_on.setter
     # def music_on (value:bool):
     #     pass
-        # print('kemba')
         # SoundController._music_on = value
         # SoundController.sound_track_channel().set_volume(float(value))
         
  
-    def sound_on ():
-        return SoundController._sound_on
+    def is_sound_effect_on ():
+        return SoundController._is_sound_effect_on
+    
+    def is_sound_of_space_on():
+        return SoundController._is_sound_of_space_on
    
     # @sound_on.setter
     # def sound_on (value:bool):

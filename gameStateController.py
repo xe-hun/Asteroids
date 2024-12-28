@@ -18,15 +18,14 @@ class GameStateController():
         self.ASTEROID_DESTROYED_POINT = 100
         self.NEW_LEVEL_POINT = ControllerConfig.new_level_point
 
-        self.START_LIVES = 2
         
         self._high_score = 0
         self._bonus_time = 0
         self._level_time = 0
         self._number_of_asteroids_destroyed = 0
-        self._game_level = 1
+        self._game_level = ControllerConfig.start_game_level
         # self._ship_level = 10
-        self._ship_level = 1
+        self._ship_level = ControllerConfig.start_ship_level
       
         # self._lives_remaining = self.START_LIVES
         self._game_score = 0
@@ -35,8 +34,8 @@ class GameStateController():
         
    
         self._game_score_counter = 0
-        SoundController.set_music_on(True)
-        SoundController.set_sound_on(True)
+        SoundController.set_music(True)
+        SoundController.set_sound_effect(True)
         
    
         self.delay_before_new_level = Delay()
