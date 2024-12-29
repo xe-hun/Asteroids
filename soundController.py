@@ -25,8 +25,8 @@ class SoundController():
         
     def set_sound_of_space(value:bool):
         SoundController._is_sound_of_space_on = value
-        SoundController.ship_boost_channel().set_volume(float(value))
-        SoundController.ship_weapon_channel().set_volume(float(value))
+        SoundController.ship_boost_channel().set_volume(float(not value))
+        SoundController.ship_weapon_channel().set_volume(float(not value))
         
         
     
@@ -34,13 +34,6 @@ class SoundController():
     def is_music_on ():
         return SoundController._is_music_on
    
-   
-    # @music_on.setter
-    # def music_on (value:bool):
-    #     pass
-        # SoundController._music_on = value
-        # SoundController.sound_track_channel().set_volume(float(value))
-        
  
     def is_sound_effect_on ():
         return SoundController._is_sound_effect_on
@@ -48,16 +41,6 @@ class SoundController():
     def is_sound_of_space_on():
         return SoundController._is_sound_of_space_on
    
-    # @sound_on.setter
-    # def sound_on (value:bool):
-    #     pass
-        # SoundController._sound_on = value
-        # SoundController.ship_boost_channel().set_volume(float(value))
-        # SoundController.game_effect_channel().set_volume(float(value))
-        # SoundController.ship_weapon_channel().set_volume(float(value))
-
-   
-    
     
     @staticmethod
     def load_resources(laser_fire_sound_filepath,
@@ -110,13 +93,6 @@ class SoundController():
     def ship_boost_channel():
         return pygame.mixer.Channel(SoundController._num_effect_channel + 1)
     
-   
-    
-
-    
-    # @staticmethod
-    # def game_effect_channel():
-    #     return pygame.mixer.Channel(6)
     
     @staticmethod
     def sound_track_channel():
@@ -125,3 +101,4 @@ class SoundController():
     @staticmethod
     def achievement_channel():
         return pygame.mixer.Channel(SoundController._num_effect_channel + 3)
+    

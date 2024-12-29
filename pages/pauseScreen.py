@@ -1,12 +1,12 @@
 import pygame
-from config.global_config import GlobalConfig
-from config.event_config import EventConfig
+from config.GlobalConfig import GlobalConfig
+from config.EventConfig import EventConfig
 from utils.colors import Colors
 
 from gRouter import G_Router
 from gameStateController import GameStateController
 from pages.mapButtonScreen import MapButtonScreen
-from pages.page_base import PageBase
+from pages.pageBase import PageBase
 from soundController import SoundController
 from ui.uiFactory import UiFactory
 from utils.lerp import Lerp
@@ -31,11 +31,20 @@ class PauseScreen(PageBase):
         self._start_sequence_lerp = Lerp()
         
         self._continue_button = UiFactory.create_button('CONTINUE', self._on_continue)
-        self._music_button = UiFactory.create_button('MUSIC', self._on_music_control, is_active = SoundController.is_music_on())
-        self._sound_effect_button = UiFactory.create_button('SOUND EFFECT', self._on_sound_effect_control, is_active = SoundController.is_sound_effect_on())
-        self._sound_of_space_button = UiFactory.create_button('SOUND OF SPACE', self._on_sound_of_space_control, is_active = SoundController.is_sound_of_space_on())
+        self._music_button = self._create_music_button()
+        self._sound_effect_button = self._create_sound_effect_button()
+        self._sound_of_space_button = self._create_sound_of_space_button()
         self._map_button = UiFactory.create_button('MAP BUTTON', self._on_map_button)
-        self._quit_button = UiFactory.create_button('QUIT', self._on_back)
+        self._quit_button = UiFactory.create_button('QUIT', self._on_quit)
+        
+    def _create_music_button(self):
+        return UiFactory.create_button('MUSIC', self._on_music_control, is_active = SoundController.is_music_on())
+        
+    def _create_sound_effect_button(self):
+        return UiFactory.create_button('SOUND EFFECT', self._on_sound_effect_control, is_active = SoundController.is_sound_effect_on())
+        
+    def _create_sound_of_space_button(self):        
+        return UiFactory.create_button('SOUND OF SPACE', self._on_sound_of_space_control, is_active = SoundController.is_sound_of_space_on())
        
     def _on_continue(self): 
         self._controller.game_paused = False
@@ -43,22 +52,22 @@ class PauseScreen(PageBase):
         
     def _on_music_control(self):
         SoundController.set_music(not SoundController.is_music_on())
-        self._music_button = UiFactory.create_button('MUSIC', on_clicked=self._on_music_control, is_active = SoundController.is_music_on())
+        self._music_button = self._create_music_button()
             
     def _on_map_button(self):
         G_Router.push(MapButtonScreen(self._controller.key_map))
             
     def _on_sound_effect_control(self):
         SoundController.set_sound_effect(not SoundController.is_sound_effect_on())
-        self._sound_effect_button = UiFactory.create_button('SOUND EFFECT', on_clicked=self._on_sound_effect_control, is_active = SoundController.is_sound_effect_on())
+        self._sound_effect_button = self._create_sound_effect_button()
             
     def _on_sound_of_space_control(self):
         SoundController.set_sound_of_space(not SoundController.is_sound_of_space_on())
-        self._sound_of_space_button = UiFactory.create_button('SOUND OF SPACE', on_clicked=self._on_sound_of_space_control, is_active = SoundController.is_sound_of_space_on())
+        self._sound_of_space_button = self._create_sound_of_space_button()
        
             
         
-    def _on_back(self):
+    def _on_quit(self):
          pygame.event.post(pygame.event.Event(EventConfig.exit_game_event))
         
         

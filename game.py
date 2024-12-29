@@ -3,12 +3,12 @@ import random
 import numpy as np
 import pygame
 import Box2D
-from config.event_config import  EventConfig
-from config.controller_config import ControllerConfig
-from config.global_config import GlobalConfig
+from config.EventConfig import  EventConfig
+from config.ControllerConfig import ControllerConfig
+from config.GlobalConfig import GlobalConfig
 from gRouter import G_Router
 from gameObjects.objectBase import ObjectBase
-from pages.page_base import PageBase
+from pages.pageBase import PageBase
 from pages.pauseScreen import PauseScreen
 from strategies.penaltyStrategy import PenaltyStrategy
 from soundController import SoundController
@@ -24,10 +24,9 @@ from gameObjects.sparks import Sparks
 from gameStateController import GameStateController
 from utils.helper import get_target_within_range, v_mag, v_to_angle
 from utils.camera import Camera
-from utils.box2DHelperClasses import CollisionFilter, ContactListener
+from utils.box2DHelperClass import Box2DHelperClass
 from gameObjects.asteroid import Asteroid
 from gameObjects.cannon import Cannon
-from constant import SHAKE_EVENT, WIDTH, HEIGHT, WSCALE
 from pages.hud import Hud
 from gameObjects.ship import Ship
 
@@ -42,16 +41,18 @@ class Game(PageBase):
         
         self.VELOCITY_ITERATIONS = 10
         self.POSITION_ITERATIONS = 10
-        
-
         self._number_of_asteroid_spawned = 0
       
         self._camera = Camera(GlobalConfig.camera_shake_duration, GlobalConfig.camera_shake_intensity, GlobalConfig.camera_shake_frequency)
-        self._world = Box2D.b2World((0, 0), doSleep=True)
-        self._world.contactFilter = CollisionFilter()
-        self._world.contactListener = ContactListener()
+        
+        
+        # self._world = Box2D.b2World((0, 0), doSleep=True)
+        # self._world.contactFilter = _CollisionFilter()
+        # self._world.contactListener = _ContactListener()
+        self._world = Box2DHelperClass.init_world()
         
         self._create_world_boundary()
+        
         self._spawn_strategy = SpawnStrategy(self._spawn_asteroid, self._spawn_rocket_perk, self._spawn_upgrade_perk)
         
         
@@ -79,8 +80,8 @@ class Game(PageBase):
         
     def _create_world_boundary(self):
         
-        width = WIDTH / WSCALE
-        height = HEIGHT / WSCALE
+        width = GlobalConfig.width / GlobalConfig.world_scale
+        height = GlobalConfig.height / GlobalConfig.world_scale
         offset = 50
         
         self._world.CreateStaticBody(
@@ -113,7 +114,7 @@ class Game(PageBase):
         self._projectile_list.append(projectile)
         
     def _register_ship_asteroid_collision(self, penalty):
-        pygame.event.post(pygame.event.Event(SHAKE_EVENT))
+        pygame.event.post(pygame.event.Event(EventConfig.shake_event))
         self._create_spark(self._ship.position)
         self._ship_penalty_strategy.penalise_collision(penalty)
      
@@ -334,7 +335,9 @@ class Game(PageBase):
             self._world.Step(1.0/60, self.VELOCITY_ITERATIONS, self.POSITION_ITERATIONS)
             self._projectile_asteroid_collision()
             self._ship_perks_collision()
-            self._ship.update(self._game_controller.ship_level, self._ship_penalty_strategy.penalty_active())
+            self._ship.update(self._game_controller.ship_level,
+                              self._ship_penalty_strategy.penalty_active,
+                              self._game_controller.rocket_empty)
             self._update_projectiles()
             self._update_asteroids()
             self._update_particles()
@@ -383,5 +386,9 @@ class Game(PageBase):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.toggle_pause_state()
+                
+    def dispose(self):
+        self._ship.dispose()
+        Box2DHelperClass.dispose_world()
         
         

@@ -1,5 +1,5 @@
 import random
-from config.controller_config import ControllerConfig
+from config.ControllerConfig import ControllerConfig
 from utils.delay import Delay
 
 

@@ -2,8 +2,8 @@
 import math
 import numpy as np
 import pygame
-from config.global_config import GlobalConfig
-from config.rocket_config import RocketConfig
+from config.GlobalConfig import GlobalConfig
+from config.RocketConfig import RocketConfig
 # from rocketConfig import RocketConfig
 from utils.delay import Delay
 from gameObjects.objectBase import ObjectBase, ProjectileBase
@@ -19,12 +19,14 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         
         self._camera = camera
         
-        self.image = scale(pygame.image.load(RocketConfig.image_path).convert_alpha(), .2)
+        self._surface = scale(pygame.image.load(RocketConfig.image_path).convert_alpha(), .2)
+        self.image = self._surface.copy()
         self.rect = self.image.get_rect()
         
         self._speed = RocketConfig.speed
         self._angle = 0
         self._position = np.array(start_position)
+        self._camera_adjusted_position = self._position.copy()
         self._updated_direction = start_direction
         self._direction = self._updated_direction
         self._turn_rate = math.radians(RocketConfig.turn_rate_degrees)
@@ -40,7 +42,7 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         
         
     def to_world_pos(self, vec:tuple):
-        return self._position + v_rotate(vec, self._angle)
+        return self._camera_adjusted_position + v_rotate(vec, self._angle)
     
     def _draw_flare(self, screen:pygame.surface.Surface):
         rect = self.flare_image.get_rect(center=self.to_world_pos((-7, .2)))
@@ -85,6 +87,7 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         if self._rocket_life_delay != None:
             self._rocket_life_delay.delay(1000, self._on_count_down, True)
         
+        
         self.rocket_on = self.flare_delay.delay(200).is_done
         
         if self.rocket_on:
@@ -97,7 +100,10 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         self._angle = math.atan2(self._direction[1], self._direction[0])
   
         self._position += velocity
-        self._smoke.update(self.direction, velocity, self.position)
+        self._camera_adjusted_position = self._camera.watch(self._position)
+        
+        self._smoke.update(self.direction, velocity, self._camera_adjusted_position)
+        
 
         
     
@@ -106,9 +112,9 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         if self.rocket_on:
             self._draw_flare(screen)
        
-        rotImg = pygame.transform.rotate(self.image, -math.degrees(self._angle))
-        self.rect = rotImg.get_rect(center = (self._position[0], self._position[1]))
-        screen.blit(rotImg, self.rect.topleft)
+        self.image = pygame.transform.rotate(self._surface, -math.degrees(self._angle))
+        self.rect = self.image.get_rect(center = (self._camera_adjusted_position[0], self._camera_adjusted_position[1]))
+        screen.blit(self.image, self.rect.topleft)
         
         if self.rocket_on:
             self._smoke.draw(screen)

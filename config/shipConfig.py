@@ -29,6 +29,12 @@ class ShipConfig():
     
     flame_path = os.path.join(Helper.resource_path(), 'images', 'flame101x186.png')
     
+    @staticmethod
+    def ship_durability(ship_level:int):
+        min_value = 2
+        max_value = 3.5
+        return int(Helper.asymptotic_value(min_value, max_value, 0.1, ship_level))
+        
 
     @staticmethod
     def ship_upgrade_perks_to_completion(ship_level:int):

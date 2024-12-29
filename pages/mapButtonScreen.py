@@ -1,13 +1,13 @@
 
 import pygame
-from config.global_config import GlobalConfig
-from config.buttonMapConfig import MiscConfig
-from config.event_config import EventConfig
+from config.GlobalConfig import GlobalConfig
+from config.MiscConfig import MiscConfig
+from config.EventConfig import EventConfig
 from utils.colors import Colors
 from customEnum import ShipActions
 from gRouter import G_Router
 from globalResolver import GlobalResolver
-from pages.page_base import PageBase
+from pages.pageBase import PageBase
 from utils.helper import Helper
 from ui.button import Button
 from ui.uiFactory import UiFactory

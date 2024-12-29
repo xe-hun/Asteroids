@@ -1,6 +1,6 @@
 import random
 from config.asteroidConfig import AsteroidConfig
-from config.global_config import GlobalConfig
+from config.GlobalConfig import GlobalConfig
 from utils.colors import Colors
     
 import math

@@ -3,7 +3,7 @@ import random
 
 import pygame
 
-from config.global_config import GlobalConfig
+from config.GlobalConfig import GlobalConfig
 
 
 class WorldStar():

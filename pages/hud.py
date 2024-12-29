@@ -1,6 +1,6 @@
 import pygame
-from config.global_config import GlobalConfig
-from config.rocket_config import RocketConfig
+from config.GlobalConfig import GlobalConfig
+from config.RocketConfig import RocketConfig
 from soundController import SoundController
 from utils.fonts import Fonts
 from utils.colors import Colors

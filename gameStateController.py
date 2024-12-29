@@ -1,13 +1,14 @@
 import pygame
 
 from Activity import Activity
-from config.buttonMapConfig import MiscConfig
-from config.event_config import EventConfig
-from config.controller_config import ControllerConfig
+from config.MiscConfig import MiscConfig
+from config.EventConfig import EventConfig
+from config.ControllerConfig import ControllerConfig
 from gameObjects.rocket import Rocket
-from config.controller_config import ControllerConfig
+from config.ControllerConfig import ControllerConfig
 from gRouter import G_Router
 from config.shipConfig import ShipConfig
+from model.save_data_model import SaveDataModel
 from soundController import SoundController
 from utils.helper import Helper
 from utils.delay import Delay
@@ -19,7 +20,7 @@ class GameStateController():
         self.NEW_LEVEL_POINT = ControllerConfig.new_level_point
 
         
-        self._high_score = 0
+        
         self._bonus_time = 0
         self._level_time = 0
         self._number_of_asteroids_destroyed = 0
@@ -36,6 +37,7 @@ class GameStateController():
         self._game_score_counter = 0
         SoundController.set_music(True)
         SoundController.set_sound_effect(True)
+        SoundController.set_sound_of_space(False)
         
    
         self.delay_before_new_level = Delay()
@@ -45,27 +47,31 @@ class GameStateController():
         self._ship_rocket_count = ControllerConfig.start_rocket_quantity
         
         self._game_paused = False
-        self._load_key_map()
+        self._load_config()
         
        
-    def _load_key_map(self):        
+    def _load_config(self):        
         key_map = Helper.load_key_map(MiscConfig.map_button_save_location) 
         self.key_map = key_map if key_map != None else MiscConfig.default_key_map
+        
+        saved_data = Helper.load_data(MiscConfig.saved_data_location)
+        self._saved_data = SaveDataModel.from_dict(saved_data)
+        
 
-    def _score_update(self):
-        def update():
-             self._game_score_counter += counter_step
+    # def _score_update(self):
+    #     def update():
+    #          self._game_score_counter += counter_step
         
-        # update the highScore
-        if self._game_score > self._high_score:
-            self._high_score = self._game_score
+    #     # update the highScore
+    #     if self._game_score > self._highest_level:
+    #         self._highest_level = self._game_score
             
-        counter_step = int((self._game_score - self._game_score_counter) / 50)
+    #     counter_step = int((self._game_score - self._game_score_counter) / 50)
         
-        if self._game_score_counter <= self._game_score:
-            self.counter_delay.delay(100, on_done=update,  reset=True)
-        else:
-            self._game_score_counter = self._game_score
+    #     if self._game_score_counter <= self._game_score:
+    #         self.counter_delay.delay(100, on_done=update,  reset=True)
+    #     else:
+    #         self._game_score_counter = self._game_score
         
     def set_level_in_progress(self, value):
         self._level_in_progress = value
@@ -91,6 +97,10 @@ class GameStateController():
     def ship_rocket_count(self):
         return self._ship_rocket_count   
     
+    @property
+    def rocket_empty(self):
+        return self.ship_rocket_count <= 0
+    
     
     @property
     def ship_upgrade_perk_collected(self):
@@ -105,8 +115,12 @@ class GameStateController():
         return self._ship_level
     
     @property
-    def high_score(self):
-        return self._high_score    
+    def best_level(self):
+        return self.saved_data.best_level    
+      
+    @property
+    def saved_data(self):
+        return self._saved_data    
           
     @property  
     def is_time_up(self):
@@ -196,7 +210,8 @@ class GameStateController():
         if self.game_paused:
             return
         
-        self._score_update()
+        # self._score_update()
+        self.saved_data.best_level = max(self.saved_data.best_level, self.game_level)
         
        
         if level_completed:
@@ -231,4 +246,4 @@ class GameStateController():
             self._game_time_pulse()
         
         if event.type == EventConfig.save_button_map_event:
-            self._load_key_map()
+            self._load_config()

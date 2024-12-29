@@ -1,6 +1,6 @@
 
 import numpy as np
-from config.event_config import EventConfig
+from config.EventConfig import EventConfig
 from utils.lerp import Lerp
 
 
@@ -23,13 +23,7 @@ class Camera():
             self._displacement = 0
         else: 
             self._displacement = self.lerp.do(self.duration, self.shake_function).value
-            
-        # lerp_object = self.lerp.do(4000, self.shake_function)
-        # if not lerp_object.is_done:
-        #     self._displacement = lerp_object.value
-        # else:
-        #     self._displacement = 0
-            
+        
             
     def watch(self, pos):
         return self._displacement + np.array(list(pos))

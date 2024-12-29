@@ -1,12 +1,12 @@
-from config.global_config import GlobalConfig
-from config.event_config import EventConfig
+from config.GlobalConfig import GlobalConfig
+from config.EventConfig import EventConfig
 from utils.fonts import Fonts
 from utils.colors import Colors
 
 
 import pygame
 
-from pages.page_base import PageBase
+from pages.pageBase import PageBase
 from ui.uiFactory import UiFactory
 
 

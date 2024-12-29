@@ -2,8 +2,8 @@ import math
 import numpy as np
 import pygame
 import Box2D
-from config.global_config import GlobalConfig
-from config.buttonMapConfig import MiscConfig
+from config.GlobalConfig import GlobalConfig
+from config.MiscConfig import MiscConfig
 from utils.colors import Colors
 from customEnum import ShipActions, Steering
 
@@ -15,7 +15,7 @@ from gameObjects.rocket import Rocket
 from config.shipConfig import ShipConfig
 from strategies.shootingStrategy import ShootingStrategy
 from utils.camera import Camera
-from utils.box2DHelperClasses import RaycastCallback
+from utils.box2DHelperClass import RaycastCallback
 from utils.helper import Helper, v_angle_diff, check_box2D_object_in_bounds, clamp, v_dot, v_norm, v_rotate, scale, v_to_angle, v_to_component, to_box2D_position,\
                         to_pixel_position, debug_draw_box2D_bodies
 from gameObjects.cannon import Cannon
@@ -37,7 +37,6 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self._collision_force = 0
         
       
-        self.MAX_COLLISION_FORCE = ShipConfig.max_collision_force
       
         self._set_ship_parameters(ship_level)
         
@@ -58,7 +57,8 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
         # ship parameters
         self._turn_force = 0
-        self._position = (GlobalConfig.width // 2, GlobalConfig.height // 2)
+        self._position = np.array((GlobalConfig.width // 2, GlobalConfig.height // 2))
+        self._camera_adjusted_position = self._position.copy()
    
 
         # rocket kick back parameters
@@ -127,9 +127,13 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self.BOOST_FORCE = ShipConfig.boost_force(ship_level)
         
         self._ship_level_watcher = Watcher(self._on_ship_level_change, ship_level)
+        
+        self.SHIP_DURABILITY = ShipConfig.ship_durability(ship_level)
+        self.MAX_COLLISION_FORCE = ShipConfig.max_collision_force
+
     
-    def _on_ship_level_change(self, value):
-        self._set_ship_parameters(value)
+    def _on_ship_level_change(self, ship_level):
+        self._set_ship_parameters(ship_level)
         
        
 
@@ -177,7 +181,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         if self._is_colliding:
             
             self._collision_force = min(self._collision_force, self.MAX_COLLISION_FORCE)
-            penalty_point = self._collision_force / (2 * self.MAX_COLLISION_FORCE)
+            penalty_point = self._collision_force / (self.SHIP_DURABILITY * self.MAX_COLLISION_FORCE)
             self._register_damage(penalty_point)
         
         self._is_colliding = False
@@ -264,10 +268,12 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self._alive = False
         self._ship_surface = None
         self._world.DestroyBody(self._ship_body_box2D)
+        SoundController.ship_boost_channel().stop()
 
        
    
-    def update(self, ship_level, is_penalty_active):
+    def update(self, ship_level, is_penalty_active, is_rocket_empty):
+        
         
         self._penalty_active = is_penalty_active
         
@@ -280,7 +286,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         # if self.in_boundary:
         is_ship_in_penalty = not self.in_boundary or is_penalty_active
         self._cannon_fire_strategy.update(is_ship_in_penalty, self._fire_cannon)
-        self._rocket_fire_strategy.update(is_ship_in_penalty, self._fire_missile)
+        self._rocket_fire_strategy.update(is_ship_in_penalty or is_rocket_empty, self._fire_missile)
           
     
         self._boost_ship(self._ship_body_box2D, self._boosting, self.BOOST_FORCE, self.SHIP_BASE_POINT)
@@ -290,7 +296,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         # wrap_box2D_object(self._ship_body_box2D)   
         
         self._position = to_pixel_position(self._ship_body_box2D.position, GlobalConfig.world_scale, GlobalConfig.height) 
-        self._position = self._camera.watch(self.position)
+        self._camera_adjusted_position = self._camera.watch(self._position)
         
     
     def draw(self, screen:pygame.surface.Surface, glow_screen:pygame.surface.Surface):
@@ -301,10 +307,9 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         if self._boosting == True:
             self._draw_flame(screen, degree_angle)
             
-        
         self.image = pygame.transform.rotate(self._ship_surface, degree_angle)
         
-        self.rect = self.image.get_rect(center=self._position)
+        self.rect = self.image.get_rect(center=self._camera_adjusted_position)
         
         screen.blit(self.image, self.rect.topleft)
        
@@ -330,13 +335,11 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
         if SoundController.ship_boost_channel().get_busy() == False and boosting == True:
         
-            # self._sound_strategy.channel2().play(self._sound_strategy.ship_movement_sound())
-            SoundController.ship_boost_channel().play(SoundController.ship_movement_sound, -1, fade_ms=500)
-            # pygame.mixer.music.set_pos(random.random())
+            SoundController.ship_boost_channel().play(SoundController.ship_movement_sound, -1, fade_ms=1000)
 
         elif SoundController.ship_boost_channel().get_busy() == True and boosting == False:
        
-            SoundController.ship_boost_channel().stop()
+            SoundController.ship_boost_channel().fadeout(1000)
             
         
         if boosting == False:

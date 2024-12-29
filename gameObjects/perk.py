@@ -4,7 +4,7 @@ from enum import Enum
 import random
 
 import numpy as np
-from config.global_config import GlobalConfig
+from config.GlobalConfig import GlobalConfig
 from utils.colors import Colors
 from utils.fonts import Fonts
 
@@ -35,7 +35,6 @@ class Perk(ObjectBase, ProjectileBase):
         self.rect = self.image.get_rect()
         
         self._time_to_die = 15000        
-        # self._position = np.array(position)
         self._alive = True
         self._time_to_die_lerp = Lerp()
         self._delay = Delay()
@@ -116,7 +115,7 @@ class Perk(ObjectBase, ProjectileBase):
     def update(self):
         self._scale, _displacement = self._time_to_die_lerp.do(self._time_to_die, self._scale_and_displacement, self.check_and_dispose).value
         if self._target == None:
-            self._position = (self._position[0], self._position[1] + _displacement)
+            self._position = np.array((self._position[0], self._position[1] + _displacement))
         else:
             position_difference = self._target.position - self.position 
             direction_to_target = v_norm(position_difference)

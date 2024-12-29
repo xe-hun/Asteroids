@@ -1,6 +1,6 @@
 
 
-from pages.page_base import PageBase
+from pages.pageBase import PageBase
 
 
 class G_Router():
@@ -25,7 +25,11 @@ class G_Router():
             G_Router._page_list.append(page)
         else:
             G_Router._page_list[-1] = page
-    
+            
+    @staticmethod
+    def start(page:PageBase):
+       G_Router._page_list = [page]
+       
     
     def update(self):
         G_Router._page_list[-1].update(G_Router.game_paused)
@@ -44,8 +48,6 @@ class G_Router():
         self._recursive_draw(page_index - 1, page.is_transparent, screen, **kwargs)
         page.draw(screen, **kwargs)
             
-        
-        
         
     def handle_event(self, event):    
         G_Router._page_list[-1].handle_event(event)

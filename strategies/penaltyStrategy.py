@@ -1,7 +1,7 @@
 
 
 
-from config.global_config import GlobalConfig
+from config.GlobalConfig import GlobalConfig
 from config.shipConfig import ShipConfig
 from constant import FPS
 from utils.delay import Delay
@@ -27,6 +27,7 @@ class PenaltyStrategy():
     def _penalty_point(self, value):
         self._penalty = min(value, 1)
         
+    @property
     def penalty_active(self):
         return self._penalty_point >= 1
 
