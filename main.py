@@ -1,5 +1,8 @@
 import contextlib
 
+from utils.fonts import Fonts
+from ui.uiFactory import UiFactory
+
 
 
 # This suppresses the `Hello from pygame` message.
@@ -105,6 +108,8 @@ class Main():
     
     def logic(self):
         
+        fps_font = Fonts.quantum(15)
+        
         obstacle_timer = pygame.USEREVENT + 1
         pygame.time.set_timer(obstacle_timer,2000)
         
@@ -126,6 +131,9 @@ class Main():
             # self.handle_update()
             self.g_router.update()
             self.g_router.draw(self.screen, glow_screen = self.glow_screen)
+            
+            text_fps = UiFactory.create_text(f'{clock.get_fps():.1f}', font = fps_font)
+            self.screen.blit(text_fps, text_fps.get_rect(center=(GlobalConfig.width - 25, GlobalConfig.height - 20)).topleft)
             
             pygame.display.flip()
               

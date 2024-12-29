@@ -81,6 +81,8 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self._ship_surface, self.rect = self._build_ship_in_pixel(self._position,
                                             self.SHIP_WIDTH, self.SHIP_HEIGHT, list(polygon_points))
         
+        self._ship_surface = Helper.add_glow5(self._ship_surface)
+        
         self.image = self._ship_surface
         
         self._world = world

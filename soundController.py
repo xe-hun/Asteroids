@@ -67,7 +67,7 @@ class SoundController():
         SoundController.ready_sound = SoundController.load_sound(ready_sound_filepath)
         
         pygame.mixer.set_num_channels(8)
-        SoundController._effect_channels = [pygame.mixer.Channel(i) for i in range(1, SoundController._num_effect_channel)]
+        SoundController._effect_channels = [pygame.mixer.Channel(i) for i in range(0, SoundController._num_effect_channel)]
     
     _num_effect_channel = 4
     _effect_channels = []
@@ -82,6 +82,7 @@ class SoundController():
     @staticmethod
     def game_effect_channel():
         channel = SoundController._effect_channels[SoundController._current_effect_channel]
+        SoundController._current_effect_channel += 1
         SoundController._current_effect_channel = (SoundController._current_effect_channel) % (SoundController._num_effect_channel - 1)
         return channel
     
