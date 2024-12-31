@@ -13,14 +13,16 @@ class StartScreen(PageBase):
     
     def __init__(self, best_level:int, key_map:dict) -> None:
         
+        self._asteroid_star = UiFactory.create_text('ASTEROID *')
+        self._asteroid_star_rect = self._asteroid_star.get_rect(center=(GlobalConfig.width / 2, 0.2 * GlobalConfig.height))
         
-        self._text_start_game = UiFactory.create_button('START GAME', self._start_game, 30)
+        self._text_start_game = UiFactory.create_button('START GAME', self._start_game, 20)
         self._text_start_game_position = (GlobalConfig.width / 2, .4 * GlobalConfig.height)
      
-        self._text_map_button = UiFactory.create_button('MAP BUTTON', self._on_map_button, 30)
+        self._text_map_button = UiFactory.create_button('MAP BUTTON', self._on_map_button, 20)
         self._text_map_button_position = (GlobalConfig.width / 2, 0.5 * GlobalConfig.height)
         
-        self._text_quit = UiFactory.create_button('EXIT', self._quit_game, 30)
+        self._text_quit = UiFactory.create_button('EXIT', self._quit_game, 20)
         self._text_quit_position = (GlobalConfig.width / 2, 0.6 * GlobalConfig.height)
         
         # font = Fonts.quantum(30)
@@ -37,6 +39,7 @@ class StartScreen(PageBase):
         
       
         screen.fill(Colors.background_color)
+        screen.blit(self._asteroid_star, self._asteroid_star_rect)
         self._text_start_game.draw(screen, self._text_start_game_position)
         self._text_map_button.draw(screen, self._text_map_button_position)
         self._text_quit.draw(screen, self._text_quit_position)
