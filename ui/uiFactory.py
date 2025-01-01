@@ -28,9 +28,11 @@ class UiFactory():
         else:
             return Button(text, dimension = dimension, on_click=on_clicked, click_color = UiFactory._click_color, hover_color=None, font = font, text_color = UiFactory._text_deactivate_color, with_sound = False)
         
-    def make_list(screen:pygame.surface.Surface, items:list, top:float, bottom:float, x:float):
-        for i in range(items):
-            position = (x, top + i * (bottom - top) / len(items))
+    def make_button_list(screen:pygame.surface.Surface, items:list[Button], top:float, bottom:float, x:float):
+        assert len(items) != 0 
+        'Item list may not be empty!'
+        for i in range(len(items)):
+            position = (x, top + i * (bottom - top) / len(items) - 1)
             items[i].draw(screen, position)
         
             

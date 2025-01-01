@@ -13,18 +13,14 @@ class StartScreen(PageBase):
     
     def __init__(self, best_level:int, key_map:dict) -> None:
         
-        self._asteroid_star = UiFactory.create_text('ASTEROID *')
+        self._asteroid_star = UiFactory.create_text('ASTEROID X', font = Fonts.quantum(50))
         self._asteroid_star_rect = self._asteroid_star.get_rect(center=(GlobalConfig.width / 2, 0.2 * GlobalConfig.height))
         
-        self._text_start_game = UiFactory.create_button('START GAME', self._start_game, 20)
-        self._text_start_game_position = (GlobalConfig.width / 2, .4 * GlobalConfig.height)
+        self._start_game_button = UiFactory.create_button('START GAME', self._start_game, 25)
      
-        self._text_map_button = UiFactory.create_button('MAP BUTTON', self._on_map_button, 20)
-        self._text_map_button_position = (GlobalConfig.width / 2, 0.5 * GlobalConfig.height)
-        
-        self._text_quit = UiFactory.create_button('EXIT', self._quit_game, 20)
-        self._text_quit_position = (GlobalConfig.width / 2, 0.6 * GlobalConfig.height)
-        
+        self._map_button = UiFactory.create_button('MAP BUTTON', self._on_map_button, 25)
+    
+        self._quit_button = UiFactory.create_button('EXIT', self._quit_game, 25)        
         # font = Fonts.quantum(30)
         self.msg_score = UiFactory.create_text(f'Best Level : {best_level}', font = Fonts.quantum(30))
         # self.msg_score = font.render(f'High Score : {highScore}', False, Colors.drawing_color)
@@ -40,10 +36,21 @@ class StartScreen(PageBase):
       
         screen.fill(Colors.background_color)
         screen.blit(self._asteroid_star, self._asteroid_star_rect)
-        self._text_start_game.draw(screen, self._text_start_game_position)
-        self._text_map_button.draw(screen, self._text_map_button_position)
-        self._text_quit.draw(screen, self._text_quit_position)
-        screen.blit(self.msg_score, self.msg_score_rect)
+        # self._start_game_button.draw(screen, self._start_game_button_position)
+        # self._map_button.draw(screen, self._map_button_position)
+        # self._quit_button.draw(screen, self._quit_button_position)
+        
+        UiFactory.make_button_list(screen, [
+            self._start_game_button,
+            self._map_button,
+            self._quit_button
+        ], 
+        GlobalConfig.height * .5,
+        GlobalConfig.height * .8,
+        GlobalConfig.width / 2
+                                   )
+        
+        screen.blit(self.msg_score, self.msg_score_rect.topleft)
         
     
     def _start_game(self):

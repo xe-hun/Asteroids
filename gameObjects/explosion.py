@@ -19,15 +19,13 @@ class Explosion():
         self._flare_scale = None
         self._alpha = None
         self._max_radius = 90
-        self._flare_size = 500
+        self._flare_max_radius = 300
         self._flare_radius = 30
         
         self._surface = pygame.Surface((self._max_radius * 2,) * 2, pygame.SRCALPHA)
-        self._flare_surface = pygame.Surface((self._flare_size * 2 ,) * 2, pygame.SRCALPHA).convert_alpha()
+        self._flare_surface = pygame.Surface((self._flare_max_radius * 2 ,) * 2, pygame.SRCALPHA).convert_alpha()
         
        
-        
-        
         self._explosion_lerp = Lerp()
         self._flare_lerp = Lerp()
         self._alive = True
@@ -51,7 +49,7 @@ class Explosion():
     def _flare_parameters(self, lerp:Lerp):
         # flare_alpha = lerp.sinusoidal(10, 30)
         flare_alpha = lerp.ease_out(60, 0)
-        flare_scale = lerp.linear(1, 8)
+        flare_scale = lerp.linear(1, self._flare_max_radius / self._flare_radius)
         return int(flare_alpha), flare_scale
         
         
@@ -70,7 +68,7 @@ class Explosion():
         if self._flare_lerp.is_done == False:
             # flare_surface = self._flare_surface.copy()
             self._flare_surface.fill((0, 0, 0, 0))
-            pygame.draw.circle(self._flare_surface, (255, 255, 255, self.flare_alpha), (self._flare_size,) * 2, self._flare_radius * self._flare_scale)
+            pygame.draw.circle(self._flare_surface, (255, 255, 255, self.flare_alpha), (self._flare_max_radius,) * 2, self._flare_radius * self._flare_scale)
             # self._flare_surface.set_alpha(self.flare_alpha)
             
             # self._flare_surface = Helper.add_glow5(self._flare_surface, intensity=5, radius=self.flare_blur_radius)
