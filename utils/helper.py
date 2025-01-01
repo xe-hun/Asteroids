@@ -128,6 +128,31 @@ class Helper():
             velocity *= max_speed
             
         body.linearVelocity = velocity
+            
+    @staticmethod
+    def get_target_within_range(object_position:tuple, target_list:list, target_range:int):
+        closest_locked_distance = float('inf')
+        closest_un_locked_distance = float('inf')
+        
+        locked_target = None
+        un_locked_target = None
+        
+        for t in target_list:
+            distance = v_mag( (t.position[0] - object_position[0],
+                                t.position[1] - object_position[1]))
+            if t.is_locked_on == True:
+                if distance < target_range and distance < closest_un_locked_distance:
+                    locked_target = t
+                    closest_un_locked_distance = distance
+            else:
+                if distance < target_range and distance < closest_locked_distance:
+                    un_locked_target = t
+                    closest_locked_distance = distance
+                    
+        return un_locked_target if un_locked_target != None else locked_target
+
+            
+        
 
 
 def scale(surface: pygame.Surface, factor):
@@ -272,29 +297,6 @@ def check_box2D_object_in_bounds(body:Box2D.b2Body):
 
             
 
-def get_target_within_range(object_position:tuple, target_list:list, target_range:int):
-    closest_locked_distance = float('inf')
-    closest_un_locked_distance = float('inf')
-    
-    locked_target = None
-    un_locked_target = None
-    
-    for t in target_list:
-        distance = v_mag( (t.position[0] - object_position[0],
-                            t.position[1] - object_position[1]))
-        if t.is_locked_on == True:
-            if distance < target_range and distance < closest_un_locked_distance:
-                locked_target = t
-                closest_un_locked_distance = distance
-        else:
-            if distance < target_range and distance < closest_locked_distance:
-                un_locked_target = t
-                closest_locked_distance = distance
-                
-    return un_locked_target if un_locked_target != None else locked_target
-
-        
-    
                 
                 
                 

@@ -16,13 +16,14 @@ from strategies.spawnStrategy import SpawnStrategy
 from ui.timedList import TimedList
 from utils.lerp import Lerp
 from utils.delay import Delay
+# from utils.helper import Helper
 from effects.worldStar import WorldStar
 from gameObjects.explosion import Explosion
 from gameObjects.perk import Perk, PerkType
 from gameObjects.rocket import Rocket
 from gameObjects.sparks import Sparks
 from gameStateController import GameStateController
-from utils.helper import get_target_within_range, v_mag, v_to_angle
+from utils.helper import Helper, v_mag, v_to_angle
 from utils.camera import Camera
 from utils.box2DHelperClass import Box2DHelperClass
 from gameObjects.asteroid import Asteroid
@@ -132,9 +133,12 @@ class Game(PageBase):
             if isinstance(projectile, Rocket):
                 rocket = projectile
                 if rocket.has_target == False:
-                    target = get_target_within_range(rocket._position, self._asteroid_list, 100)
+                    rocket.set_target(self._asteroid_list)
+                
+                # if rocket.has_target == False:
+                #     target = Helper.get_target_within_range(rocket._position, self._asteroid_list, 100)
         
-                    rocket.set_target(target)
+                #     rocket.set_target(target)
                     
                 
     def _draw_projectiles(self, screen, glow_screen):

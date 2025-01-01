@@ -5,6 +5,7 @@ import pygame
 from config.GlobalConfig import GlobalConfig
 from config.RocketConfig import RocketConfig
 # from rocketConfig import RocketConfig
+from utils.lerp import Lerp
 from utils.delay import Delay
 from gameObjects.objectBase import ObjectBase, ProjectileBase
 from gameObjects.smoke import Smoke
@@ -39,6 +40,8 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         self.rocket_on = False
         self._rocket_life = RocketConfig.rocket_life
         self._rocket_life_delay = Delay()
+        self._rocket_visibility_Lerp = Lerp()
+        self._rocket_visibility = RocketConfig.min_visibility
         
         
     def to_world_pos(self, vec:tuple):
@@ -52,10 +55,47 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
     def has_target(self):
         return self._target is not None
         
-    def set_target(self, target):
+  
+    
+    def _update_visibility_range(self):
+        # when the rocket is fired, it initialy has a visibility of min_visibility
+        # and grows steadily to max_visibility
+        # this is to make sure the rocket does lock on to target behind the ship 
+        # just because its closer
+        self._rocket_visibility = self._rocket_visibility_Lerp.do(2000, lambda lerp: lerp.linear(RocketConfig.min_visibility, RocketConfig.max_visibility)).value
+        
+    def set_target(self, target_list:list):
+       
+        target = self._get_target_within_range(target_list, self._rocket_visibility)
         if target != None:
             target.rocket_lock(self)
         self._target = target
+        
+    
+            
+    def _get_target_within_range(self, target_list, rocket_visibility):
+        closest_locked_distance = float('inf')
+        closest_un_locked_distance = float('inf')
+        
+        locked_target = None
+        un_locked_target = None
+        
+        for t in target_list:
+            distance = np.linalg.norm(t.position - self.position)
+            # distance = v_mag( (t.position[0] - self.position[0],
+            #                     t.position[1] - self.position[1]))
+            if t.is_locked_on == True:
+                if distance < rocket_visibility and distance < closest_un_locked_distance:
+                    locked_target = t
+                    closest_un_locked_distance = distance
+            else:
+                if distance < rocket_visibility and distance < closest_locked_distance:
+                    un_locked_target = t
+                    closest_locked_distance = distance
+                    
+        return un_locked_target if un_locked_target != None else locked_target
+    
+    
         
     def _update_target(self):
         
@@ -84,6 +124,9 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         
     
     def update(self):
+        
+        self._update_visibility_range()
+        
         if self._rocket_life_delay != None:
             self._rocket_life_delay.delay(1000, self._on_count_down, True)
         

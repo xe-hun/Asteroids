@@ -15,3 +15,5 @@ class RocketConfig():
     
     # in seconds
     rocket_life = 5
+    min_visibility = 50
+    max_visibility = 100
