@@ -23,12 +23,16 @@ class Explosion():
         self._flare_radius = 30
         
         self._surface = pygame.Surface((self._max_radius * 2,) * 2, pygame.SRCALPHA)
-        self._flare_surface = pygame.Surface((self._flare_max_radius * 2 ,) * 2, pygame.SRCALPHA).convert_alpha()
+        self._flare_surface = pygame.Surface((self._flare_max_radius * 2 ,) * 2, pygame.SRCALPHA)
+        
+        self._flash_surface = pygame.Surface((GlobalConfig.width, GlobalConfig.height), pygame.SRCALPHA)
+        pygame.draw.rect(self._flash_surface, (255, 255, 255, 20), pygame.Rect(0, 0, GlobalConfig.width, GlobalConfig.height))
         
        
         self._explosion_lerp = Lerp()
         self._flare_lerp = Lerp()
         self._alive = True
+        self._flash = False
         
         
     @property
@@ -58,6 +62,7 @@ class Explosion():
       
         self.flare_alpha, self._flare_scale = self._flare_lerp.do(int(7/GlobalConfig.fps * 1000), self._flare_parameters).value
         
+        
     
     def draw(self, screen:pygame.surface.Surface):
         self._surface.fill((0, 0, 0, 0))
@@ -74,4 +79,10 @@ class Explosion():
             # self._flare_surface = Helper.add_glow5(self._flare_surface, intensity=5, radius=self.flare_blur_radius)
             flare_rect = self._flare_surface.get_rect(center=self._position)
             screen.blit(self._flare_surface, flare_rect.topleft)
+            
+            
+        if self._flash == False:
+            screen.blit(self._flash_surface, (0, 0))
+            self._flash = True
+            
 
