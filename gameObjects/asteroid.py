@@ -10,7 +10,7 @@ import Box2D
 
 from gameObjects.objectBase import ObjectBase
 from utils.camera import Camera
-from utils.helper import Helper, debug_draw_box2D_bodies, map_value, v_norm, to_box2D_position, v_to_component, to_pixel_position, wrap_box2D_object
+from utils.helper import Helper, debug_draw_box2D_bodies, map_value, v_normalize, to_box2D_coordinate, v_to_component, to_pixel_coordinate, wrap_box2D_object
 
 
 class Asteroid(pygame.sprite.Sprite, ObjectBase):
@@ -33,6 +33,10 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
         MAX_SIZE = AsteroidConfig.max_size(game_level)
         MIN_LIFE = AsteroidConfig.min_life
         MAX_LIFE = AsteroidConfig.max_life(game_level)
+        self._asteroid_max_speed = Helper.convert_pixel_frame_to_meters_second(AsteroidConfig.max_speed)
+
+        # MIN_LIFE = AsteroidConfig.min_life 
+        # MAX_LIFE = AsteroidConfig.max_life(game_level)
      
         
        
@@ -40,8 +44,7 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
         self._breakage_threshold = MIN_SIZE
         
         self._asteroid_half_size =  np.random.randint(MIN_SIZE, MAX_SIZE) if halfSize is None else halfSize
-        # num_side = np.random.randint(MIN_SIDES, MAX_SIDES)
-          # map the asteroid life according to its size
+    
         self._asteroid_life = int(map_value(MIN_SIZE, MAX_SIZE, MIN_LIFE, MAX_LIFE, self._asteroid_half_size))
       
 
@@ -53,25 +56,18 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
         else:
             self._position = position
             
-        self._direction = direction
-        
-        SPEED = AsteroidConfig.min_speed + random.random() * AsteroidConfig.max_speed
-        initial_linear_velocity = self._direction * SPEED
-        initial_angular_velocity = AsteroidConfig.min_initial_angular_velocity + random.random() * AsteroidConfig.max_initial_angular_velocity
+        self._direction = direction  
+        self._speed = AsteroidConfig.min_speed + random.random() * AsteroidConfig.max_speed
    
-        # lenght_displacement_range = self._asteroid_half_size * .3
-        # angle_displacement_range = .05
+        box_2d_velocity = Helper.invert_y_axis(self._direction) * Helper.convert_pixel_frame_to_meters_second(self._speed)
+        
+        initial_angular_velocity = AsteroidConfig.min_initial_angular_velocity + random.random() * AsteroidConfig.max_initial_angular_velocity
         
         
-      
-        # polygon_points = self._create_polygon_points(self._asteroid_half_size, num_side, lenght_displacement_range, angle_displacement_range)
-        # self._asteroid_body_box2D = self._create_asteroid_body_box2D(polygon_points, self._world, self._position, initial_linear_velocity, initial_angular_velocity)
-        
-        self._asteroid_body_box2D = self._create_asteroid_body_box2D_circle(self._asteroid_half_size, self._world, self._position, initial_linear_velocity, initial_angular_velocity)
+        self._asteroid_body_box2D = self._create_asteroid_body_box2D_circle(self._asteroid_half_size, self._world, self._position, box_2d_velocity, initial_angular_velocity)
 
 
          
-        # self._surface = self._draw_asteroid_in_pixel(polygon_points, self._asteroid_half_size, stroke_width)
         self._surface = self._draw_asteroid_in_pixel_circle(self._asteroid_half_size, stroke_width)
         self.image = self._surface
         self.rect = self._surface.get_rect()
@@ -86,68 +82,19 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
         
         
         return tuple(random.choices([
-            (-creation_extension,                           np.random.rand() * world_height,   v_norm(v_to_component(map_value(0, 1, -0.25 * pi, 0.25 * pi, np.random.rand())))),
-            (world_width + creation_extension,               np.random.rand() * world_height,   v_norm(v_to_component(map_value(0, 1, 0.75 * pi , 1.25 * pi, np.random.rand())))),
-            (np.random.rand() * world_width,    world_height + creation_extension,              v_norm(v_to_component(map_value(0, 1, 1.25 * pi , 1.75 * pi, np.random.rand())))),
-            (np.random.rand() * world_width,    -creation_extension,                           v_norm(v_to_component(map_value(0, 1, 0.25 * pi , 0.75 * pi, np.random.rand())))),
+            (-creation_extension,                           np.random.rand() * world_height,   v_to_component(map_value(0, 1, -0.25 * pi, 0.25 * pi, np.random.rand()))),
+            (world_width + creation_extension,               np.random.rand() * world_height,   v_to_component(map_value(0, 1, 0.75 * pi , 1.25 * pi, np.random.rand()))),
+            (np.random.rand() * world_width,    world_height + creation_extension,              v_to_component(map_value(0, 1, 1.25 * pi , 1.75 * pi, np.random.rand()))),
+            (np.random.rand() * world_width,    -creation_extension,                           v_to_component(map_value(0, 1, 0.25 * pi , 0.75 * pi, np.random.rand()))),
          ],
          weights=[1,1,1,1]).pop())
         
    
-        
-    # def _create_polygon_points(self, asteroid_half_size, num_side, lenght_displacement_range, angle_displacement_range):
-    #     # give the polygon uneven sides and angles
-       
-    #     displacement = [(asteroid_half_size - np.random.randint(0, lenght_displacement_range), asteroid_half_size -np.random.randint(0, lenght_displacement_range)) for _ in range(num_side)]
-    #     poly_angles = [np.random.randn() * angle_displacement_range + x for x in np.linspace(0, math.pi * 2 , num_side)]
-        
-    #     # add displacement values to each sides and angles of the polygon
-    #     polygon_points = [(displacement[i][0] * math.cos(j), displacement[i][1] * math.sin(j)) for i, j in enumerate(poly_angles) if i < num_side - 1]
-       
-    #     return polygon_points
-        
-        
-    # def _create_asteroid_body_box2D(self, polygon_points, world:Box2D.b2World, position, linear_velocity, angular_velocity):
-        
-    #     position = to_box2D_position(position, GlobalConfig.world_scale, GlobalConfig.height)
-        
-    #     # scale the polygon points to world dimension
-    #     polygon_points = [(p[0] / GlobalConfig.world_scale, p[1] / GlobalConfig.world_scale) for p in polygon_points]
-    #     # invert the x axis to account for inverted angle rotation when creating the polygon points
-    #     polygon_points = [(-p[0], p[1]) for p in polygon_points]
-        
-    #     asteroid_body = world.CreateDynamicBody(position = position,
-    #                                            linearVelocity = linear_velocity,
-    #                                            angularVelocity = angular_velocity,
-    #                                            userData = self,
-    #                                         )
-        
-    #     asteroidShape = Box2D.b2PolygonShape(vertices = polygon_points)
-    #     asteroid_body.CreateFixture(
-    #         shape = asteroidShape,
-    #         density = 1,
-    #         friction = .3,
-    #         restitution = .4
-    #     )
-        
-    #     self.box2D_bodies_debug_list.append(asteroid_body)
-    #     return asteroid_body
-        
-
-    # def _draw_asteroid_in_pixel(self, polygon_oints, asteroid_half_size, stroke_width):
-    #     # shift the polygon so that pos 0, 0 is at top left for pygame coordinate
-
-    #     polygon_points_shifted = [(polygon_oints[i][0] + asteroid_half_size, polygon_oints[i][1] + asteroid_half_size) for i in range(len(polygon_oints))]
-    #     asteroid_surface = pygame.Surface((asteroid_half_size * 2 + stroke_width , asteroid_half_size * 2 + stroke_width), pygame.SRCALPHA)
-    #     pygame.draw.polygon(asteroid_surface, Colors.fill_color, polygon_points_shifted)
-    #     pygame.draw.polygon(asteroid_surface, Colors.drawing_color, polygon_points_shifted, stroke_width)
-       
-    #     return asteroid_surface
-    
     
     def _create_asteroid_body_box2D_circle(self, radius, world:Box2D.b2World, position, linear_velocity, angular_velocity):
         
-        position = to_box2D_position(position, GlobalConfig.world_scale, GlobalConfig.height)
+        position = to_box2D_coordinate(position, GlobalConfig.world_scale, GlobalConfig.height)
+        
         
         asteroid_body = world.CreateDynamicBody(position = position,
                                                linearVelocity = linear_velocity,
@@ -209,14 +156,22 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
     def direction(self):
         return self._direction
     
+    @property
+    def velocity(self):
+        return Helper.convert_meters_second_to_pixel_frame(Helper.invert_y_axis(self._asteroid_body_box2D.linearVelocity))
+      
+    
+    @property
+    def speed(self):
+        return self._speed
+    
     
     def can_break_apart(self):
         return self._asteroid_half_size > self._breakage_threshold * 2
         
     
     def break_apart(self, game_level, debug_draw:bool):
-        # position = self.asteroidBodybox2D.position
-        # break_parts = random.choices([2, 3, ],[5, 1])[0]
+      
         break_parts = AsteroidConfig.get_break_parts(game_level)
         asteroids = []
         for _ in range(break_parts):
@@ -234,12 +189,12 @@ class Asteroid(pygame.sprite.Sprite, ObjectBase):
     
 
     def update(self):
-        
+                
         self._update_rocket_lock()
         wrap_box2D_object(self._asteroid_body_box2D)  
-        self._position = to_pixel_position(self._asteroid_body_box2D.position, GlobalConfig.world_scale, GlobalConfig.height) 
+        self._position = to_pixel_coordinate(self._asteroid_body_box2D.position, GlobalConfig.world_scale, GlobalConfig.height) 
         self._position = self._camera.watch(self._position)
-        Helper.cap_box2D_body_speed(self._asteroid_body_box2D, AsteroidConfig.max_speed)
+        Helper.cap_box2D_body_speed(self._asteroid_body_box2D, self._asteroid_max_speed)
  
     def draw(self, screen:pygame.surface.Surface):
         

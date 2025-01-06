@@ -348,7 +348,7 @@ class Game(PageBase):
             self._hud.update()
             self._update_reticle()
             self._update_perks()
-            self._spawn_strategy.update(self._game_controller.level_time, self._can_spawn_asteroid, self._game_controller.game_level)
+            self._spawn_strategy.update(self._game_controller.level_time, self._can_spawn_asteroid, self._game_controller.game_level, len(self._asteroid_list) == 0)
             self._ship_penalty_strategy.update(not self._ship.in_boundary)
             self._timed_list.update()
             self._camera.update()

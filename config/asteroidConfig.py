@@ -45,8 +45,8 @@ class AsteroidConfig():
     #     return 12
 
     
-    min_speed = 7
-    max_speed = 15
+    min_speed = .5
+    max_speed = 1.2
     min_initial_angular_velocity = 2
     max_initial_angular_velocity = 7
     

@@ -30,7 +30,17 @@ class Helper():
         
         return base_path
     
+    @staticmethod
+    def invert_y_axis(vec):
+        return np.array((vec[0], -vec[1]))
     
+    @staticmethod
+    def convert_pixel_frame_to_meters_second(val):
+        return (val * GlobalConfig.fps) / GlobalConfig.world_scale
+    
+    @staticmethod
+    def convert_meters_second_to_pixel_frame(val):
+        return (val * GlobalConfig.world_scale) / GlobalConfig.fps
     
     @staticmethod
     def add_glow5(surface:pygame.surface.Surface, intensity:int = 5, radius:float = 5):
@@ -151,7 +161,56 @@ class Helper():
                     
         return un_locked_target if un_locked_target != None else locked_target
 
+    @staticmethod
+    def calculate_interception_vector(target_speed, target_velocity, target_position, source_position, source_speed):
+        
+        target_source_distance = source_position - target_position
+        d = np.linalg.norm(target_source_distance)
+        
+        a = np.square(source_speed) - np.square(target_speed)
+        b = 2 * np.dot(target_source_distance, target_velocity)
+        c = - np.square(d)
+        
+        if a == 0:
+            # target speed and bullet speed are thesame
+            # a quadratic equation is not possible because their
+            # can be only one solution in this case
+            t = -c / b
+            # time can't be negative
+            if t <= 0:
+                
+                print('negative time')
+                return
+        else:
+            b_squar_4ac = np.square(b) - 4 * a * c
+        
+            if (b_squar_4ac) < 0:
+                # no sulution
+                print('no solution')
+                return
             
+            root_b_square_4ac =  math.sqrt(b_squar_4ac)
+            two_a = 2 * a
+                    
+            # their are always two solutions
+            t1 = - (b + root_b_square_4ac) / two_a
+            t2 = - (b - root_b_square_4ac) / two_a
+           
+            if (t1 <=  0 and t2 <= 0):
+                print('negative time')
+                # no solution
+                return
+            # always choose the smallest non negative t
+            if t1 < 0:
+                t = t2
+            elif t2 < 0:
+                t = t1
+            else:
+                t = min(t1, t2)
+            
+        intersept_point = target_position + target_velocity * t
+        source_velocity = (intersept_point - source_position) / t
+        return source_velocity
         
 
 
@@ -175,7 +234,7 @@ def v_to_angle(vec:tuple):
 def v_perpendicular(vec:tuple):
     return np.array((vec[1], -vec[0]))
 
-def v_norm(vec:tuple):
+def v_normalize(vec:tuple):
     magnitude = v_mag(vec)
     if magnitude == 0:
         return np.array((0, 0))
@@ -219,11 +278,11 @@ def map_value(minVar, maxVar, minDest, maxDest, var):
     return ((var - minVar) / (maxVar - minVar) * (maxDest - minDest)) + minDest
 
 
-def to_box2D_position(position, scale:float, screenHeight):
+def to_box2D_coordinate(position, scale:float, screenHeight):
     return Box2D.b2Vec2([position[0] / scale, (screenHeight - position[1]) / scale])
 
 
-def to_pixel_position(position:tuple, scale:float, screenHeight):
+def to_pixel_coordinate(position:tuple, scale:float, screenHeight):
     return Box2D.b2Vec2([position[0] * scale, screenHeight - (position[1] * scale)])
 
 def WHToPixel(w, h, scale):
@@ -237,7 +296,7 @@ def debug_draw_box2D_bodies(screen:pygame.Surface, box2D_bodies_debug_list:list)
         for fixture in box2D_body.fixtures:
             shape = fixture.shape
             
-            position = to_pixel_position(box2D_body.position, GlobalConfig.world_scale, GlobalConfig.height)
+            position = to_pixel_coordinate(box2D_body.position, GlobalConfig.world_scale, GlobalConfig.height)
             if isinstance(shape, Box2D.b2CircleShape):
                 radius = shape.radius * GlobalConfig.world_scale
                 pygame.draw.circle(screen, Colors.debug_color, position, radius)
@@ -249,7 +308,7 @@ def debug_draw_box2D_bodies(screen:pygame.Surface, box2D_bodies_debug_list:list)
             
             elif isinstance(shape, Box2D.b2PolygonShape):
                 coordPoints = [(box2D_body.transform * v) for v in shape.vertices]
-                coordPoints = [to_pixel_position(v, GlobalConfig.world_scale, GlobalConfig.height) for v in coordPoints ]
+                coordPoints = [to_pixel_coordinate(v, GlobalConfig.world_scale, GlobalConfig.height) for v in coordPoints ]
                 pygame.draw.polygon(screen, Colors.debug_color, coordPoints)
                 
             elif isinstance(shape, Box2D.b2EdgeShape):

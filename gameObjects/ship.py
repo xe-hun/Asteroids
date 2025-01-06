@@ -16,8 +16,8 @@ from config.shipConfig import ShipConfig
 from strategies.shootingStrategy import ShootingStrategy
 from utils.camera import Camera
 from utils.box2DHelperClass import RaycastCallback
-from utils.helper import Helper, v_angle_diff, check_box2D_object_in_bounds, clamp, v_dot, v_norm, v_rotate, scale, v_to_angle, v_to_component, to_box2D_position,\
-                        to_pixel_position, debug_draw_box2D_bodies
+from utils.helper import Helper, v_angle_diff, check_box2D_object_in_bounds, clamp, v_dot, v_normalize, v_rotate, scale, v_to_angle, v_to_component, to_box2D_coordinate,\
+                        to_pixel_coordinate, debug_draw_box2D_bodies
 from gameObjects.cannon import Cannon
 from utils.watcher import Watcher
 
@@ -88,7 +88,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self._world = world
         self._box2D_bodies_debug_list = []
         
-        _ship_position_in_box2D = to_box2D_position(self._position, GlobalConfig.world_scale, GlobalConfig.height)
+        _ship_position_in_box2D = to_box2D_coordinate(self._position, GlobalConfig.world_scale, GlobalConfig.height)
         self._ship_body_box2D = self._build_ship_body_box2D(self._world, _ship_position_in_box2D, list(polygon_points_seperated))
         
         self._camera = camera
@@ -239,7 +239,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
        
     def _fire_cannon(self):
         SoundController.ship_weapon_channel().play(SoundController.laser_fire_sound)
-        cannon_position = to_pixel_position(self._ship_body_box2D.GetWorldPoint((-5/GlobalConfig.world_scale, 15/GlobalConfig.world_scale)), GlobalConfig.world_scale, GlobalConfig.height)
+        cannon_position = to_pixel_coordinate(self._ship_body_box2D.GetWorldPoint((-5/GlobalConfig.world_scale, 15/GlobalConfig.world_scale)), GlobalConfig.world_scale, GlobalConfig.height)
         cannon_position = self._camera.watch(cannon_position)
         cannon = Cannon(self.direction, cannon_position, self._camera)
         self._register_projectile(cannon)
@@ -248,7 +248,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         xPos = -10 if self.rocket_alternate else 10
         self.rocket_alternate = not self.rocket_alternate
         
-        rocket_position = to_pixel_position(self._ship_body_box2D.GetWorldPoint((xPos/GlobalConfig.world_scale, 15/GlobalConfig.world_scale)), GlobalConfig.world_scale, GlobalConfig.height)
+        rocket_position = to_pixel_coordinate(self._ship_body_box2D.GetWorldPoint((xPos/GlobalConfig.world_scale, 15/GlobalConfig.world_scale)), GlobalConfig.world_scale, GlobalConfig.height)
         rocket_position = self._camera.watch(rocket_position)
         missile = Rocket(rocket_position, self.direction, self._camera)
         self._register_projectile(missile)
@@ -260,7 +260,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
     @property
     def direction(self):
-        return v_norm(v_to_component(- self._ship_body_box2D.angle - math.pi / 2))
+        return v_normalize(v_to_component(- self._ship_body_box2D.angle - math.pi / 2))
         
     @property
     def alive(self):
@@ -297,7 +297,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
             
         # wrap_box2D_object(self._ship_body_box2D)   
         
-        self._position = to_pixel_position(self._ship_body_box2D.position, GlobalConfig.world_scale, GlobalConfig.height) 
+        self._position = to_pixel_coordinate(self._ship_body_box2D.position, GlobalConfig.world_scale, GlobalConfig.height) 
         self._camera_adjusted_position = self._camera.watch(self._position)
         
     
@@ -323,13 +323,13 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
             
     def _draw_flame(self, screen:pygame.surface.Surface, angle:float):
-        rocket_pos = to_pixel_position(self._ship_body_box2D .GetWorldPoint((.2, self.SHIP_BASE_POINT - 2)), GlobalConfig.world_scale, GlobalConfig.height)
+        rocket_pos = to_pixel_coordinate(self._ship_body_box2D .GetWorldPoint((.2, self.SHIP_BASE_POINT - 2)), GlobalConfig.world_scale, GlobalConfig.height)
         rocket_pos = self._camera.watch(rocket_pos)
         self.animation_handler.animate(rocket_pos, angle, screen)
         
         
     def _draw_flare(self, screen:pygame.surface.Surface):
-        rocket_pos = to_pixel_position(self._ship_body_box2D .GetWorldPoint((0, self.SHIP_BASE_POINT-.5)), GlobalConfig.world_scale, GlobalConfig.height)
+        rocket_pos = to_pixel_coordinate(self._ship_body_box2D .GetWorldPoint((0, self.SHIP_BASE_POINT-.5)), GlobalConfig.world_scale, GlobalConfig.height)
         rect = self.flare_image.get_rect(center=rocket_pos)
         screen.blit(self.flare_image, rect)
    
@@ -378,8 +378,8 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
        
     
     def _debug_draw_ray_cast(self, ray_cast_start, ray_cast_end, screen):
-        ray_cast_start_in_pixel = to_pixel_position(ray_cast_start, GlobalConfig.world_scale, GlobalConfig.height)
-        ray_cast_end_in_pixel = to_pixel_position(ray_cast_end, GlobalConfig.world_scale, GlobalConfig.height)
+        ray_cast_start_in_pixel = to_pixel_coordinate(ray_cast_start, GlobalConfig.world_scale, GlobalConfig.height)
+        ray_cast_end_in_pixel = to_pixel_coordinate(ray_cast_end, GlobalConfig.world_scale, GlobalConfig.height)
         pygame.draw.line(screen, (255, 10, 10), ray_cast_start_in_pixel, ray_cast_end_in_pixel)
        
         

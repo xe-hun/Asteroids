@@ -1,3 +1,4 @@
+import numpy as np
 from utils.delay import Delay
 
 
@@ -11,7 +12,10 @@ class Watcher():
     
     def watch(self, value):
         self._update()
-        if value != self._value:
+        # if value != self._value:
+        # check for an array for comparation
+        if (np.ndim(value) > 0 and np.array_equal(value, self._value) == False) or\
+            (np.ndim(value) == 0 and value != self._value):
             self._on_change(value)
             self._value = value
           

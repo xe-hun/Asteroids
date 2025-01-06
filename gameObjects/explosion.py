@@ -26,7 +26,7 @@ class Explosion():
         self._flare_surface = pygame.Surface((self._flare_max_radius * 2 ,) * 2, pygame.SRCALPHA)
         
         self._flash_surface = pygame.Surface((GlobalConfig.width, GlobalConfig.height), pygame.SRCALPHA)
-        pygame.draw.rect(self._flash_surface, (255, 255, 255, 20), pygame.Rect(0, 0, GlobalConfig.width, GlobalConfig.height))
+        pygame.draw.rect(self._flash_surface, (255, 255, 255, 30), pygame.Rect(0, 0, GlobalConfig.width, GlobalConfig.height))
         
        
         self._explosion_lerp = Lerp()

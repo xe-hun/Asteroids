@@ -21,7 +21,7 @@ class ControllerConfig():
     
     @staticmethod
     def get_bonus_time(level_time):
-        return level_time // 3
+        return level_time // 2
     
     @staticmethod
     def chances_of_asteroid(game_level:int):
@@ -32,9 +32,8 @@ class ControllerConfig():
     @staticmethod
     def asteroid_spawn_per_level(game_level:int):
         min_qty = 15
-        # min_qty = 3
-        max_qty = 40
-        # max_qty = 4
+        max_qty = 50
+      
         return int(Helper.asymptotic_value(min_qty, max_qty, 0.2, game_level))
     
     @staticmethod

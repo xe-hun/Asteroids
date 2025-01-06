@@ -14,7 +14,7 @@ import pygame
 
 from utils.delay import Delay
 from gameObjects.objectBase import ObjectBase, ProjectileBase
-from utils.helper import v_mag, v_norm, scale
+from utils.helper import v_mag, v_normalize, scale
 from utils.lerp import Lerp
 
 
@@ -118,7 +118,7 @@ class Perk(ObjectBase, ProjectileBase):
             self._position = np.array((self._position[0], self._position[1] + _displacement))
         else:
             position_difference = self._target.position - self.position 
-            direction_to_target = v_norm(position_difference)
+            direction_to_target = v_normalize(position_difference)
             distance_to_target = v_mag(position_difference)
             
             attraction_factor = self._attraction_lerp.do(1000, lambda lerp: lerp.cubic_ease_in(0, 1)).value
