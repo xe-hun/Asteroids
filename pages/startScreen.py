@@ -22,7 +22,7 @@ class StartScreen(PageBase):
     
         self._quit_button = UiFactory.create_button('EXIT', self._quit_game, 25)        
         # font = Fonts.quantum(30)
-        self.msg_score = UiFactory.create_text(f'Best Level : {best_level}', font = Fonts.quantum(30))
+        self.msg_score = UiFactory.create_text(f'high score : {best_level}', font = Fonts.quantum(30))
         # self.msg_score = font.render(f'High Score : {highScore}', False, Colors.drawing_color)
         self.msg_score_rect = self.msg_score.get_rect(center=(GlobalConfig.width / 2, 0.8 * GlobalConfig.height))
         
