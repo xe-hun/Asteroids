@@ -15,11 +15,7 @@ from utils.delay import Delay
 
 
 class GameStateController():
-    def __init__(self) -> None:
-        self.ASTEROID_DESTROYED_POINT = 100
-        self.NEW_LEVEL_POINT = ControllerConfig.new_level_point
-
-        
+    def __init__(self) -> None: 
         
         self._bonus_time = 0
         self._level_time = 0
@@ -29,7 +25,7 @@ class GameStateController():
         self._ship_level = ControllerConfig.start_ship_level
       
         # self._lives_remaining = self.START_LIVES
-        self._game_score = 0
+        self._game_score = ControllerConfig.new_level_point
         self._game_paused = False
         self._set_new_level_parameters()
         
@@ -58,20 +54,21 @@ class GameStateController():
         self._saved_data = SaveDataModel.from_dict(saved_data)
         
 
-    # def _score_update(self):
-    #     def update():
-    #          self._game_score_counter += counter_step
+    def _score_update(self):
+        def update():
+             self._game_score_counter += counter_step
         
-    #     # update the highScore
-    #     if self._game_score > self._highest_level:
-    #         self._highest_level = self._game_score
+        # update the highScore
+        if self._game_score > self.high_score:
+            self.high_score = self._game_score
+
             
-    #     counter_step = int((self._game_score - self._game_score_counter) / 50)
+        counter_step = int((self._game_score - self._game_score_counter) / 50)
         
-    #     if self._game_score_counter <= self._game_score:
-    #         self.counter_delay.delay(100, on_done=update,  reset=True)
-    #     else:
-    #         self._game_score_counter = self._game_score
+        if self._game_score_counter < self._game_score:
+            self.counter_delay.delay(100, on_done=update,  reset=True)
+        else:
+            self._game_score_counter = self._game_score
         
     def set_level_in_progress(self, value):
         self._level_in_progress = value
@@ -115,8 +112,12 @@ class GameStateController():
         return self._ship_level
     
     @property
-    def best_level(self):
-        return self.saved_data.best_level    
+    def high_score(self):
+        return self.saved_data.high_score    
+    
+    @high_score.setter
+    def high_score(self, value):
+        self.saved_data.high_score = value
       
     @property
     def saved_data(self):
@@ -130,16 +131,17 @@ class GameStateController():
     #     self._bonus_time = value
     
     def _goto_new_level(self):
-        self._game_level += 1
-        self._game_score += self.NEW_LEVEL_POINT
-        self._set_new_level_parameters()
         pygame.event.post(pygame.event.Event(EventConfig.start_new_game_event))
+        self._game_level += 1
+        self._game_score += ControllerConfig.new_level_point
+        self._set_new_level_parameters()
        
         
         
     def _set_new_level_parameters(self):
         self._asteroid_spawned = 0
         self._bonus_time = ControllerConfig.get_bonus_time(self._level_time)
+        self._game_score += self._bonus_time * 10
         self._level_time = ControllerConfig.get_level_time(self.game_level) + self._bonus_time
         # + self._bonus_time
         self.set_level_in_progress(False)
@@ -193,6 +195,7 @@ class GameStateController():
     
     def report_asteroid_destroyed(self):
         self._number_of_asteroids_destroyed += 1
+        self._game_score += ControllerConfig.asteroid_destroyed_point
 
         
     def report_projectile_fired(self, projectile_type:type):
@@ -210,8 +213,8 @@ class GameStateController():
         if self.game_paused:
             return
         
-        # self._score_update()
-        self.saved_data.best_level = max(self.saved_data.best_level, self.game_level)
+        if self.level_is_in_progress:
+            self._score_update()
         
        
         if level_completed:

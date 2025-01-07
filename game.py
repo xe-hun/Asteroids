@@ -298,8 +298,8 @@ class Game(PageBase):
         reticle_angle =  -math.degrees(v_to_angle(self._ship.direction)) - 90
         self._hud.reticle.update(reticle_position, reticle_angle)
     
-    def _draw_reticle(self, screen):
-        self._hud.reticle.draw(screen)
+    def _draw_reticle(self, screen, ship_is_steering):
+        self._hud.reticle.draw(screen, ship_is_steering)
         
     @property
     def _can_spawn_asteroid(self):
@@ -364,6 +364,7 @@ class Game(PageBase):
         
     def draw(self, screen):
         self._hud.draw(screen, self._game_controller.level_time,
+                       self._game_controller.game_score_counter,
                        self._game_controller.ship_rocket_count, self._game_controller.ship_level,
                        self._game_controller.ship_upgrade_perk_collected,
                        self._game_controller.game_paused,
@@ -372,7 +373,7 @@ class Game(PageBase):
         self._draw_projectiles(screen)
         self._draw_asteroids(screen)
         self._draw_particles(screen)
-        self._draw_reticle(screen)
+        self._draw_reticle(screen, self.is_steering)
         self._ship.draw(screen)
         
         if self._game_controller.level_is_in_progress:

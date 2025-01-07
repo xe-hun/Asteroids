@@ -18,16 +18,19 @@ class Hud():
        
         game_font_50 = Fonts.quantum(50)
         self._game_font_10 = Fonts.quantum(10)
+        self._game_font_15 = Fonts.quantum(15)
         self._game_font_40 = Fonts.quantum(40)
         game_font_30 = Fonts.quantum(30)
+        
       
         self._m_READY_Render = UiFactory.create_text('READY', font = game_font_50)
         
         self._m_Go_Render = UiFactory.create_text('GO!!', font = game_font_50)
         
-        self._m_STAGE_X_Render = UiFactory.create_text(f"STAGE {game_level}", font = game_font_50)
+        # self._m_STAGE_X_Render = UiFactory.create_text(f"STAGE {game_level}", font = game_font_50)
+        self._m_STAGE_X_Render = UiFactory.create_text("NEW LEVEL !!", font = game_font_50)
       
-        self._m_LEVEL_UP_Render = UiFactory.create_text(f"LEVELED UP !!", font = game_font_30, color = Colors.green_color)
+        self._m_SHIP_UPGRADE_Render = UiFactory.create_text(f"SHIP UPGRADED !!", font = game_font_30, color = Colors.green_color)
         
         self._m_TIME_UP_Render = UiFactory.create_text(f"TIME UP !!", font = game_font_30)
         
@@ -41,16 +44,10 @@ class Hud():
         
         self._object_position_up = 0.1 * GlobalConfig.height
         self._object_position_down = 0.9 * GlobalConfig.height
-        right_margin = 0.97 * GlobalConfig.width
+        # right_margin = 0.97 * GlobalConfig.width
         
         self._time_text_position = (0.5 * GlobalConfig.width, self._object_position_up)
         
-        self._perk_details_position = (right_margin, self._object_position_up)
-        self._rocket_details_position = (right_margin, self._object_position_up)
-      
-        self._rocket_thumbnail_position = (right_margin, self._object_position_up)
-        
-        self._penalty_bar_position = (right_margin, self._object_position_down)
         
         self._rocket_count_rect = None
         self._perk_count_rect = None
@@ -58,7 +55,7 @@ class Hud():
         self._start_sequence_lerp = Lerp()
         self._end_sequence_lerp = Lerp()
         self._sequence3_lerp = Lerp()
-        self._level_up_sequence_lerp = None
+        self._ship_upgrade_sequence_lerp = None
         
         self.reticle = Reticle()
         self._rocket_count_render_effect = Effect()
@@ -70,15 +67,12 @@ class Hud():
         self._ship_level_watcher = Watcher(self._on_ship_level_change, ship_level)
         self._upgrade_perk_collected_watcher = Watcher(self._on_upgrade_perk_collected_change, ship_upgrade_perk_collected)
         
-     
-        # self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)
-       
        
     def _on_rocket_count_change(self, _):
         self._rocket_count_render_effect.activate()
         
     def _on_ship_level_change(self, _):
-        self._level_up_sequence_lerp = Lerp()
+        self._ship_upgrade_sequence_lerp = Lerp()
         self._perk_count_render_effect.activate()
         SoundController.achievement_channel().play(SoundController.level_up_sound)
         
@@ -110,7 +104,7 @@ class Hud():
         
         
     def _level_up_sequence(self, lerp:Lerp, screen):
-        self._animate_sequence(lerp, screen, self._m_LEVEL_UP_Render)
+        self._animate_sequence(lerp, screen, self._m_SHIP_UPGRADE_Render)
         
             
     def _sequence1(self, lerp:Lerp, screen):
@@ -129,11 +123,6 @@ class Hud():
             
             return y_up, y_down
         
-        
-    # def _pause_game(self, on_game_paused:callable):
-    #     on_game_paused()
-          
-          
   
         
     def handle_event(self, event):
@@ -152,13 +141,11 @@ class Hud():
     def update(self):
         self._penalty_bar.update()
         
-    def draw(self, screen, level_time:int, ship_rocket_count:int, ship_level:int, ship_upgrade_perk_collected:int, game_paused:bool, is_time_up:bool, set_level_in_progress:callable):
-        
-       
+    def draw(self, screen, level_time:int, game_score:int, ship_rocket_count:int, ship_level:int, ship_upgrade_perk_collected:int, game_paused:bool, is_time_up:bool, set_level_in_progress:callable):
         
         # level_time =  level_time
         rocket_count = self._rocket_count_watcher.watch(ship_rocket_count).new_value(150)
-        level_count = self._ship_level_watcher.watch(ship_level).new_value(150)
+        ship_level_count = self._ship_level_watcher.watch(ship_level).new_value(150)
         self._upgrade_perk_collected_watcher.watch(ship_upgrade_perk_collected)
         
         
@@ -169,53 +156,32 @@ class Hud():
                 
             y_up, y_down = self._sequence3_lerp.control(game_paused).do(1000, self._sequence3,  set_level_in_progress, on_begin = self._play_ready_sound, screen = screen).value
                             
-            _ , game_time_render = self._render_text(f"{level_time:02d}", self._game_font_40)
-            
-            perk_count_rect, perk_count_render = self._render_text(f" x {level_count:02d}",
-                                                                   self._game_font_10,
-                                                                   self._perk_count_render_effect.effect_1)
-            if self._perk_count_rect == None:
-                self._perk_count_rect = perk_count_rect
+            game_time_render = UiFactory.create_text(f"{level_time:02d}", font = self._game_font_40)
+            game_score_render = UiFactory.create_text(f"score : {game_score}", font = self._game_font_15)
+          
+            perk_count_render = UiFactory.create_text(f" x {ship_level_count:02d}", font = self._game_font_10)
+            rocket_count_render = UiFactory.create_text(f" x {rocket_count:02d}", font = self._game_font_10)
 
             
-            rocket_count_rect, rocket_count_render = self._render_text(f" x {rocket_count:02d}",
-                                                                       self._game_font_10,
-                                                                       self._rocket_count_render_effect.effect_1)
             
-            if self._rocket_count_rect == None:
-                self._rocket_count_rect = rocket_count_rect
-                 
-            rocket_thumbnail_rect = self.rocket_thumbnail_surface.get_rect()
-            spacing = 2
-            
-          
-            perk_count_x_pos = self._perk_details_position[0]
-            perk_count_y_pos =  y_up - self._perk_count_rect.height / 2
-            
-            perk_bar_x_pos =  self._perk_details_position[0] - self._perk_count_rect.width - spacing
-            perk_bar_y_pos = y_up - self._ship_level_bar_rect.height / 2
-            
-            rocket_count_x_pos = perk_count_x_pos
-            rocket_count_y_pos = perk_count_y_pos - self._ship_level_bar_rect.height - spacing - rocket_count_rect.height / 2
-            
-            rocket_thumbnail_x_pos = perk_bar_x_pos
-            rocket_thumbnail_y_pos = perk_bar_y_pos - self._ship_level_bar_rect.height - spacing - rocket_thumbnail_rect.height / 2
-            
-            penalty_bar_x_pos = self._penalty_bar_position[0]
-            penalty_bar_y_pos =  y_down - self._penalty_bar_rect.height / 2
+            ui_x_pos_1 = GlobalConfig.width * .95
+            ui_x_pos_2 = GlobalConfig.width * .9
+            perk_count_render_rect = perk_count_render.get_rect()
+            ui_margin_y = perk_count_render_rect.height
             
             
+            screen.blit(perk_count_render,  perk_count_render.get_rect(topright = (ui_x_pos_1, y_up)))
+            screen.blit(self._ship_level_bar.surface,  self._ship_level_bar.surface.get_rect(topright = (ui_x_pos_1 - perk_count_render_rect.width, y_up)))
             
-            screen.blit(perk_count_render,  perk_count_render.get_rect(topright = (perk_count_x_pos, perk_count_y_pos)))
-            screen.blit(self._ship_level_bar.surface,  self._ship_level_bar.surface.get_rect(topright = (perk_bar_x_pos, perk_bar_y_pos)))
-            
-            screen.blit(rocket_count_render,  rocket_count_render.get_rect(topright = (rocket_count_x_pos, rocket_count_y_pos)))
-            screen.blit(self.rocket_thumbnail_surface,  self.rocket_thumbnail_surface.get_rect(topright = (rocket_thumbnail_x_pos, rocket_thumbnail_y_pos))) 
+            screen.blit(rocket_count_render,  rocket_count_render.get_rect(topright = (ui_x_pos_1, y_up - ui_margin_y)))
+            screen.blit(self.rocket_thumbnail_surface,  self.rocket_thumbnail_surface.get_rect(topright = (ui_x_pos_1 - perk_count_render_rect.width, y_up - ui_margin_y))) 
             
             screen.blit(game_time_render, game_time_render.get_rect(center = (self._time_text_position[0], y_up)))
+            screen.blit(game_score_render, game_score_render.get_rect(topleft = (20, y_up)))
                         
-            screen.blit(self._penalty_bar.surface, self._penalty_bar.surface.get_rect(topright = (penalty_bar_x_pos, penalty_bar_y_pos)))   
-                
+            screen.blit(self._penalty_bar.surface, self._penalty_bar.surface.get_rect(topright = (ui_x_pos_2, y_down)))   
+            
+            
             
         if is_time_up:
             end_sequence = self._end_sequence_lerp.control(game_paused).wait(300).and_then(1000, self.end_sequence_1)
@@ -223,15 +189,15 @@ class Hud():
                 surface, rect = end_sequence.value
                 screen.blit(surface, rect)
                 
-        if self._level_up_sequence_lerp != None:
-            self._level_up_sequence_lerp.control(game_paused).do(1000, self._level_up_sequence, self.level_up_sequence_done, screen = screen)
+        if self._ship_upgrade_sequence_lerp != None:
+            self._ship_upgrade_sequence_lerp.control(game_paused).do(1000, self._level_up_sequence, self.level_up_sequence_done, screen = screen)
     
     
   
             
             
     def level_up_sequence_done(self):
-        self._level_up_sequence_lerp = None
+        self._ship_upgrade_sequence_lerp = None
     
     
     def end_sequence_1(self, lerp:Lerp):    

@@ -78,7 +78,7 @@ class Main():
         
         self._dispose_old_game()  
         self._game_controller = GameStateController()
-        self.start_screen = StartScreen(self._game_controller.best_level, self._game_controller.key_map)
+        self.start_screen = StartScreen(self._game_controller.high_score, self._game_controller.key_map)
         self.g_router.start(self.start_screen)
    
         SoundController.sound_track_channel().play(SoundController.menu_sound_track, -1)

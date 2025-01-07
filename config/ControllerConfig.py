@@ -8,6 +8,8 @@ class ControllerConfig():
 
     new_level_point = 2000
     
+    asteroid_destroyed_point = 100
+    
     max_asteroid_on_screen = 12
   
     start_rocket_quantity = 20
