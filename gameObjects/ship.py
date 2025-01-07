@@ -301,7 +301,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self._camera_adjusted_position = self._camera.watch(self._position)
         
     
-    def draw(self, screen:pygame.surface.Surface, glow_screen:pygame.surface.Surface):
+    def draw(self, screen:pygame.surface.Surface):
       
         
         degree_angle = math.degrees(self._ship_body_box2D.angle - math.pi)

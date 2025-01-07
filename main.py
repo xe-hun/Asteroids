@@ -1,5 +1,6 @@
 import contextlib
 
+from gameObjects.background import Background
 from utils.fonts import Fonts
 from ui.uiFactory import UiFactory
 
@@ -38,17 +39,15 @@ class Main():
       
      
         pygame.mixer.init(buffer=64)
-        # pygame.mixer.stop()
-        # sleep(.5)
-        # pygame.mixer.init(buffer=64)
-        # sleep(.5)
         pygame.init()
       
         pygame.display.set_caption('Asteroids')
         
+        self.back_ground = Background()
+        
         
         self.screen = pygame.display.set_mode((GlobalConfig.width, GlobalConfig.height))
-        self.glow_screen = pygame.Surface((GlobalConfig.width, GlobalConfig.height)).convert()
+        # self.glow_screen = pygame.Surface((GlobalConfig.width, GlobalConfig.height)).convert()
         self._game:Game = None
 
         SoundController.load_resources(
@@ -87,9 +86,6 @@ class Main():
         
     def initialize_game(self):
         
-        
-     
-        
         SoundController.sound_track_channel().play(SoundController.game_sound_track, -1)
         
         if self._game_controller.bonus_time_activity != None:
@@ -118,7 +114,8 @@ class Main():
         while run:
             clock.tick(FPS)
             self.screen.fill(Colors.background_color)
-            self.glow_screen.fill(Colors.background_color)
+            self.back_ground.draw(self.screen)
+            # self.glow_screen.fill(Colors.background_color)
     
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -130,7 +127,7 @@ class Main():
             
             # self.handle_update()
             self.g_router.update()
-            self.g_router.draw(self.screen, glow_screen = self.glow_screen)
+            self.g_router.draw(self.screen)
             
             text_fps = UiFactory.create_text(f'{clock.get_fps():.1f}', font = fps_font)
             self.screen.blit(text_fps, text_fps.get_rect(center=(GlobalConfig.width - 25, GlobalConfig.height - 20)).topleft)

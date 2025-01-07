@@ -55,7 +55,7 @@ class Cannon(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
         self._camera_adjusted_position = self._camera.watch(self._position)
     
         
-    def draw(self, screen:pygame.surface.Surface, glow_screen:pygame.surface.Surface):
+    def draw(self, screen:pygame.surface.Surface):
         self.rect = self.image.get_rect(center = self._camera_adjusted_position)
         # self.blur_screen.fill(Colors.background_color)
         # Helper.draw_with_glow(screen, glow_screen, self.surface_r, self.rect.topleft)

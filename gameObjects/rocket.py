@@ -198,7 +198,7 @@ class Rocket(pygame.sprite.Sprite, ObjectBase, ProjectileBase):
 
         
     
-    def draw(self, screen:pygame.surface.Surface, glow_screen:pygame.surface.Surface):
+    def draw(self, screen:pygame.surface.Surface):
         
         if self.rocket_on:
             self._draw_flare(screen)

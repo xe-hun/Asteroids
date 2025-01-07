@@ -141,11 +141,11 @@ class Game(PageBase):
                 #     rocket.set_target(target)
                     
                 
-    def _draw_projectiles(self, screen, glow_screen):
+    def _draw_projectiles(self, screen):
         for projectile in self._projectile_list:
             if projectile.alive == False:
                 continue
-            projectile.draw(screen, glow_screen = glow_screen)
+            projectile.draw(screen)
                 
     def _projectile_asteroid_collision(self):
         collisionDetected = False
@@ -362,18 +362,18 @@ class Game(PageBase):
         
       
         
-    def draw(self, screen, glow_screen):
+    def draw(self, screen):
         self._hud.draw(screen, self._game_controller.level_time,
                        self._game_controller.ship_rocket_count, self._game_controller.ship_level,
                        self._game_controller.ship_upgrade_perk_collected,
                        self._game_controller.game_paused,
                        self._game_controller.is_time_up,  self._set_level_in_progress)
         self._draw_perks(screen)
-        self._draw_projectiles(screen, glow_screen = glow_screen)
+        self._draw_projectiles(screen)
         self._draw_asteroids(screen)
         self._draw_particles(screen)
         self._draw_reticle(screen)
-        self._ship.draw(screen, glow_screen = glow_screen)
+        self._ship.draw(screen)
         
         if self._game_controller.level_is_in_progress:
             self._timed_list.draw(screen) 
