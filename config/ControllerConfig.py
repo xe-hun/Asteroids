@@ -35,7 +35,6 @@ class ControllerConfig():
     def asteroid_spawn_per_level(game_level:int):
         min_qty = 15
         max_qty = 50
-      
         return int(Helper.asymptotic_value(min_qty, max_qty, 0.2, game_level))
     
     @staticmethod

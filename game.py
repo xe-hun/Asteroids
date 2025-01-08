@@ -373,7 +373,7 @@ class Game(PageBase):
         self._draw_projectiles(screen)
         self._draw_asteroids(screen)
         self._draw_particles(screen)
-        self._draw_reticle(screen, self.is_steering)
+        self._draw_reticle(screen, self._ship.is_steering)
         self._ship.draw(screen)
         
         if self._game_controller.level_is_in_progress:
@@ -384,7 +384,7 @@ class Game(PageBase):
         self._hud.handle_event(event)
         self._camera.handle_event(event)
         
-        self._ship.handle_event(event, self._game_controller.key_map)
+        self._ship.handle_event(event, self._game_controller.key_map, self._game_controller.level_is_in_progress)
         self._game_controller.handle_event(event)
         
     def handle_event_2(self, event):

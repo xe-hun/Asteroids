@@ -1,6 +1,7 @@
 import pygame
 
 from Activity import Activity
+from config.GlobalConfig import GlobalConfig
 from config.MiscConfig import MiscConfig
 from config.EventConfig import EventConfig
 from config.ControllerConfig import ControllerConfig
@@ -50,7 +51,7 @@ class GameStateController():
         key_map = Helper.load_key_map(MiscConfig.map_button_save_location) 
         self.key_map = key_map if key_map != None else MiscConfig.default_key_map
         
-        saved_data = Helper.load_data(MiscConfig.saved_data_location)
+        saved_data = Helper.load_data(MiscConfig.saved_data_location, GlobalConfig.key)
         self._saved_data = SaveDataModel.from_dict(saved_data)
         
 
@@ -137,7 +138,6 @@ class GameStateController():
         self._set_new_level_parameters()
        
         
-        
     def _set_new_level_parameters(self):
         self._asteroid_spawned = 0
         self._bonus_time = ControllerConfig.get_bonus_time(self._level_time)
@@ -145,10 +145,6 @@ class GameStateController():
         self._level_time = ControllerConfig.get_level_time(self.game_level) + self._bonus_time
         # + self._bonus_time
         self.set_level_in_progress(False)
-    
-        
-   
-       
       
     @property
     def bonus_time_activity(self):

@@ -7,10 +7,13 @@ import math
 import os
 import sys
 import Box2D
+import cryptography
+import cryptography.fernet
 import numpy as np
 import pygame
 
 from config.GlobalConfig import GlobalConfig
+from strategies.encryptionStrategy import EncryptionStrategy
 from utils.colors import Colors
 from customEnum import ShipActions
 
@@ -103,20 +106,34 @@ class Helper():
             return None
         
     @staticmethod
-    def save_save_data(file_name, save_data:dict):
-        with open(file_name, 'w') as file:
-            json.dump(save_data, file)
+    def save_data(file_name, data:dict, key = None):
+        
+        if key != None:
+            data = EncryptionStrategy.encrypt_json(data, key)
+        else:
+            data = json.dumps(data)
+            
+        with open(file_name, 'wb') as file:
+            file.write(data)
+            # json.dump(data, file)
         
     @staticmethod
-    def load_data(file_name):
+    def load_data(file_name, key = None):
         try:
             with open(file_name, 'r') as file:
-                return json.load(file)
+                data = file.read()
+               
+            if key != None:
+                return EncryptionStrategy.decrypt_json(data, key)
+            else:
+                return json.loads(data)
+                # return json.load(file)
                 # return {ShipActions(int(i)) : value for i, value in serialized_key_map.items()}
         except FileNotFoundError:
             print('file not found')
             return None
-        
+        except cryptography.fernet.InvalidToken:
+            return None
         
     # @staticmethod
     # def log_level(value):

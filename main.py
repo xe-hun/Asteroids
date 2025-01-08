@@ -144,7 +144,7 @@ class Main():
         if self._game_controller == None:
             return
         
-        Helper.save_save_data(MiscConfig.saved_data_location, self._game_controller.saved_data.to_dict())
+        Helper.save_data(MiscConfig.saved_data_location, self._game_controller.saved_data.to_dict(), GlobalConfig.key)
             
             
     def handle_event(self, event):

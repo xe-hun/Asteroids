@@ -226,9 +226,16 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
     def _set_ship_steer(self, value:bool):
         self._steer_on = value
         
+    @property
+    def is_steering(self):
+        return self._steer_on
+        
 
         
-    def handle_event(self, event: pygame.event.Event, key_map : dict):
+    def handle_event(self, event: pygame.event.Event, key_map : dict, is_game_inprogress : bool):
+        if is_game_inprogress == False:
+            return
+        
         self._handle_mapped_key_press(event, ShipActions.Boost, key_map, lambda: self._set_ship_boost(True), lambda: self._set_ship_boost(False))
         self._handle_mapped_key_press(event, ShipActions.Cannon, key_map, lambda: self._set_ship_cannon(True), lambda: self._set_ship_cannon(False))
         self._handle_mapped_key_press(event, ShipActions.Rocket, key_map, lambda: self._set_ship_rocket(True), lambda: self._set_ship_rocket(False))
@@ -272,10 +279,8 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self._world.DestroyBody(self._ship_body_box2D)
         SoundController.ship_boost_channel().stop()
 
-       
    
     def update(self, ship_level, is_penalty_active, is_rocket_empty):
-        
         
         self._penalty_active = is_penalty_active
         
@@ -314,9 +319,6 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self.rect = self.image.get_rect(center=self._camera_adjusted_position)
         
         screen.blit(self.image, self.rect.topleft)
-       
-        
-        
         
         if self._debugDraw:
             debug_draw_box2D_bodies(screen, self._box2D_bodies_debug_list)

@@ -15,5 +15,7 @@ class GlobalConfig():
     camera_shake_intensity = 2
     camera_shake_frequency = 5
     
+    key = b'X3mZ0pO7HKLFUN1OKuhG2mxVXQGAoDClaeXytkp4VvM='
+    
     
 

@@ -19,11 +19,12 @@ class Background():
         for _ in range(self._max_stars):
             x = random.random() * GlobalConfig.width
             y = random.random() * GlobalConfig.height
-            r = self._base_color[0] + (255 - self._base_color[0]) * random.random()
-            g = self._base_color[1] + (255 - self._base_color[1]) * random.random()
-            b = self._base_color[2] + (255 - self._base_color[2]) * random.random()
+            # r = self._base_color[0] + (255 - self._base_color[0]) * random.random()
+            # g = self._base_color[1] + (255 - self._base_color[1]) * random.random()
+            # b = self._base_color[2] + (255 - self._base_color[2]) * random.random()
         
-            color = (r, g, b, self._alpha)
+            # color = (r, g, b, self._alpha)
+            color = (245, 240, 224, self._alpha)
             
             radius = 1 + random.random() * self._max_radius
             pygame.draw.circle(surface, color, (x, y), radius)
