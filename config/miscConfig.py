@@ -8,7 +8,7 @@ from customEnum import ShipActions
 
 class MiscConfig():
     
-    saved_data_location = 'data.json'
+    saved_data_location = 'data.bin'
    
     
     map_button_save_location = 'button_map.json'
