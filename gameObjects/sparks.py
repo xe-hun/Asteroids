@@ -85,7 +85,7 @@ class SparkParticle():
         self._color = (255, 255, 255)
         self._surface = pygame.Surface((self._radius * 2,) * 2, pygame.SRCALPHA)
         pygame.draw.circle(self._surface, self._color, (self._radius,) * 2, self._radius)
-        self._surface = Helper.add_glow5(self._surface, intensity=3)
+        # self._surface = Helper.add_glow5(self._surface, intensity=3)
         self._lerp = Lerp()
         self._alive = True
         self._path = self._position

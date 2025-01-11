@@ -191,7 +191,7 @@ class Game(PageBase):
             activity = self._game_controller.report_rocket_perk_collected()
             self._timed_list.register_item(activity)
             
-        SoundController.game_effect_channel().play(SoundController.perk_collected_sound)
+        # SoundController.game_effect_channel().play(SoundController.perk_collected_sound)
             
         perk.dispose()
               

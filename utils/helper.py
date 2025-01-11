@@ -1,5 +1,5 @@
 
-from PIL import Image, ImageFilter, ImageEnhance, ImageChops
+# from PIL import Image, ImageFilter, ImageEnhance, ImageChops
 
 
 import json
@@ -7,8 +7,7 @@ import math
 import os
 import sys
 import Box2D
-import cryptography
-import cryptography.fernet
+# from packages.cryptography import  cryptography
 import numpy as np
 import pygame
 
@@ -45,48 +44,42 @@ class Helper():
     def convert_meters_second_to_pixel_frame(val):
         return (val * GlobalConfig.world_scale) / GlobalConfig.fps
     
-    @staticmethod
-    def add_glow5(surface:pygame.surface.Surface, intensity:int = 5, radius:float = 5):
+    # @staticmethod
+    # def add_glow5(surface:pygame.surface.Surface, intensity:int = 5, radius:float = 5):
 
-        img_str = pygame.image.tostring(surface, "RGBA", False)
-        image = Image.frombytes('RGBA', surface.get_size(), img_str)
-        # Load the image with transparency
-        # image = Image.open(input_image).convert("RGBA")
+    #     img_str = pygame.image.tostring(surface, "RGBA", False)
+    #     image = Image.frombytes('RGBA', surface.get_size(), img_str)
+    #     # Load the image with transparency
+    #     # image = Image.open(input_image).convert("RGBA")
 
-        # Increase the canvas size to accommodate the glow
-        border_size = 20  # Adjust as needed for more glow
-        new_size = (image.width + 2 * border_size, image.height + 2 * border_size)
-        glow_base = Image.new("RGBA", new_size, (0, 0, 0, 0))
-        glow_base.paste(image, (border_size, border_size))
+    #     # Increase the canvas size to accommodate the glow
+    #     border_size = 20  # Adjust as needed for more glow
+    #     new_size = (image.width + 2 * border_size, image.height + 2 * border_size)
+    #     glow_base = Image.new("RGBA", new_size, (0, 0, 0, 0))
+    #     glow_base.paste(image, (border_size, border_size))
 
-        # Extract the alpha channel
-        alpha = glow_base.getchannel("A")
+    #     # Extract the alpha channel
+    #     alpha = glow_base.getchannel("A")
 
-        # Create a mask for the edges (outer edges only)
-        # Dilate the alpha to grow outward
-        dilated = alpha.filter(ImageFilter.MaxFilter(intensity))  # Slight expansion
-        # Subtract the original alpha from the dilated one to isolate edges
-        edges = ImageChops.subtract(dilated, alpha)
+    #     # Create a mask for the edges (outer edges only)
+    #     # Dilate the alpha to grow outward
+    #     dilated = alpha.filter(ImageFilter.MaxFilter(intensity))  # Slight expansion
+    #     # Subtract the original alpha from the dilated one to isolate edges
+    #     edges = ImageChops.subtract(dilated, alpha)
 
-        # Apply a Gaussian blur to the edges to create the glow
-        glow = edges.filter(ImageFilter.GaussianBlur(radius=radius))
+    #     # Apply a Gaussian blur to the edges to create the glow
+    #     glow = edges.filter(ImageFilter.GaussianBlur(radius=radius))
 
-        # Add color to the glow (e.g., a soft white glow)
-        colored_glow = Image.new("RGBA", new_size, (255, 255, 255, 0))
-        colored_glow.putalpha(glow)
+    #     # Add color to the glow (e.g., a soft white glow)
+    #     colored_glow = Image.new("RGBA", new_size, (255, 255, 255, 0))
+    #     colored_glow.putalpha(glow)
 
-        # Combine the glow with the original image
-        final_image = Image.alpha_composite(glow_base, colored_glow)
+    #     # Combine the glow with the original image
+    #     final_image = Image.alpha_composite(glow_base, colored_glow)
         
-        final_image = final_image.tobytes()
-        return pygame.image.fromstring(final_image, new_size, 'RGBA')
-#     pil_blured = pygame.image.fromstring(im1, aux_dimension, "RGB")
+    #     final_image = final_image.tobytes()
+    #     return pygame.image.fromstring(final_image, new_size, 'RGBA')
 
-        # # Save or display the final image
-        # final_image.save(output_image)
-        # return final_image
-
-        
     
     
     @staticmethod
@@ -113,7 +106,7 @@ class Helper():
         else:
             data = json.dumps(data)
             
-        with open(file_name, 'wb') as file:
+        with open(file_name, 'w') as file:
             file.write(data)
             # json.dump(data, file)
         
@@ -132,8 +125,11 @@ class Helper():
         except FileNotFoundError:
             print('file not found')
             return None
-        except cryptography.fernet.InvalidToken:
+            print('other errors')
+        except :
             return None
+        # except Fernet.InvalidToken:
+        #     return None
         
     # @staticmethod
     # def log_level(value):

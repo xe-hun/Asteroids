@@ -74,7 +74,7 @@ class Hud():
     def _on_ship_level_change(self, _):
         self._ship_upgrade_sequence_lerp = Lerp()
         self._perk_count_render_effect.activate()
-        SoundController.achievement_channel().play(SoundController.level_up_sound)
+        # SoundController.achievement_channel().play(SoundController.level_up_sound)
         
     def _on_upgrade_perk_collected_change(self, value):
         self._ship_level_bar.set_progress(value)
@@ -136,7 +136,8 @@ class Hud():
         self._penalty_bar.set_progress(1 - penalty_point)
         
     def _play_ready_sound(self):
-        SoundController.game_effect_channel().play(SoundController.ready_sound)
+        pass
+        # SoundController.game_effect_channel().play(SoundController.ready_sound)
     
     def update(self):
         self._penalty_bar.update()

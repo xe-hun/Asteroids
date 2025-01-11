@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import pygame
-import Box2D
+from Box2D import Box2D
 from config.GlobalConfig import GlobalConfig
 from config.MiscConfig import MiscConfig
 from utils.colors import Colors
@@ -81,7 +81,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self._ship_surface, self.rect = self._build_ship_in_pixel(self._position,
                                             self.SHIP_WIDTH, self.SHIP_HEIGHT, list(polygon_points))
         
-        self._ship_surface = Helper.add_glow5(self._ship_surface)
+        # self._ship_surface = Helper.add_glow5(self._ship_surface)
         
         self.image = self._ship_surface
         
@@ -245,7 +245,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         
        
     def _fire_cannon(self):
-        SoundController.ship_weapon_channel().play(SoundController.laser_fire_sound)
+        # SoundController.ship_weapon_channel().play(SoundController.laser_fire_sound)
         cannon_position = to_pixel_coordinate(self._ship_body_box2D.GetWorldPoint((-5/GlobalConfig.world_scale, 15/GlobalConfig.world_scale)), GlobalConfig.world_scale, GlobalConfig.height)
         cannon_position = self._camera.watch(cannon_position)
         cannon = Cannon(self.direction, cannon_position, self._camera)
@@ -259,7 +259,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         rocket_position = self._camera.watch(rocket_position)
         missile = Rocket(rocket_position, self.direction, self._camera)
         self._register_projectile(missile)
-        SoundController.ship_weapon_channel().play(SoundController.rocket_fire_sound)
+        # SoundController.ship_weapon_channel().play(SoundController.rocket_fire_sound)
         
     @property
     def position(self):
@@ -277,7 +277,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         self._alive = False
         self._ship_surface = None
         self._world.DestroyBody(self._ship_body_box2D)
-        SoundController.ship_boost_channel().stop()
+        # SoundController.ship_boost_channel().stop()
 
    
     def update(self, ship_level, is_penalty_active, is_rocket_empty):
@@ -337,13 +337,13 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
    
     def _boost_ship(self, ship_body:Box2D.b2Body, boosting:bool, boost_force:int, ship_base_position:float):
         
-        if SoundController.ship_boost_channel().get_busy() == False and boosting == True:
+        # if SoundController.ship_boost_channel().get_busy() == False and boosting == True:
         
-            SoundController.ship_boost_channel().play(SoundController.ship_movement_sound, -1, fade_ms=1000)
+        #     SoundController.ship_boost_channel().play(SoundController.ship_movement_sound, -1, fade_ms=1000)
 
-        elif SoundController.ship_boost_channel().get_busy() == True and boosting == False:
+        # elif SoundController.ship_boost_channel().get_busy() == True and boosting == False:
        
-            SoundController.ship_boost_channel().fadeout(1000)
+        #     SoundController.ship_boost_channel().fadeout(1000)
             
         
         if boosting == False:
