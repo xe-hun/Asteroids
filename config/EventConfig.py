@@ -11,3 +11,4 @@ class EventConfig():
     exit_game_event = pygame.USEREVENT + 5
     shake_event = pygame.USEREVENT + 6
     save_button_map_event = pygame.USEREVENT + 8
+    # tips_timer = pygame.USEREVENT + 9

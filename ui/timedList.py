@@ -8,9 +8,13 @@ from utils.lerp import Lerp
 
 
 class TimedList():
-    def __init__(self, position:tuple, ingress_time:int = 1000, item_display_duration:int = 3000):
+    def __init__(self, position:tuple, ingress_time:int = 1000, item_display_duration:int = 3000, size:int = 10, font:pygame.font.Font = None):
         
-        self._game_font_10 = Fonts.quantum(10)
+        if font == None:
+            self._font = Fonts.quantum(size)
+        else:
+            self._font = font
+        
         self._ingress_time = ingress_time
         self._item_display_duration = item_display_duration
         self._position = position
@@ -29,16 +33,16 @@ class TimedList():
         
     def register_item(self, item_description:str):
         
-        render = self._game_font_10.render(item_description, False, Colors.drawing_color)
+        render = self._font.render(item_description, False, Colors.drawing_color)
         surface = pygame.Surface(render.get_size(), pygame.SRCALPHA)
         # surface.set_alpha(0)
         surface.blit(render, (0, 0))
-      
+        
         
         _target_e = (self._position, surface, Delay())
         self._item_register_queue.append(_target_e)
         
-        if self._lerp1.is_done:
+        if self._lerp1.is_done or self._lerp1.activated == False:
             if (self._target_item != None):
                 self._save_position_checkpoint()
                 self._item_update_queue.append(self._target_item)
@@ -51,8 +55,7 @@ class TimedList():
 
         if lerp_1.is_done == False:
             self._alpha, self._y_displacement = lerp_1.value
-        # else:
-        #     self._alpha = 255
+       
         
         
         

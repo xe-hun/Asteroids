@@ -45,7 +45,7 @@ class ShipConfig():
 
     @staticmethod
     def cannon_fire_cool_down(ship_level:int):
-        min_value = 1.3
+        min_value = 1.1
         max_value = 2
         return Helper.asymptotic_value(min_value, max_value, 0.1, ship_level)
     

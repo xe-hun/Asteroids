@@ -74,6 +74,10 @@ class Lerp():
     @property
     def value(self):
         return self._value
+    
+    @property
+    def activated(self):
+        return self._activate
         
     def copy_params(self, on_done, on_begin, duration):
        

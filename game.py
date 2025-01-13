@@ -71,7 +71,7 @@ class Game(PageBase):
         pygame.time.set_timer(EventConfig.time_timer, 1000)
         
         self.background_stars = WorldStar()
-        self._update_reticle()
+        # self._update_reticle()
         self._perk_delay = Delay()
        
         
@@ -346,7 +346,7 @@ class Game(PageBase):
             self._update_asteroids()
             self._update_particles()
             self._hud.update()
-            self._update_reticle()
+            # self._update_reticle()
             self._update_perks()
             self._spawn_strategy.update(self._game_controller.level_time, self._can_spawn_asteroid, self._game_controller.game_level, len(self._asteroid_list) == 0)
             self._ship_penalty_strategy.update(not self._ship.in_boundary)
@@ -373,7 +373,7 @@ class Game(PageBase):
         self._draw_projectiles(screen)
         self._draw_asteroids(screen)
         self._draw_particles(screen)
-        self._draw_reticle(screen, self._ship.is_steering)
+        # self._draw_reticle(screen, self._ship.is_steering)
         self._ship.draw(screen)
         
         if self._game_controller.level_is_in_progress:

@@ -20,13 +20,17 @@ class UiFactory():
         return text_render_surface
     
     
-    def create_button(text:str, on_clicked:callable, size:int = 20, is_active:bool = True, dimension:tuple = _button_size_dimension):
+    def create_button(text:str, on_clicked:callable, size:int = 20, is_active:bool = True, dimension:tuple = _button_size_dimension, font:pygame.font.Font = None, hover:bool = True):
         
-        font = Fonts.quantum(size)
-        if is_active:
-            return Button(text, dimension = dimension, on_click=on_clicked, click_color = UiFactory._click_color, hover_color=UiFactory._hover_color, font = font)
+        if font == None:
+            m_font = Fonts.quantum(size)
         else:
-            return Button(text, dimension = dimension, on_click=on_clicked, click_color = UiFactory._click_color, hover_color=None, font = font, text_color = UiFactory._text_deactivate_color, with_sound = False)
+            m_font = font
+            
+        if is_active:
+            return Button(text, dimension = dimension, on_click=on_clicked, click_color = UiFactory._click_color, hover_color= False if not hover else UiFactory._hover_color, font = m_font)
+        else:
+            return Button(text, dimension = dimension, on_click=on_clicked, click_color = UiFactory._click_color, hover_color=None, font = m_font, text_color = UiFactory._text_deactivate_color, with_sound = False)
         
         
     def make_button_list(screen:pygame.surface.Surface, items:list[Button], top:float, bottom:float, x:float):

@@ -1,5 +1,8 @@
 import contextlib
 
+with contextlib.redirect_stdout(None):
+    import pygame
+
 from gameObjects.background import Background
 from utils.fonts import Fonts
 from ui.uiFactory import UiFactory
@@ -7,8 +10,7 @@ from ui.uiFactory import UiFactory
 
 
 # This suppresses the `Hello from pygame` message.
-with contextlib.redirect_stdout(None):
-    import pygame
+
 
 import os
 from time import sleep
@@ -106,13 +108,11 @@ class Main():
         
         fps_font = Fonts.quantum(15)
         
-        obstacle_timer = pygame.USEREVENT + 1
-        pygame.time.set_timer(obstacle_timer,2000)
         
         clock = pygame.time.Clock()
         run = True
         while run:
-            clock.tick(FPS)
+            clock.tick(GlobalConfig.fps)
             self.screen.fill(Colors.background_color)
             self.back_ground.draw(self.screen)
             # self.glow_screen.fill(Colors.background_color)

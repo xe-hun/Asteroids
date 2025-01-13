@@ -16,8 +16,8 @@ class PageBase(ABC):
     def draw(self, screen:pygame.surface.Surface, **kwargs):
         pass
     
-    def handle_event(self, event):
+    def handle_event(self, event:pygame.event.Event):
         pass
     
-    def handle_event_2(self, event):
+    def handle_event_2(self, event:pygame.event.Event):
         pass
