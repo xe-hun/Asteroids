@@ -4,6 +4,7 @@ import pygame
 import Box2D
 from config.GlobalConfig import GlobalConfig
 from config.MiscConfig import MiscConfig
+from utils.delay import Delay
 from utils.colors import Colors
 from customEnum import ShipActions, Steering
 
@@ -99,15 +100,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         # self.flare_image.set_alpha(.9)
         self.animation_handler = AnimationHandler(ShipConfig.flame_path, 101, 186, 5, .13)
 
-        
-        # # Create bloom surface (can be pre-computed for static scenes)
-        # self.bloom_surf = Helper.create_bloom_surface(self.image, intensity=1, threshold=0)
-        # self.bloom_surface = Helper.create_bloom(self.image, 
-        #                               blur_passes=6,    # More passes = more blur
-        #                               blur_radius=10,    # Larger radius = wider glow
-        #                               intensity=2.0)    
-        
-
+        self._shut_down_sound_delay = Delay(activate=False)
 
     def _set_ship_parameters(self, ship_level):
         CANNON_FIRE_COOL_DOWN = ShipConfig.cannon_fire_cool_down(ship_level)
@@ -236,19 +229,22 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         if is_game_inprogress == False:
             return
         
-        self._handle_mapped_key_press(event, ShipActions.Boost, key_map, lambda : self.boost_ship_with_sound(True), lambda : self.boost_ship_with_sound(False))
+        self._handle_mapped_key_press(event, ShipActions.Boost, key_map, lambda : self._boost_ship_and_sound(True), lambda : self._boost_ship_and_sound(False))
         self._handle_mapped_key_press(event, ShipActions.Cannon, key_map, lambda: self._set_ship_cannon(True), lambda: self._set_ship_cannon(False))
         self._handle_mapped_key_press(event, ShipActions.Rocket, key_map, lambda: self._set_ship_rocket(True), lambda: self._set_ship_rocket(False))
         self._handle_mapped_key_press(event, ShipActions.Steer, key_map, lambda: self._set_ship_steer(True), lambda: self._set_ship_steer(False))
       
-    def boost_ship_with_sound(self, value:bool):
+    def _boost_ship_and_sound(self, value:bool):
         
         self._set_ship_boost(value)
         
         if value == True:
             SoundController.ship_boost_channel().play(SoundController.ship_startup_sound)
-        else:
+            self._shut_down_sound_delay = Delay()
+        elif self._shut_down_sound_delay.is_done:
             SoundController.ship_boost_channel().play(SoundController.ship_shutdown_sound)
+        else:
+            SoundController.ship_boost_channel().stop()
             
         
                 
@@ -291,6 +287,10 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
 
    
     def update(self, ship_level, is_penalty_active, is_rocket_empty):
+        
+        # if ship boosts for more than shut_down_sound_delay, then the ship shutdown sound
+        # may be played
+        self._shut_down_sound_delay.delay(1000)
         
         self._penalty_active = is_penalty_active
         
@@ -346,15 +346,7 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         screen.blit(self.flare_image, rect)
    
     def _boost_ship(self, ship_body:Box2D.b2Body, boosting:bool, boost_force:int, ship_base_position:float):
-        
-        # if SoundController.ship_boost_channel().get_busy() == False and boosting == True:
-        
-        #     SoundController.ship_boost_channel().play(SoundController.ship_movement_sound, -1, fade_ms=1000)
-
-        # elif SoundController.ship_boost_channel().get_busy() == True and boosting == False:
-       
-        #     SoundController.ship_boost_channel().fadeout(1000)
-        # SoundController.ship_boost_channel().play(SoundController.ship_startup_sound)
+      
         
         if boosting and SoundController.ship_boost_channel().get_busy() == False:
             SoundController.ship_boost_channel().play(SoundController.ship_engine_sound, -1)
