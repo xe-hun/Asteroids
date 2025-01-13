@@ -12,7 +12,8 @@ class MiscConfig():
     def get_game_tips(_key_map:dict):
         return [
             f'Tips!: press {_key_map[ShipActions.Steer]} and move the mouse to steer the Ship.',
-            f'Tips!: press {_key_map[ShipActions.Cannon]} to fire the Cannon, and {_key_map[ShipActions.Rocket]} to fire a Missile.',
+            f'Tips!: press {_key_map[ShipActions.Cannon]} to fire a Cannon',
+            f'Tips!: press {_key_map[ShipActions.Rocket]} to fire a Missile.',
             f'Tips!: press {_key_map[ShipActions.Boost]} to boost your Ship.',
             'Tips!: Use Missiles to gain Advantage.',
             'Tips!: Beat the Time!!!',

@@ -28,8 +28,8 @@ class ControllerConfig():
     @staticmethod
     def chances_of_asteroid(game_level:int):
         min_chance = .6
-        max_chance = .9
-        return Helper.asymptotic_value(min_chance, max_chance, 0.1, game_level)
+        max_chance = 1
+        return Helper.asymptotic_value(min_chance, max_chance, 0.2, game_level)
     
     @staticmethod
     def asteroid_spawn_per_level(game_level:int):
