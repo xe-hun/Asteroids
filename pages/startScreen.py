@@ -1,6 +1,7 @@
 import random
 from config.GlobalConfig import GlobalConfig
 from config.EventConfig import EventConfig
+from config.MiscConfig import MiscConfig
 from customEnum import ShipActions
 from utils.delay import Delay
 from pages.creditPage import CreditPage
@@ -51,14 +52,7 @@ class StartScreen(PageBase):
         
         self._tips_index = 1
         
-        self._tips = [
-            f'Tips!: press {self._key_map[ShipActions.Steer]} and move the mouse to steer the Ship.',
-            f'Tips!: press {self._key_map[ShipActions.Cannon]} to fire the Cannon, and {self._key_map[ShipActions.Rocket]} to fire a Missile.',
-            f'Tips!: press {self._key_map[ShipActions.Boost]} to boost your Ship.',
-            'Tips!: Use Missiles to gain Advantage.',
-            'Tips!: Beat the Time',
-         
-        ]
+        self._tips = MiscConfig.get_game_tips(key_map)
         
         self._tips_timed_list.register_item(self._tips[0])
 

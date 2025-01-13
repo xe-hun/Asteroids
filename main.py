@@ -63,6 +63,9 @@ class Main():
             perk_collected_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'collect_perk.mp3'),
             level_up_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'level_up.mp3'),
             ready_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'ready.mp3'),
+            ship_startup_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'ship_startup2.wav'),
+            ship_shutdown_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'ship_shutdown1.wav'),
+            ship_engine_sound_filepath = os.path.join(Helper.resource_path(), 'sound', 'game', 'ship_engine.wav'),
         )
         # self._controller = GameStateController()
         self._timed_list = TimedList((GlobalConfig.width * .9, GlobalConfig.height * .2), 500)

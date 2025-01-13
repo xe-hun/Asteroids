@@ -53,6 +53,9 @@ class SoundController():
                        perk_collected_sound_filepath,
                        level_up_sound_filepath,
                        ready_sound_filepath,
+                       ship_startup_sound_filepath,
+                       ship_shutdown_sound_filepath,
+                       ship_engine_sound_filepath,
                        ):
         
         SoundController.rocket_fire_sound = SoundController.load_sound(rocket_fire_sound_filepath)
@@ -65,6 +68,9 @@ class SoundController():
         SoundController.perk_collected_sound = SoundController.load_sound(perk_collected_sound_filepath)
         SoundController.level_up_sound = SoundController.load_sound(level_up_sound_filepath)
         SoundController.ready_sound = SoundController.load_sound(ready_sound_filepath)
+        SoundController.ship_startup_sound = SoundController.load_sound(ship_startup_sound_filepath)
+        SoundController.ship_shutdown_sound = SoundController.load_sound(ship_shutdown_sound_filepath)
+        SoundController.ship_engine_sound = SoundController.load_sound(ship_engine_sound_filepath)
         
         pygame.mixer.set_num_channels(8)
         SoundController._effect_channels = [pygame.mixer.Channel(i) for i in range(0, SoundController._num_effect_channel)]

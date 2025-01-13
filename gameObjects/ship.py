@@ -236,11 +236,21 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
         if is_game_inprogress == False:
             return
         
-        self._handle_mapped_key_press(event, ShipActions.Boost, key_map, lambda: self._set_ship_boost(True), lambda: self._set_ship_boost(False))
+        self._handle_mapped_key_press(event, ShipActions.Boost, key_map, lambda : self.boost_ship_with_sound(True), lambda : self.boost_ship_with_sound(False))
         self._handle_mapped_key_press(event, ShipActions.Cannon, key_map, lambda: self._set_ship_cannon(True), lambda: self._set_ship_cannon(False))
         self._handle_mapped_key_press(event, ShipActions.Rocket, key_map, lambda: self._set_ship_rocket(True), lambda: self._set_ship_rocket(False))
         self._handle_mapped_key_press(event, ShipActions.Steer, key_map, lambda: self._set_ship_steer(True), lambda: self._set_ship_steer(False))
       
+    def boost_ship_with_sound(self, value:bool):
+        
+        self._set_ship_boost(value)
+        
+        if value == True:
+            SoundController.ship_boost_channel().play(SoundController.ship_startup_sound)
+        else:
+            SoundController.ship_boost_channel().play(SoundController.ship_shutdown_sound)
+            
+        
                 
         
        
@@ -337,13 +347,17 @@ class Ship(pygame.sprite.Sprite, ObjectBase):
    
     def _boost_ship(self, ship_body:Box2D.b2Body, boosting:bool, boost_force:int, ship_base_position:float):
         
-        if SoundController.ship_boost_channel().get_busy() == False and boosting == True:
+        # if SoundController.ship_boost_channel().get_busy() == False and boosting == True:
         
-            SoundController.ship_boost_channel().play(SoundController.ship_movement_sound, -1, fade_ms=1000)
+        #     SoundController.ship_boost_channel().play(SoundController.ship_movement_sound, -1, fade_ms=1000)
 
-        elif SoundController.ship_boost_channel().get_busy() == True and boosting == False:
+        # elif SoundController.ship_boost_channel().get_busy() == True and boosting == False:
        
-            SoundController.ship_boost_channel().fadeout(1000)
+        #     SoundController.ship_boost_channel().fadeout(1000)
+        # SoundController.ship_boost_channel().play(SoundController.ship_startup_sound)
+        
+        if boosting and SoundController.ship_boost_channel().get_busy() == False:
+            SoundController.ship_boost_channel().play(SoundController.ship_engine_sound, -1)
             
         
         if boosting == False:
