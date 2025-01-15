@@ -57,7 +57,6 @@ class Hud():
         self._sequence3_lerp = Lerp()
         self._ship_upgrade_sequence_lerp = None
         
-        # self.reticle = Reticle()
         self._rocket_count_render_effect = Effect()
         self._perk_count_render_effect = Effect()
         
@@ -125,8 +124,8 @@ class Hud():
         
   
         
-    def handle_event(self, event):
-        pass
+    # def handle_event(self, event):
+    #     pass
         # self.reticle.handle_event(event)
         
         

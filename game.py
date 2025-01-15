@@ -381,7 +381,7 @@ class Game(PageBase):
         
     def handle_event(self, event:pygame.event.Event):
         
-        self._hud.handle_event(event)
+        # self._hud.handle_event(event)
         self._camera.handle_event(event)
         
         self._ship.handle_event(event, self._game_controller.key_map, self._game_controller.level_is_in_progress)
