@@ -46,6 +46,8 @@ class GameStateController():
         self._game_paused = False
         self._load_config()
         
+        self._new_high_score = None
+        
        
     def _load_config(self):        
         key_map = Helper.load_key_map(MiscConfig.map_button_save_location) 
@@ -61,7 +63,8 @@ class GameStateController():
         
         # update the highScore
         if self._game_score > self.high_score:
-            self.high_score = self._game_score
+            self._new_high_score = self.high_score = self._game_score
+            
 
             
         counter_step = int((self._game_score - self._game_score_counter) / 50)
@@ -236,7 +239,7 @@ class GameStateController():
     def _game_over(self):
         self._set_new_level_parameters()
         # self._lives_remaining -= 1
-        pygame.event.post(pygame.event.Event(EventConfig.end_game_event))
+        pygame.event.post(pygame.event.Event(EventConfig.end_game_event, new_high_score = self._new_high_score))
         
         
     def handle_event(self, event):

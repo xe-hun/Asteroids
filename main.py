@@ -101,9 +101,9 @@ class Main():
         self.g_router.replace(self._game)
 
         
-    def initialize_end_game_screen(self):
+    def initialize_end_game_screen(self, new_high_score:int):
         self._dispose_old_game()
-        endGameScreen = EndGameScreen()
+        endGameScreen = EndGameScreen(new_high_score = new_high_score)
         self.g_router.replace(endGameScreen)
        
     
@@ -156,7 +156,7 @@ class Main():
             self.initialize_game()
         if event.type == EventConfig.end_game_event:
             self._save_game()
-            self.initialize_end_game_screen()
+            self.initialize_end_game_screen(event.new_high_score)
         if event.type == EventConfig.exit_game_event:
             self._save_game()
             self.initialize_start_screen()
