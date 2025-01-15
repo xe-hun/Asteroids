@@ -23,7 +23,7 @@ class ControllerConfig():
     
     @staticmethod
     def get_bonus_time(level_time):
-        return level_time // 2
+        return min(level_time // 2, 30)
     
     @staticmethod
     def chances_of_asteroid(game_level:int):
