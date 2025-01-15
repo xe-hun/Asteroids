@@ -27,8 +27,8 @@ class ControllerConfig():
     
     @staticmethod
     def chances_of_asteroid(game_level:int):
-        min_chance = .6
-        max_chance = 1
+        min_chance = .75
+        max_chance = .9
         return Helper.asymptotic_value(min_chance, max_chance, 0.2, game_level)
     
     @staticmethod
@@ -40,8 +40,8 @@ class ControllerConfig():
     @staticmethod
     def get_level_time(game_level:int):
      
-        min_level_time = 100
-        max_level_time = 250
+        min_level_time = 120
+        max_level_time = 200
         return int(Helper.asymptotic_value(min_level_time, max_level_time, 0.1, game_level))
     
    
