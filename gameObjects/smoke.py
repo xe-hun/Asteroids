@@ -3,7 +3,7 @@
 import random
 import numpy as np
 import pygame
-from config.RocketConfig import RocketConfig
+from config.rocketConfig import RocketConfig
 from constant import FPS
 from utils.lerp import Lerp
 from utils.helper import scale

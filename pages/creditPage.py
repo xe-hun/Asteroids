@@ -1,6 +1,6 @@
 
 
-from config.GlobalConfig import GlobalConfig
+from config.globalConfig import GlobalConfig
 from utils.fonts import Fonts
 from gRouter import G_Router
 from pages.pageBase import PageBase

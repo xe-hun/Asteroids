@@ -1,12 +1,12 @@
 import pygame
 
 from Activity import Activity
-from config.GlobalConfig import GlobalConfig
-from config.MiscConfig import MiscConfig
-from config.EventConfig import EventConfig
-from config.ControllerConfig import ControllerConfig
+from config.globalConfig import GlobalConfig
+from config.miscConfig import MiscConfig
+from config.eventConfig import EventConfig
+from config.controllerConfig import ControllerConfig
 from gameObjects.rocket import Rocket
-from config.ControllerConfig import ControllerConfig
+from config.controllerConfig import ControllerConfig
 from gRouter import G_Router
 from config.shipConfig import ShipConfig
 from model.save_data_model import SaveDataModel

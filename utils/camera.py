@@ -1,6 +1,6 @@
 
 import numpy as np
-from config.EventConfig import EventConfig
+from config.eventConfig import EventConfig
 from utils.lerp import Lerp
 
 

@@ -1,7 +1,7 @@
 
 
 
-from config.GlobalConfig import GlobalConfig
+from config.globalConfig import GlobalConfig
 from config.shipConfig import ShipConfig
 from constant import FPS
 from utils.delay import Delay

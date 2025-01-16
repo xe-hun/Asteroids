@@ -3,7 +3,7 @@
 
 import pygame
 # from constant import outline_color
-from config.GlobalConfig import GlobalConfig
+from config.globalConfig import GlobalConfig
 from utils.helper import Helper, clamp
 from utils.colors import Colors
 from utils.lerp import Lerp

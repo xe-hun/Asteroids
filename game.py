@@ -3,9 +3,9 @@ import random
 import numpy as np
 import pygame
 import Box2D
-from config.EventConfig import  EventConfig
-from config.ControllerConfig import ControllerConfig
-from config.GlobalConfig import GlobalConfig
+from config.eventConfig import  EventConfig
+from config.controllerConfig import ControllerConfig
+from config.globalConfig import GlobalConfig
 from gRouter import G_Router
 from gameObjects.objectBase import ObjectBase
 from pages.pageBase import PageBase

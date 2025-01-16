@@ -15,9 +15,9 @@ from ui.uiFactory import UiFactory
 import os
 from time import sleep
 # import pygame
-from config.GlobalConfig import GlobalConfig
-from config.MiscConfig import MiscConfig
-from config.EventConfig import EventConfig
+from config.globalConfig import GlobalConfig
+from config.miscConfig import MiscConfig
+from config.eventConfig import EventConfig
 from utils.colors import Colors
 from constant import FPS
 from game import Game

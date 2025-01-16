@@ -4,7 +4,7 @@ from enum import Enum
 import random
 
 import numpy as np
-from config.GlobalConfig import GlobalConfig
+from config.globalConfig import GlobalConfig
 from utils.colors import Colors
 from utils.fonts import Fonts
 

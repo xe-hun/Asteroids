@@ -4,8 +4,8 @@ import math
 import numpy as np
 import pygame
 
-from config.GlobalConfig import GlobalConfig
-from config.CannonConfig import CannonConfig
+from config.globalConfig import GlobalConfig
+from config.cannonConfig import CannonConfig
 from utils.colors import Colors
 
 from gameObjects.objectBase import ObjectBase, ProjectileBase

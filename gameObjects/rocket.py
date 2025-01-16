@@ -2,8 +2,8 @@
 import math
 import numpy as np
 import pygame
-from config.GlobalConfig import GlobalConfig
-from config.RocketConfig import RocketConfig
+from config.globalConfig import GlobalConfig
+from config.rocketConfig import RocketConfig
 from gameObjects.asteroid import Asteroid
 from utils.lerp import Lerp
 from utils.delay import Delay

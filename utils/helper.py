@@ -12,7 +12,7 @@ import cryptography.fernet
 import numpy as np
 import pygame
 
-from config.GlobalConfig import GlobalConfig
+from config.globalConfig import GlobalConfig
 from strategies.encryptionStrategy import EncryptionStrategy
 from utils.colors import Colors
 from customEnum import ShipActions

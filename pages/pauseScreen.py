@@ -1,6 +1,6 @@
 import pygame
-from config.GlobalConfig import GlobalConfig
-from config.EventConfig import EventConfig
+from config.globalConfig import GlobalConfig
+from config.eventConfig import EventConfig
 from utils.colors import Colors
 
 from gRouter import G_Router

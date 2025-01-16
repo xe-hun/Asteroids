@@ -1,7 +1,7 @@
 import random
-from config.GlobalConfig import GlobalConfig
-from config.EventConfig import EventConfig
-from config.MiscConfig import MiscConfig
+from config.globalConfig import GlobalConfig
+from config.eventConfig import EventConfig
+from config.miscConfig import MiscConfig
 from customEnum import ShipActions
 from utils.delay import Delay
 from pages.creditPage import CreditPage

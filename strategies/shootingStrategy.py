@@ -1,8 +1,10 @@
-from constant import FPS
+
+
+from config.globalConfig import GlobalConfig
 
 
 class ShootingStrategy():
-    def __init__(self, fire_cool_down:float, burst_rate:float, burst_count:int, report_projectile_fire:callable, projectile_type:type, fps:int = FPS):
+    def __init__(self, fire_cool_down:float, burst_rate:float, burst_count:int, report_projectile_fire:callable, projectile_type:type, fps:int = GlobalConfig.fps):
         
         self.bursting = False
         self.shooting = False
@@ -11,7 +13,7 @@ class ShootingStrategy():
         self._projectile_type = projectile_type
         
         # frames per second
-        self.FPS = fps
+        self.FPS = GlobalConfig.fps
         
         # fire per second
         self.FIRE_COOL_DOWN = fire_cool_down

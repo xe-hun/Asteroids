@@ -2,8 +2,8 @@ import math
 import numpy as np
 import pygame
 import Box2D
-from config.GlobalConfig import GlobalConfig
-from config.MiscConfig import MiscConfig
+from config.globalConfig import GlobalConfig
+from config.miscConfig import MiscConfig
 from utils.delay import Delay
 from utils.colors import Colors
 from customEnum import ShipActions, Steering

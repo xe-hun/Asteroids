@@ -1,7 +1,7 @@
 
    
-from config.GlobalConfig import GlobalConfig
-from config.EventConfig import EventConfig
+from config.globalConfig import GlobalConfig
+from config.eventConfig import EventConfig
 from utils.effect import Effect
 from utils.fonts import Fonts
 from utils.colors import Colors
