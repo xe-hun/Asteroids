@@ -8,6 +8,7 @@ a = Analysis(
     datas=[('./sound', 'sound'),
         ('./font', 'font'),
         ('./images', 'images'),
+        ('./icon', 'icon'),
     ],
     hiddenimports=[],
     hookspath=[],
@@ -38,4 +39,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='icon/icon.ico',
 )

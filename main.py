@@ -43,7 +43,9 @@ class Main():
         pygame.mixer.init(buffer=64)
         pygame.init()
       
-        pygame.display.set_caption('Asteroids')
+        icon = pygame.image.load(os.path.join(Helper.resource_path(), 'icon', 'icon.png'))
+        pygame.display.set_icon(icon)
+        pygame.display.set_caption('Asteroidx')
         
         self.back_ground = Background()
         

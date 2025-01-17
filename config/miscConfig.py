@@ -25,10 +25,10 @@ class MiscConfig():
     
     map_button_save_location = 'button_map.json'
     default_key_map = {
-            ShipActions.Boost: 'DOWN',
-            ShipActions.Cannon:'LEFT',
-            ShipActions.Rocket: 'RIGHT',
-            ShipActions.Steer: 'L CLICK'
+            ShipActions.Boost: 'S',
+            ShipActions.Cannon:'L CLICK',
+            ShipActions.Rocket: 'R CLICK',
+            ShipActions.Steer: 'A'
         }
     
     button_to_event_map = {
